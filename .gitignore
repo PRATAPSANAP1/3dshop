@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+dist/
+.DS_Store
+
+# Frontend specific
+Frontend/dist/
+Frontend/.vercel
+Frontend/.env.local
+Frontend/.env.development.local
+Frontend/.env.test.local
+Frontend/.env.production.local
+
+# Backend specific
+Backend/dist/
+Backend/.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log

@@ -1,0 +1,438 @@
+import { Request, Response } from 'express';
+import Order from '../models/Order';
+import Product from '../models/Product';
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
+import { createAuditLog } from '../middleware/audit';
+
+const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
+const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
+
+const razorpay = new Razorpay({
+  key_id: RAZORPAY_KEY_ID,
+  key_secret: RAZORPAY_KEY_SECRET,
+});
+
+if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+  console.warn('WARNING: Razorpay API keys are missing in environment variables.');
+}
+
+export const addOrderItems = async (req: Request, res: Response) => {
+  const { orderItems, shippingAddress, paymentMethod, itemsPrice, taxPrice, shippingPrice, totalPrice } = req.body;
+
+  if (orderItems && orderItems.length === 0) {
+    res.status(400).json({ message: 'No order items' });
+    return;
+  }
+
+  const order = new Order({
+    user: (req.user as any)._id,
+    orderItems,
+    shippingAddress,
+    paymentMethod,
+    taxPrice,
+    shippingPrice,
+    totalPrice,
+    statusHistory: [{ status: 'Ordered' }]
+  });
+
+  const createdOrder = await order.save();
+
+  const io = req.app.get('io');
+  io.emit('new_order', createdOrder);
+
+  await createAuditLog(req.user, 'ORDER_CREATE', 'Order', 'Order created by ' + ((req.user as any)?.name || (req.user as any)?.email), {
+    entityId: createdOrder._id.toString(),
+    entityName: 'Order ' + createdOrder._id,
+    changes: { items: createdOrder.orderItems.length, total: createdOrder.totalPrice }
+  });
+
+  res.status(201).json(createdOrder);
+};
+
+export const createPaymentOrder = async (req: Request, res: Response) => {
+  if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+    return res.status(503).json({ message: 'Payment gateway not configured. Contact admin.' });
+  }
+
+  const { amount, currency = 'INR', receipt } = req.body;
+
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ message: 'Invalid payment amount' });
+  }
+
+  try {
+    const options = {
+      amount: Math.round(amount * 100),
+      currency,
+      receipt,
+      notes: {
+        userId: (req.user as any)._id.toString(),
+        platform: '3Dshop'
+      }
+    };
+    const order = await razorpay.orders.create(options);
+    res.json(order);
+  } catch (error: any) {
+    console.error('Razorpay Order Creation Error:', error);
+    res.status(500).json({ 
+      message: 'Payment gateway error. Please try again later.',
+    });
+  }
+};
+
+export const verifyPayment = async (req: Request, res: Response) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
+
+    // Validate required fields
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !orderId) {
+      return res.status(400).json({ status: 'failure', message: 'Missing payment verification fields' });
+    }
+
+    // SECURITY: Never use a fallback secret — reject if secret is missing
+    if (!RAZORPAY_KEY_SECRET) {
+      console.error('CRITICAL: RAZORPAY_KEY_SECRET is missing during payment verification!');
+      return res.status(503).json({ status: 'failure', message: 'Payment verification unavailable' });
+    }
+
+    // Generate HMAC signature for verification
+    const generated_signature = crypto
+      .createHmac('sha256', RAZORPAY_KEY_SECRET)
+      .update(razorpay_order_id + '|' + razorpay_payment_id)
+      .digest('hex');
+
+    // Constant-time comparison to prevent timing attacks
+    const signatureBuffer = Buffer.from(generated_signature, 'hex');
+    const receivedBuffer = Buffer.from(razorpay_signature, 'hex');
+
+    if (signatureBuffer.length !== receivedBuffer.length || !crypto.timingSafeEqual(signatureBuffer, receivedBuffer)) {
+      console.warn(`Payment signature mismatch for order ${orderId}. Possible tampering attempt.`);
+      return res.status(400).json({ status: 'failure', message: 'Payment signature verification failed' });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Prevent double-payment
+    if (order.isPaid) {
+      return res.json({ status: 'success', message: 'Payment already confirmed' });
+    }
+
+    order.isPaid = true;
+    order.paidAt = new Date();
+    order.paymentResult = {
+      id: razorpay_payment_id,
+      status: 'Paid',
+      update_time: new Date().toISOString(),
+      receipt_url: razorpay_order_id,
+    };
+    await order.save();
+
+    // Notify via Socket
+    const io = req.app.get('io');
+    io.to('admin_orders').emit('order_status_updated', order);
+
+    await createAuditLog(req.user, 'PAYMENT_VERIFIED', 'Order', `Payment verified for order ${orderId}`, {
+      entityId: orderId,
+      entityName: 'Order ' + orderId,
+      changes: { razorpay_payment_id, razorpay_order_id, amount: order.totalPrice }
+    });
+
+    res.json({ status: 'success' });
+  } catch (error: any) {
+    console.error('Payment Verification Error:', error);
+    res.status(500).json({ status: 'failure', message: 'Internal verification error' });
+  }
+};
+
+export const getMyOrders = async (req: Request, res: Response) => {
+  const orders = await Order.find({ user: (req.user as any)._id }).populate('delivery.assignedTo', 'id name mobile email').sort({ createdAt: -1 });
+  res.json(orders);
+};
+
+export const getOrderById = async (req: Request, res: Response) => {
+  const order = await Order.findById(req.params.id).populate('user', 'name email').populate('delivery.assignedTo', 'id name mobile email');
+  if (order) {
+    res.json(order);
+  } else {
+    res.status(404).json({ message: 'Order not found' });
+  }
+};
+
+export const updateOrderStatus = async (req: Request, res: Response) => {
+  const { status, comment } = req.body;
+  const order = await Order.findById(req.params.id);
+
+  if (order) {
+    order.orderStatus = status;
+    order.statusHistory.push({ status, comment, timestamp: new Date() });
+
+    if (status === 'Delivered') {
+      order.isDelivered = true;
+      order.deliveredAt = new Date();
+    }
+
+    const updatedOrder = await order.save();
+
+    const io = req.app.get('io');
+    io.to(order._id.toString()).emit('order_status_updated', updatedOrder);
+
+    await createAuditLog(req.user, 'ORDER_STATUS_UPDATE', 'Order', 'Order status updated to ' + status, {
+      entityId: order._id.toString(),
+      entityName: 'Order ' + order._id,
+      changes: { status }
+    });
+
+    res.json(updatedOrder);
+  } else {
+    res.status(404).json({ message: 'Order not found' });
+  }
+};
+
+export const requestReturnOrder = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { reason } = req.body;
+
+  const order = await Order.findById(id);
+  if (order) {
+    if (order.orderStatus !== 'Delivered') return res.status(400).json({ message: 'Only delivered orders can be returned' });
+
+    order.isReturnRequested = true;
+    order.returnReason = reason;
+    order.returnStatus = 'Requested';
+    order.statusHistory.push({ status: 'ReturnRequested', comment: reason, timestamp: new Date() });
+
+    const updatedOrder = await order.save();
+
+    await createAuditLog(req.user, 'RETURN_REQUEST', 'Order', 'Return requested for order', {
+      entityId: order._id.toString(),
+      entityName: 'Order ' + order._id,
+      changes: { reason }
+    });
+
+    res.json(updatedOrder);
+  } else {
+    res.status(404).json({ message: 'Order not found' });
+  }
+};
+
+export const handleReturnOrder = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { status, comment } = req.body;
+
+  const order = await Order.findById(id);
+  if (order) {
+    order.returnStatus = status;
+    order.statusHistory.push({ status: 'Return' + status, comment, timestamp: new Date() });
+
+    if (status === 'Refunded') {
+      order.orderStatus = 'Returned';
+    }
+
+    const updatedOrder = await order.save();
+
+    const io = req.app.get('io');
+    io.to(order._id.toString()).emit('order_status_updated', updatedOrder);
+
+    await createAuditLog(req.user, 'RETURN_HANDLE', 'Order', 'Return status updated to ' + status, {
+      entityId: order._id.toString(),
+      entityName: 'Order ' + order._id,
+      changes: { returnStatus: status, comment }
+    });
+
+    res.json(updatedOrder);
+  } else {
+    res.status(404).json({ message: 'Order not found' });
+  }
+};
+
+export const getAllOrders = async (req: Request, res: Response) => {
+  const orders = await Order.find({}).populate('user', 'id name email').populate('delivery.assignedTo', 'id name mobile email').sort({ createdAt: -1 });
+  res.json(orders);
+};
+
+export const getPaymentStats = async (req: Request, res: Response) => {
+  try {
+    const orders = await Order.find({});
+
+    const totalOrders = orders.length;
+    const paidOnline = orders.filter(o => o.isPaid && o.paymentMethod !== 'COD');
+    const paidCOD = orders.filter(o => o.paymentMethod === 'COD' && (o.isDelivered || o.orderStatus === 'Delivered'));
+    const unpaid = orders.filter(o => !o.isPaid && o.paymentMethod !== 'COD');
+    const pendingCOD = orders.filter(o => o.paymentMethod === 'COD' && !o.isDelivered && o.orderStatus !== 'Delivered');
+
+    const totalRevenue = orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+    const collectedOnline = paidOnline.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+    const collectedCOD = paidCOD.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+    const pendingAmount = unpaid.reduce((sum, o) => sum + (o.totalPrice || 0), 0) + pendingCOD.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+
+    // Recent payments (last 20)
+    const recentPayments = orders
+      .filter(o => o.isPaid || (o.paymentMethod === 'COD' && o.isDelivered))
+      .sort((a, b) => (b.paidAt || b.deliveredAt || b.createdAt).getTime() - (a.paidAt || a.deliveredAt || a.createdAt).getTime())
+      .slice(0, 20)
+      .map(o => ({
+        orderId: o._id,
+        amount: o.totalPrice,
+        method: o.paymentMethod,
+        status: o.isPaid ? 'Paid' : 'COD Collected',
+        date: o.paidAt || o.deliveredAt || o.createdAt,
+        razorpayId: o.paymentResult?.id || null,
+        razorpayOrderId: o.paymentResult?.receipt_url || null,
+        customerName: null, // populated below
+      }));
+
+    // Populate customer names
+    const populatedOrders = await Order.find({ _id: { $in: recentPayments.map(p => p.orderId) } }).populate('user', 'name email');
+    recentPayments.forEach(p => {
+      const o = populatedOrders.find(po => po._id.toString() === p.orderId.toString());
+      if (o && o.user) {
+        p.customerName = (o.user as any).name || (o.user as any).email;
+      }
+    });
+
+    res.json({
+      summary: {
+        totalOrders,
+        totalRevenue,
+        collectedOnline,
+        collectedCOD,
+        pendingAmount,
+        paidOnlineCount: paidOnline.length,
+        paidCODCount: paidCOD.length,
+        unpaidCount: unpaid.length + pendingCOD.length,
+      },
+      recentPayments,
+    });
+  } catch (error: any) {
+    console.error('Payment Stats Error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const fetchPaymentDetails = async (req: Request, res: Response) => {
+  try {
+    if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+      return res.status(503).json({ message: 'Razorpay not configured' });
+    }
+
+    const { paymentId } = req.params;
+    const payment: any = await razorpay.payments.fetch(paymentId as string);
+    res.json({
+      id: payment.id,
+      amount: Number(payment.amount) / 100,
+      currency: payment.currency,
+      status: payment.status,
+      method: payment.method,
+      email: payment.email,
+      contact: payment.contact,
+      created_at: payment.created_at,
+      captured: payment.captured,
+    });
+  } catch (error: any) {
+    console.error('Razorpay fetch error:', error);
+    res.status(500).json({ message: 'Could not fetch payment details from Razorpay' });
+  }
+};
+
+export const updateOrderToDelivered = async (req: Request, res: Response) => {
+  const order = await Order.findById(req.params.id);
+  if (order) {
+    order.isDelivered = true;
+    order.deliveredAt = new Date();
+    order.orderStatus = 'Delivered';
+    order.statusHistory.push({ status: 'Delivered', timestamp: new Date() });
+    const updatedOrder = await order.save();
+    res.json(updatedOrder);
+  } else {
+    res.status(404).json({ message: 'Order not found' });
+  }
+};
+
+export const updateDeliveryDetails = async (req: Request, res: Response) => {
+  const { assignedTo, deliveryDate, timeSlot, notes, priority } = req.body;
+  const order = await Order.findById(req.params.id);
+
+  if (order) {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    (order as any).delivery = {
+      assignedTo,
+      assignedAt: new Date(),
+      deliveryDate,
+      timeSlot,
+      status: 'Assigned',
+      otp,
+      otpVerified: false,
+      notes,
+      priority: priority || 'Normal'
+    };
+
+    order.statusHistory.push({ status: 'DeliveryAssigned', comment: 'Assigned slot: ' + (timeSlot || 'Any time'), timestamp: new Date() });
+
+    const updatedOrder = await order.save();
+    const populatedOrder = await Order.findById(updatedOrder._id).populate('delivery.assignedTo', 'id name mobile email');
+    const io = req.app.get('io');
+    io.to(order._id.toString()).emit('order_status_updated', populatedOrder);
+    res.json(populatedOrder);
+  } else {
+    res.status(404).json({ message: 'Order not found' });
+  }
+};
+
+export const verifyDeliveryOtp = async (req: Request, res: Response) => {
+  const { otp } = req.body;
+  const order = await Order.findById(req.params.id);
+
+  if (order && (order as any).delivery) {
+    if ((order as any).delivery.otp === otp) {
+      (order as any).delivery.otpVerified = true;
+      (order as any).delivery.status = 'Delivered';
+      order.orderStatus = 'Delivered';
+      order.isDelivered = true;
+      order.deliveredAt = new Date();
+      order.statusHistory.push({ status: 'Delivered', comment: 'OTP Verified & Delivered', timestamp: new Date() });
+      const updatedOrder = await order.save();
+      const populatedOrder = await Order.findById(updatedOrder._id).populate('delivery.assignedTo', 'id name mobile email');
+      const io = req.app.get('io');
+      io.to(order._id.toString()).emit('order_status_updated', populatedOrder);
+      res.json(populatedOrder);
+    } else {
+      res.status(400).json({ message: 'Invalid OTP' });
+    }
+  } else {
+    res.status(404).json({ message: 'Order not found' });
+  }
+};
+
+export const updateDeliveryStatus = async (req: Request, res: Response) => {
+  const { status, notes } = req.body;
+  const order = await Order.findById(req.params.id);
+
+  if (order && (order as any).delivery) {
+    (order as any).delivery.status = status;
+    if (notes) (order as any).delivery.notes = notes;
+
+    const statusMap: Record<string, string> = {
+      'OutForDelivery': 'OutForDelivery',
+      'Failed': 'FailedDelivery',
+      'Rescheduled': 'Rescheduled'
+    };
+
+    if (statusMap[status]) {
+       order.orderStatus = statusMap[status] as any;
+       order.statusHistory.push({ status: order.orderStatus, comment: notes || 'Delivery status: ' + status, timestamp: new Date() });
+    }
+
+    const updatedOrder = await order.save();
+    const populatedOrder = await Order.findById(updatedOrder._id).populate('delivery.assignedTo', 'id name mobile email');
+    const io = req.app.get('io');
+    io.to(order._id.toString()).emit('order_status_updated', populatedOrder);
+    res.json(populatedOrder);
+  } else {
+    res.status(404).json({ message: 'Order not found' });
+  }
+};

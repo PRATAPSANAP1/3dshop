@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3Dshop — Design System Color Map</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #F8FAFC;
+      color: #0F172A;
+    }
+
+    .page-header {
+      text-align: center;
+      padding: 60px 20px 30px;
+      background: linear-gradient(145deg, #FFFBF5 0%, #FFF7ED 40%, #FEF3C7 70%, #FFFBEB 100%);
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .page-header h1 {
+      font-size: 42px;
+      font-weight: 900;
+      font-style: italic;
+      text-transform: uppercase;
+      letter-spacing: -2px;
+      color: #0F172A;
+    }
+
+    .page-header h1 span {
+      color: #EA580C;
+      font-style: normal;
+    }
+
+    .page-header p {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #94A3B8;
+      margin-top: 8px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 900;
+      font-style: italic;
+      text-transform: uppercase;
+      letter-spacing: -1.5px;
+      padding: 50px 40px 10px;
+    }
+
+    .section-subtitle {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #94A3B8;
+      padding: 0 40px 30px;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      padding: 0 40px 50px;
+    }
+
+    .color-card {
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .color-card:hover {
+      border-color: #CBD5E1;
+      box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .swatch {
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .swatch-hex {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(4px);
+    }
+
+    .color-info {
+      padding: 20px;
+    }
+
+    .color-info .component-name {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #0F172A;
+      margin-bottom: 4px;
+    }
+
+    .color-info .component-desc {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748B;
+      line-height: 1.5;
+    }
+
+    .color-info .usage-tag {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: #F1F5F9;
+      color: #64748B;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #E5E7EB, transparent);
+      margin: 0 40px;
+    }
+
+    /* Gradient swatches */
+    .swatch-gradient {
+      background: linear-gradient(135deg, var(--g1), var(--g2));
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <h1>3Dshop <span>Color Map.</span></h1>
+    <p>Complete Design System Reference &bull; Component-Level Color Mapping</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION 1: SHOPPER PAGE COLORS                     -->
+  <!-- ═══════════════════════════════════════════════════ -->
+
+  <h2 class="section-title">🛍️ Shopper <span style="color:#EA580C">Pages.</span></h2>
+  <p class="section-subtitle">Colors used across Shop, Catalog, Cart, Checkout, Orders, Delivery, Wishlist, Profile</p>
+
+  <div class="color-grid">
+
+    <!-- Page Background -->
+    <div class="color-card">
+      <div class="swatch" style="background: linear-gradient(145deg, #FFFBF5, #FFF7ED, #FEF3C7, #FFFBEB);">
+        <span class="swatch-hex" style="color:#92400E">#FFFBF5 → #FFFBEB</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Page Background (Body)</div>
+        <div class="component-desc">Warm cream-to-amber gradient applied to the full body. Creates the signature luxury
+          warmth.</div>
+        <span class="usage-tag">Global &bull; All Pages</span>
+      </div>
+    </div>
+
+    <!-- Sidebar Background -->
+    <div class="color-card">
+      <div class="swatch" style="background: #FFFFFF;">
+        <span class="swatch-hex" style="color:#0F172A">#FFFFFF</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Sidebar Background</div>
+        <div class="component-desc">Pure white sidebar with subtle border-right (#F1F5F9). Clean separation from warm
+          page body.</div>
+        <span class="usage-tag">ShopperSidebar</span>
+      </div>
+    </div>
+
+    <!-- Sidebar Logo Gradient -->
+    <div class="color-card">
+      <div class="swatch" style="background: linear-gradient(135deg, #EA580C, #D97706);">
+        <span class="swatch-hex" style="color:white">#EA580C → #D97706</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Sidebar Logo Icon</div>
+        <div class="component-desc">Orange-to-amber gradient icon box. The primary brand mark used for the 3Dshop
+          identity.</div>
+        <span class="usage-tag">Store Icon &bull; Brand</span>
+      </div>
+    </div>
+
+    <!-- Primary Orange -->
+    <div class="color-card">
+      <div class="swatch" style="background: #EA580C;">
+        <span class="swatch-hex" style="color:white">#EA580C</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Primary Action / CTA</div>
+        <div class="component-desc">Main action buttons, page headings accent, active nav indicator, "Add to Cart",
+          checkout buttons.</div>
+        <span class="usage-tag">Buttons &bull; Links &bull; Headings</span>
+      </div>
+    </div>
+
+    <!-- Amber Accent -->
+    <div class="color-card">
+      <div class="swatch" style="background: #D97706;">
+        <span class="swatch-hex" style="color:white">#D97706</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Secondary Amber Accent</div>
+        <div class="component-desc">Used in gradient endpoints, hover transitions, price badges, and warm tonal accents.
+        </div>
+        <span class="usage-tag">Gradients &bull; Hover States</span>
+      </div>
+    </div>
+
+    <!-- Card White -->
+    <div class="color-card">
+      <div class="swatch" style="background: #FFFFFF; border-bottom: 1px solid #F1F5F9;">
+        <span class="swatch-hex" style="color:#0F172A">#FFFFFF</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Cards / Containers</div>
+        <div class="component-desc">Product cards, order cards, modal backgrounds, checkout step containers. Border:
+          #E5E7EB.</div>
+        <span class="usage-tag">Cards &bull; Modals &bull; Sheets</span>
+      </div>
+    </div>
+
+    <!-- Slate 900 Text -->
+    <div class="color-card">
+      <div class="swatch" style="background: #0F172A;">
+        <span class="swatch-hex" style="color:white">#0F172A</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Primary Text / Headings</div>
+        <div class="component-desc">All main headings, product names, prices, order totals. Font-weight 800-900 italic
+          uppercase.</div>
+        <span class="usage-tag">Typography &bull; Headings</span>
+      </div>
+    </div>
+
+    <!-- Slate 400 Muted -->
+    <div class="color-card">
+      <div class="swatch" style="background: #94A3B8;">
+        <span class="swatch-hex" style="color:white">#94A3B8</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Muted Labels / Descriptions</div>
+        <div class="component-desc">Small uppercase tracking labels, timestamps, sub-descriptions, "AUTHENTICATED" badge
+          text.</div>
+        <span class="usage-tag">Labels &bull; Timestamps &bull; Metadata</span>
+      </div>
+    </div>
+
+    <!-- Slate 50 Surfaces -->
+    <div class="color-card">
+      <div class="swatch" style="background: #F8FAFC;">
+        <span class="swatch-hex" style="color:#64748B">#F8FAFC</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Surface / Background Tint</div>
+        <div class="component-desc">Icon backgrounds, sidebar hover, skeleton loaders, empty state containers, product
+          image fallback.</div>
+        <span class="usage-tag">Icons &bull; Hover &bull; Skeleton</span>
+      </div>
+    </div>
+
+    <!-- Emerald Success -->
+    <div class="color-card">
+      <div class="swatch" style="background: #10B981;">
+        <span class="swatch-hex" style="color:white">#10B981</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Success / Delivered Status</div>
+        <div class="component-desc">Order "Delivered" badge, payment confirmed icon, OTP verified state, approve return
+          button.</div>
+        <span class="usage-tag">Status &bull; Success Toast</span>
+      </div>
+    </div>
+
+    <!-- Blue Order Placed -->
+    <div class="color-card">
+      <div class="swatch" style="background: #3B82F6;">
+        <span class="swatch-hex" style="color:white">#3B82F6</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Order Placed / Confirmed</div>
+        <div class="component-desc">The "Ordered" status badge and timeline node. Also used for Categories nav icon.
+        </div>
+        <span class="usage-tag">Order Status &bull; Info</span>
+      </div>
+    </div>
+
+    <!-- Amber Packed -->
+    <div class="color-card">
+      <div class="swatch" style="background: #F59E0B;">
+        <span class="swatch-hex" style="color:white">#F59E0B</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Packed Status / Warning</div>
+        <div class="component-desc">"Packed" order status badge, pending payment clock icon, delivery sidebar nav
+          accent.</div>
+        <span class="usage-tag">Status &bull; Warning</span>
+      </div>
+    </div>
+
+    <!-- Indigo Shipped -->
+    <div class="color-card">
+      <div class="swatch" style="background: #6366F1;">
+        <span class="swatch-hex" style="color:white">#6366F1</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Shipped / In Transit</div>
+        <div class="component-desc">"Shipped" status badge, delivery intel tracking card accent stripe, tracking code
+          text color.</div>
+        <span class="usage-tag">Delivery &bull; Tracking</span>
+      </div>
+    </div>
+
+    <!-- Violet Orders -->
+    <div class="color-card">
+      <div class="swatch" style="background: #8B5CF6;">
+        <span class="swatch-hex" style="color:white">#8B5CF6</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Orders Nav Icon</div>
+        <div class="component-desc">Sidebar "Orders" navigation link icon color and active background tint.</div>
+        <span class="usage-tag">Navigation &bull; Sidebar</span>
+      </div>
+    </div>
+
+    <!-- Rose Danger -->
+    <div class="color-card">
+      <div class="swatch" style="background: #F43F5E;">
+        <span class="swatch-hex" style="color:white">#F43F5E</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Danger / Cancel / Logout</div>
+        <div class="component-desc">"Cancelled" badge, reject return button, logout button, destructive toast, wishlist
+          nav icon.</div>
+        <span class="usage-tag">Cancel &bull; Delete &bull; Errors</span>
+      </div>
+    </div>
+
+    <!-- Pink Cart -->
+    <div class="color-card">
+      <div class="swatch" style="background: #EC4899;">
+        <span class="swatch-hex" style="color:white">#EC4899</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Cart Nav Icon</div>
+        <div class="component-desc">Sidebar "Cart" navigation link icon. Active state uses pink/rose gradient background
+          tint.</div>
+        <span class="usage-tag">Navigation &bull; Cart</span>
+      </div>
+    </div>
+
+    <!-- Slate 900 Dark Blocks -->
+    <div class="color-card">
+      <div class="swatch" style="background: #0F172A;">
+        <span class="swatch-hex" style="color:white">#0F172A</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Dark Feature Blocks</div>
+        <div class="component-desc">Order summary payment panel, "Driver Controls" OTP section, item count badge
+          overlay, modal backdrop.</div>
+        <span class="usage-tag">Checkout &bull; Modal &bull; OTP Panel</span>
+      </div>
+    </div>
+
+    <!-- Orange User Profile Gradient -->
+    <div class="color-card">
+      <div class="swatch" style="background: linear-gradient(to right, #FFF7ED, #FFFBEB, #FEF3C7);">
+        <span class="swatch-hex" style="color:#92400E">#FFF7ED → #FEF3C7</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">User Profile Card (Sidebar)</div>
+        <div class="component-desc">Warm orange-amber gradient card showing authenticated user state in sidebar. Border:
+          #FDBA74/60.</div>
+        <span class="usage-tag">Sidebar &bull; Profile</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION 2: ADMIN PAGE COLORS                       -->
+  <!-- ═══════════════════════════════════════════════════ -->
+
+  <h2 class="section-title">⚙️ Admin <span style="color:#EA580C">Panel.</span></h2>
+  <p class="section-subtitle">Colors used across Dashboard, Products, Orders, Billing, Shop Builder, Scanner, Users,
+    Audit Logs</p>
+
+  <div class="color-grid">
+
+    <!-- Admin Sidebar -->
+    <div class="color-card">
+      <div class="swatch" style="background: #FFFFFF; border-bottom: 1px solid #F1F5F9;">
+        <span class="swatch-hex" style="color:#0F172A">#FFFFFF</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Admin Sidebar Background</div>
+        <div class="component-desc">Clean white sidebar with left fixed positioning. Border-right color #F1F5F9. Same as
+          shopper.</div>
+        <span class="usage-tag">AppSidebar &bull; Admin</span>
+      </div>
+    </div>
+
+    <!-- Admin Primary Brand -->
+    <div class="color-card">
+      <div class="swatch" style="background: linear-gradient(135deg, #EA580C, #D97706);">
+        <span class="swatch-hex" style="color:white">#EA580C → #D97706</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Admin Brand Gradient</div>
+        <div class="component-desc">Admin portal logo box, primary CTA buttons, "ACTIVATE RESTOCKING" button hover,
+          gradient border accents.</div>
+        <span class="usage-tag">Brand &bull; CTA &bull; Accent</span>
+      </div>
+    </div>
+
+    <!-- Dashboard Revenue Chart -->
+    <div class="color-card">
+      <div class="swatch" style="background: #F97316;">
+        <span class="swatch-hex" style="color:white">#F97316</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Revenue Area Chart Line</div>
+        <div class="component-desc">Stroke color of the "Market Momentum Index" area chart. Fill uses 15% opacity
+          gradient below the line.</div>
+        <span class="usage-tag">Dashboard &bull; Charts</span>
+      </div>
+    </div>
+
+    <!-- Stat Card - Inventory -->
+    <div class="color-card">
+      <div class="swatch" style="background: rgba(249, 115, 22, 0.05);">
+        <span class="swatch-hex" style="color:#EA580C">#F97316 / 5%</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Inventory Stat Card Accent</div>
+        <div class="component-desc">Background tint for the "Inventory Units" stat card. Icon color: orange-500. Text:
+          slate-900.</div>
+        <span class="usage-tag">StatCard &bull; Dashboard</span>
+      </div>
+    </div>
+
+    <!-- Stat Card - Revenue -->
+    <div class="color-card">
+      <div class="swatch" style="background: rgba(16, 185, 129, 0.05);">
+        <span class="swatch-hex" style="color:#10B981">#10B981 / 5%</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Revenue Stat Card Accent</div>
+        <div class="component-desc">Background tint for the "Net Revenue" stat card. Icon: emerald-500. Dynamic growth %
+          from DB.</div>
+        <span class="usage-tag">StatCard &bull; Revenue</span>
+      </div>
+    </div>
+
+    <!-- Stat Card - Orders -->
+    <div class="color-card">
+      <div class="swatch" style="background: rgba(59, 130, 246, 0.05);">
+        <span class="swatch-hex" style="color:#3B82F6">#3B82F6 / 5%</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Orders Stat Card Accent</div>
+        <div class="component-desc">Background tint for the "Total Orders" stat card. Icon: blue-500. Shows real-time DB
+          count.</div>
+        <span class="usage-tag">StatCard &bull; Orders</span>
+      </div>
+    </div>
+
+    <!-- Stat Card - Alerts -->
+    <div class="color-card">
+      <div class="swatch" style="background: rgba(244, 63, 94, 0.05);">
+        <span class="swatch-hex" style="color:#F43F5E">#F43F5E / 5%</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Critical Alerts Stat Card</div>
+        <div class="component-desc">Background tint for the "Critical Alerts / Low Stock" stat card. Icon: rose-500.
+        </div>
+        <span class="usage-tag">StatCard &bull; Alerts</span>
+      </div>
+    </div>
+
+    <!-- Category Pie Chart Dark -->
+    <div class="color-card">
+      <div class="swatch" style="background: #0F172A;">
+        <span class="swatch-hex" style="color:white">#0F172A</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Category Pie Chart Panel</div>
+        <div class="component-desc">Dark container for the "Category Spread" donut chart. Internal items use white/10
+          borders.</div>
+        <span class="usage-tag">Dashboard &bull; Chart Panel</span>
+      </div>
+    </div>
+
+    <!-- Pie Slice Colors -->
+    <div class="color-card">
+      <div class="swatch"
+        style="background: linear-gradient(90deg, #F97316, #8B5CF6, #10B981, #3B82F6, #EC4899, #F59E0B);">
+        <span class="swatch-hex" style="color:white">6 Segment Colors</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Pie Chart Segment Palette</div>
+        <div class="component-desc">#F97316 (orange), #8B5CF6 (violet), #10B981 (emerald), #3B82F6 (blue), #EC4899
+          (pink), #F59E0B (amber).</div>
+        <span class="usage-tag">PieChart &bull; Recharts</span>
+      </div>
+    </div>
+
+    <!-- Smart Predictions CTA -->
+    <div class="color-card">
+      <div class="swatch" style="background: linear-gradient(135deg, #EA580C, #EA580C);">
+        <span class="swatch-hex" style="color:white">#EA580C → #EA580C</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Smart Predictions Card</div>
+        <div class="component-desc">Full orange gradient panel housing the AI suggestion text and "ACTIVATE RESTOCKING"
+          CTA button.</div>
+        <span class="usage-tag">Dashboard &bull; AI Panel</span>
+      </div>
+    </div>
+
+    <!-- Health Score Card -->
+    <div class="color-card">
+      <div class="swatch" style="background: #EEF2FF;">
+        <span class="swatch-hex" style="color:#6366F1">#EEF2FF</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Health Score Card Icon</div>
+        <div class="component-desc">Indigo-50 background with indigo-500 CheckCheck icon. Shows dynamic health score
+          from DB.</div>
+        <span class="usage-tag">Dashboard &bull; Widget</span>
+      </div>
+    </div>
+
+    <!-- Admin Internal Controls -->
+    <div class="color-card">
+      <div class="swatch" style="background: #F8FAFC;">
+        <span class="swatch-hex" style="color:#64748B">#F8FAFC</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Admin Order Control Buttons</div>
+        <div class="component-desc">"Mark Packed/Shipped/Delivered/Cancelled" buttons. Default bg-slate-50, hover:
+          bg-slate-900 text-white.</div>
+        <span class="usage-tag">Orders &bull; Admin Controls</span>
+      </div>
+    </div>
+
+    <!-- Delivery Logistics Panel -->
+    <div class="color-card">
+      <div class="swatch" style="background: #6366F1;">
+        <span class="swatch-hex" style="color:white">#6366F1</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Logistics Configuration Accent</div>
+        <div class="component-desc">Indigo-500 label color for "Logistics Configuration" section. "Save Logistics" btn:
+          bg-slate-900 hover:indigo-600.</div>
+        <span class="usage-tag">Admin &bull; Delivery Panel</span>
+      </div>
+    </div>
+
+    <!-- OTP Driver Controls -->
+    <div class="color-card">
+      <div class="swatch" style="background: #0F172A;">
+        <span class="swatch-hex" style="color:#EA580C">#0F172A + #EA580C</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">OTP Driver Controls Panel</div>
+        <div class="component-desc">Dark bg-slate-900 panel with orange-500 label. "Verify OTP" button: bg-emerald-500
+          hover:emerald-600.</div>
+        <span class="usage-tag">Delivery &bull; OTP Verify</span>
+      </div>
+    </div>
+
+    <!-- Return Requested Badge -->
+    <div class="color-card">
+      <div class="swatch" style="background: #FFF7ED; border-bottom: 2px solid #FB923C;">
+        <span class="swatch-hex" style="color:#EA580C">#FFF7ED + #FB923C</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Return Requested Status</div>
+        <div class="component-desc">Orange-50 background with orange-600 icon. Text: "Pending Review". Border:
+          orange-100.</div>
+        <span class="usage-tag">Order Returns</span>
+      </div>
+    </div>
+
+    <!-- Return Approved Badge -->
+    <div class="color-card">
+      <div class="swatch" style="background: #ECFDF5; border-bottom: 2px solid #10B981;">
+        <span class="swatch-hex" style="color:#10B981">#ECFDF5 + #10B981</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Return Approved Status</div>
+        <div class="component-desc">Emerald-50 background with emerald-600 icon and text. Border: emerald-100.</div>
+        <span class="usage-tag">Order Returns</span>
+      </div>
+    </div>
+
+    <!-- Live Operations Badge -->
+    <div class="color-card">
+      <div class="swatch" style="background: #FFFFFF; border: 1px solid #F1F5F9;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="width:8px;height:8px;border-radius:50%;background:#10B981;animation:pulse 1.5s infinite;"></div>
+          <span class="swatch-hex" style="color:#475569">LIVE OPS</span>
+        </div>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Live Operations Badge</div>
+        <div class="component-desc">White container with emerald-500 pulsing dot. Text: slate-600 uppercase
+          tracking-widest. Dashboard header.</div>
+        <span class="usage-tag">Dashboard &bull; Header</span>
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="color-card">
+      <div class="swatch" style="background: linear-gradient(135deg, #0F172A 50%, #DC2626 50%);">
+        <span class="swatch-hex" style="color:white">Slate-900 / Rose-600</span>
+      </div>
+      <div class="color-info">
+        <div class="component-name">Toast Notifications</div>
+        <div class="component-desc">Success: dark bg with white text. Destructive: rose bg. Duration: 5000ms
+          auto-dismiss. Both Toaster + Sonner.</div>
+        <span class="usage-tag">Toasts &bull; Global</span>
+      </div>
+    </div>
+
+  </div>
+
+  <style>
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(1.3);
+      }
+    }
+  </style>
+
+</body>
+
+</html>
