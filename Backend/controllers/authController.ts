@@ -22,15 +22,15 @@ const generateRefreshToken = (id: string) => {
 const setCookies = (res: Response, accessToken: string, refreshToken: string) => {
   res.cookie('jwt', accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: true,
+    sameSite: 'none',
     maxAge: 15 * 60 * 1000, // 15 mins
   });
 
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: true,
+    sameSite: 'none',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 };
@@ -111,8 +111,8 @@ export const refresh = async (req: Request, res: Response) => {
 
     res.cookie('jwt', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: 15 * 60 * 1000, // 15 mins
     });
 
@@ -132,8 +132,8 @@ export const logout = async (req: Request, res: Response) => {
       await user.save();
     }
   }
-  res.cookie('jwt', '', { httpOnly: true, expires: new Date(0), secure: process.env.NODE_ENV === 'production', sameSite: 'lax' });
-  res.cookie('refreshToken', '', { httpOnly: true, expires: new Date(0), secure: process.env.NODE_ENV === 'production', sameSite: 'lax' });
+  res.cookie('jwt', '', { httpOnly: true, expires: new Date(0), secure: true, sameSite: 'none' });
+  res.cookie('refreshToken', '', { httpOnly: true, expires: new Date(0), secure: true, sameSite: 'none' });
   res.status(200).json({ message: 'Logged out successfully' });
 };
 
