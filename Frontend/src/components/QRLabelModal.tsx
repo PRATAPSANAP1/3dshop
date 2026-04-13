@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Printer, FileDown, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -148,11 +149,11 @@ const QRLabelModal = ({ open, onClose, product }: QRLabelModalProps) => {
     doc.save(`QR_${safeName}.pdf`);
   };
 
-  if (!product) return null;
+  if (!product && !open) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      {open && (
+      {open && product && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -239,7 +240,8 @@ const QRLabelModal = ({ open, onClose, product }: QRLabelModalProps) => {
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 

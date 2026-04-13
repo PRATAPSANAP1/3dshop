@@ -242,23 +242,23 @@ const Products = () => {
                     {product.qrCode && (
                       <button
                         onClick={e => { e.stopPropagation(); setQrProduct(product); }}
-                        className="h-8 w-8 rounded-xl bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-slate-500 hover:text-violet-500 hover:border-violet-300 transition-colors shadow-sm"
+                        className="h-10 w-10 rounded-xl bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-slate-500 hover:text-violet-500 hover:border-violet-300 transition-colors shadow-sm"
                         title="QR Label (Print / PDF)"
                       >
-                        <QrCode size={13} />
+                        <QrCode size={18} />
                       </button>
                     )}
                     <button
                       onClick={e => { e.stopPropagation(); openEdit(product); }}
-                      className="h-8 w-8 rounded-xl bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-slate-500 hover:text-orange-500 hover:border-orange-300 transition-colors shadow-sm"
+                      className="h-10 w-10 rounded-xl bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-slate-500 hover:text-orange-500 hover:border-orange-300 transition-colors shadow-sm"
                     >
-                      <Edit2 size={13} />
+                      <Edit2 size={16} />
                     </button>
                     <button
                       onClick={e => { e.stopPropagation(); handleDeleteProduct(product._id, product.productName); }}
-                      className="h-8 w-8 rounded-xl bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-slate-500 hover:text-rose-500 hover:border-rose-300 transition-colors shadow-sm"
+                      className="h-10 w-10 rounded-xl bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-slate-500 hover:text-rose-500 hover:border-rose-300 transition-colors shadow-sm"
                     >
-                      <Trash2 size={13} />
+                      <Trash2 size={16} />
                     </button>
                   </div>
                   {/* Gradient Header */}
@@ -292,11 +292,11 @@ const Products = () => {
                       {product.qrCode && (
                         <button
                           onClick={e => { e.stopPropagation(); setQrProduct(product); }}
-                          className="ml-auto h-7 px-2 rounded-lg bg-violet-50 border border-violet-100 flex items-center gap-1 text-violet-500 hover:bg-violet-100 transition-colors"
+                          className="ml-auto h-9 px-3 rounded-xl bg-violet-50 border border-violet-100 flex items-center gap-1.5 text-violet-600 hover:bg-violet-100 transition-colors shadow-sm"
                           title="Generate QR Label"
                         >
-                          <QrCode size={11} />
-                          <span className="text-[8px] font-black uppercase tracking-wider">QR</span>
+                          <QrCode size={16} />
+                          <span className="text-[10px] font-black uppercase tracking-wider">QR Code</span>
                         </button>
                       )}
                     </div>
