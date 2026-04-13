@@ -242,7 +242,7 @@ const Delivery = () => {
             <p className="text-sm text-slate-300 mt-1">Adjust your filters or assign new deliveries.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <AnimatePresence>
               {filteredOrders.map((order, i) => {
                 const dStatus = order.delivery?.status || "Pending";
@@ -252,71 +252,56 @@ const Delivery = () => {
                 return (
                   <motion.div
                     key={order._id}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: i * 0.03 }}
                     onClick={() => setSelectedOrder(order)}
-                    className="bg-white rounded-2xl border border-slate-100 p-5 cursor-pointer hover:border-orange-200 hover:shadow-sm transition-all group"
+                    className="bg-white rounded-[2rem] border-2 border-slate-50 p-6 cursor-pointer hover:border-orange-100 hover:shadow-xl hover:shadow-orange-500/5 transition-all group flex flex-col h-full"
                   >
-                    <div className="flex items-center gap-4">
-                      {/* Status Icon */}
-                      <div className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 ${cfg.color}`}>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${cfg.color}`}>
                         <StatusIcon size={20} />
                       </div>
+                      <Badge className={`border-none text-[9px] font-black uppercase tracking-wider px-2 py-1 ${cfg.color}`}>
+                        {cfg.label}
+                      </Badge>
+                    </div>
 
-                      {/* Order Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="text-sm font-bold text-slate-900 truncate">
-                            Order #{order._id.slice(-6).toUpperCase()}
-                          </p>
-                          <Badge className={`border-none text-[10px] font-bold uppercase ${cfg.color}`}>
-                            {cfg.label}
-                          </Badge>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400 font-medium">
-                          <span className="flex items-center gap-1">
-                            <Package size={12} /> {order.orderItems?.length || 0} items
-                          </span>
-                          <span className="font-bold text-slate-900">
-                            ₹{order.totalPrice?.toLocaleString()}
-                          </span>
-                          {order.delivery?.timeSlot && (
-                            <span className="flex items-center gap-1">
-                              <Clock size={12} /> {order.delivery.timeSlot}
-                            </span>
-                          )}
-                          {order.delivery?.deliveryDate && (
-                            <span className="flex items-center gap-1">
-                              <Calendar size={12} /> {new Date(order.delivery.deliveryDate).toLocaleDateString()}
-                            </span>
-                          )}
-                        </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Order ID</p>
+                        <p className="text-[10px] font-black text-slate-900 leading-none">#{order._id.slice(-6).toUpperCase()}</p>
                       </div>
-
-                      {/* Assigned Person */}
-                      <div className="hidden md:block text-right shrink-0">
-                        {order.delivery?.assignedTo ? (
-                          <div>
-                            <p className="text-xs font-bold text-slate-900">{getStaffName(order)}</p>
-                            <p className="text-[10px] text-slate-400 font-medium">Assigned</p>
+                      
+                      <div className="space-y-3 mt-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
+                            <MapPin size={14} className="text-slate-400" />
                           </div>
-                        ) : (
-                          <Badge className="bg-slate-50 text-slate-400 border border-slate-200 font-bold text-[10px]">Unassigned</Badge>
-                        )}
-                      </div>
-
-                      {/* OTP Badge */}
-                      {order.delivery?.otp && (
-                        <div className="hidden md:block">
-                          <Badge className={`border-none font-bold text-[10px] uppercase ${order.delivery.otpVerified ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                            {order.delivery.otpVerified ? "✓ Verified" : "OTP: " + order.delivery.otp}
-                          </Badge>
+                          <p className="text-xs font-bold text-slate-600 truncate">{order.shippingAddress?.street || "No Address"}</p>
                         </div>
-                      )}
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
+                            <Clock size={14} className="text-slate-400" />
+                          </div>
+                          <p className="text-xs font-bold text-slate-900">{order.delivery?.timeSlot || "Not Set"}</p>
+                        </div>
+                      </div>
+                    </div>
 
-                      <Eye size={16} className="text-slate-300 group-hover:text-orange-500 transition-colors shrink-0" />
+                    <div className="mt-6 pt-4 border-t border-slate-50 flex items-center justify-between">
+                      <div className="flex -space-x-2">
+                         {order.orderItems?.slice(0, 3).map((_: any, idx: number) => (
+                           <div key={idx} className="h-7 w-7 rounded-lg border-2 border-white bg-slate-100 flex items-center justify-center overflow-hidden">
+                             <Package size={12} className="text-slate-300" />
+                           </div>
+                         ))}
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">Payment</p>
+                        <p className="text-sm font-black italic text-slate-900">₹{order.totalPrice?.toLocaleString()}</p>
+                      </div>
                     </div>
                   </motion.div>
                 );

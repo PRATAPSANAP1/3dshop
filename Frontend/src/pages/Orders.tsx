@@ -319,7 +319,7 @@ const Orders = () => {
             </Button>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <AnimatePresence mode="popLayout">
               {orders.map((order, i) => {
                 const statusKey = order.orderStatus || (order.isDelivered ? 'Delivered' : (order.isPaid ? 'Shipped' : 'Ordered'));
@@ -330,70 +330,54 @@ const Orders = () => {
                 return (
                   <motion.div
                     key={order._id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: i * 0.04 }}
                     onClick={() => setSelectedOrder(order)}
-                    className={`group relative grid grid-cols-1 md:grid-cols-12 gap-6 p-6 rounded-[2.5rem] border-2 border-slate-50 bg-white transition-all cursor-pointer hover:border-orange-200 hover:border-slate-200 hover:shadow-orange-500/5 ${cfg.border} border-l-[8px]`}
+                    className={`group relative flex flex-col p-6 rounded-[2rem] border-2 border-slate-50 bg-white transition-all cursor-pointer hover:border-orange-100 hover:shadow-xl hover:shadow-orange-500/5 ${cfg.border} border-l-[6px] h-full`}
                   >
-                    <div className="md:col-span-1 flex items-center justify-center">
-                      <div className={`h-14 w-14 rounded-2xl flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 ${cfg.color}`}>
-                        <Icon size={24} />
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`h-11 w-11 rounded-xl flex items-center justify-center shadow-sm ${cfg.color}`}>
+                        <Icon size={20} />
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest block mb-0.5">ORDER ID</span>
+                        <span className="text-[10px] font-black text-slate-600">#{order._id.slice(-6).toUpperCase()}</span>
                       </div>
                     </div>
 
-                    <div className="md:col-span-4 flex flex-col justify-center">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">ORDER ID</span>
-                        <span className="text-[10px] font-black text-slate-800 leading-none">#{order._id.slice(-8).toUpperCase()}</span>
-                      </div>
-                      <h3 className="font-heading text-lg font-black italic text-slate-900 leading-none mb-2">{order.orderItems?.length || 0} Professional Items.</h3>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <Badge variant="outline" className={`px-2 py-0.5 rounded-full border-none font-black uppercase tracking-[0.1em] text-[8px] italic ${cfg.color}`}>
+                    <div className="flex-1">
+                      <h3 className="font-heading text-base font-black italic text-slate-900 leading-tight mb-2 line-clamp-2">
+                        {order.orderItems?.length || 0} Professional Items.
+                      </h3>
+                      <div className="flex flex-wrap items-center gap-1.5 mb-4">
+                        <Badge variant="outline" className={`px-2 py-0.5 rounded-full border-none font-black uppercase tracking-[0.05em] text-[8px] italic ${cfg.color}`}>
                           {cfg.label}
                         </Badge>
-                        {/* Payment Status Badge */}
                         {order.isPaid ? (
-                          <Badge className="px-2 py-0.5 rounded-full border-none font-black uppercase tracking-[0.1em] text-[8px] bg-emerald-100 text-emerald-700">✓ Paid</Badge>
-                        ) : order.paymentMethod === 'COD' ? (
-                          <Badge className="px-2 py-0.5 rounded-full border-none font-black uppercase tracking-[0.1em] text-[8px] bg-amber-100 text-amber-700">COD</Badge>
+                          <Badge className="px-2 py-0.5 rounded-full border-none font-black uppercase text-[8px] bg-emerald-100 text-emerald-700">Paid</Badge>
                         ) : (
-                          <Badge className="px-2 py-0.5 rounded-full border-none font-black uppercase tracking-[0.1em] text-[8px] bg-rose-100 text-rose-600">Unpaid</Badge>
+                          <Badge className="px-2 py-0.5 rounded-full border-none font-black uppercase text-[8px] bg-amber-100 text-amber-700">{order.paymentMethod}</Badge>
                         )}
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(order.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                       </div>
                     </div>
 
-                    <div className="md:col-span-4 flex items-center gap-4">
-                      <div className="flex -space-x-3 overflow-hidden p-1">
-                        {order.orderItems.slice(0, 3).map((item: any, idx: number) => (
-                          <div key={idx} className="h-10 w-10 rounded-xl border-2 border-white bg-slate-50 flex items-center justify-center overflow-hidden shadow-sm">
-                            <ShoppingBag size={14} className="text-slate-300" />
-                          </div>
-                        ))}
-                        {order.orderItems.length > 3 && (
-                          <div className="h-10 w-10 rounded-xl border-2 border-white bg-slate-900 text-white flex items-center justify-center text-[10px] font-black">+{order.orderItems.length - 3}</div>
-                        )}
+                    <div className="mt-auto border-t border-slate-50 pt-4 flex items-end justify-between">
+                      <div>
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">TOTAL LEDGER</p>
+                        <p className="text-xl font-black italic text-slate-900 tracking-tighter">₹{order.totalPrice.toLocaleString()}</p>
                       </div>
-                      <div className="text-right flex-1 md:pr-8">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">TOTAL LEDGER</p>
-                        <p className="text-2xl font-black italic text-slate-900 leading-none tracking-tighter">₹{order.totalPrice.toLocaleString()}</p>
-                      </div>
-                    </div>
-
-                    <div className="md:col-span-3 flex items-center justify-end gap-3">
-                      <button className="h-12 w-12 rounded-2xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center">
-                        <Eye size={18} />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); downloadInvoice(order); }}
-                        className="h-12 w-12 rounded-2xl bg-white border border-slate-100 text-slate-400 hover:border-orange-500 hover:text-orange-500 transition-all flex items-center justify-center"
-                      >
-                        <Printer size={18} />
-                      </button>
-                      <div className="h-12 w-12 rounded-2xl bg-slate-50/50 flex items-center justify-center text-slate-200">
-                        <MoreVertical size={18} />
+                      <div className="flex gap-2">
+                        <button className="h-9 w-9 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center">
+                          <Eye size={16} />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); downloadInvoice(order); }}
+                          className="h-9 w-9 rounded-xl bg-slate-50 text-slate-400 hover:bg-orange-500 hover:text-white transition-all flex items-center justify-center"
+                        >
+                          <Printer size={16} />
+                        </button>
                       </div>
                     </div>
                   </motion.div>
