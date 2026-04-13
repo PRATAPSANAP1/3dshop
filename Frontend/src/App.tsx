@@ -125,7 +125,7 @@ const AppContent = () => (
   </div>
 );
 
-const GOOGLE_CLIENT_ID = import.meta.env.GOOGLE_CLIENT_ID || "";
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 const IS_LOCALHOST = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
 // Google OAuth is disabled on localhost unless you've added your dev origin

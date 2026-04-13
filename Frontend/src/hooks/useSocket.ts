@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-const SOCKET_URL = (import.meta.env.API_URL || 'https://threedshop-dg44.onrender.com/api').replace('/api', '');
+const SOCKET_URL = (import.meta.env.VITE_API_URL || 'https://threedshop-dg44.onrender.com/api').replace('/api', '');
 
 // Singleton socket — shared across all hook instances
 let globalSocket: Socket | null = null;

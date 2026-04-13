@@ -19,5 +19,4 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
   },
-  envPrefix: [''], // Allows environment variables without the  prefix
 }));
