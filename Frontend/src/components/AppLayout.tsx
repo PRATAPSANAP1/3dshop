@@ -15,7 +15,7 @@ const AppLayout = () => {
   const is3DPage = location.pathname === '/';
 
   return (
-    <div className={`flex ${is3DPage ? 'h-[calc(100dvh-57px)] md:h-screen overflow-hidden' : 'min-h-screen'} bg-background flex-col md:flex-row`}>
+    <div className={`flex ${is3DPage ? 'h-[100dvh] md:h-screen overflow-hidden' : 'min-h-screen'} bg-background flex-col md:flex-row`}>
       {isAdminOrStaff ? (
         <>
           <motion.div
@@ -132,7 +132,7 @@ const AppLayout = () => {
           ? 'overflow-hidden p-0'
           : 'px-3 sm:px-5 py-4 md:py-10 lg:py-12 pb-24 md:pb-12'
       }`}>
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className={`animate-in fade-in slide-in-from-bottom-4 duration-700 ${is3DPage ? 'h-full' : ''}`}>
            <Outlet />
         </div>
       </main>

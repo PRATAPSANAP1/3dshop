@@ -96,8 +96,8 @@ const Racks = () => {
             Rack<span className="text-slate-900 not-italic">Manager</span>
             <span className="text-slate-400 not-italic font-normal lowercase tracking-widest text-lg ml-2">/ {racks.length} units</span>
           </h1>
-          <Button onClick={() => setShowAdd(!showAdd)} className="gap-2 h-12 px-6 bg-primary hover:bg-primary/90 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-sm">
-            {showAdd ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          <Button onClick={() => setShowAdd(!showAdd)} className="gap-2 h-11 px-5 bg-primary hover:bg-primary/90 text-white rounded-xl font-black uppercase tracking-widest text-[10px] shadow-sm transition-all active:scale-95">
+            {showAdd ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
             {showAdd ? "Cancel" : "Add Rack"}
           </Button>
         </div>
@@ -131,9 +131,11 @@ const Racks = () => {
                   <Input type="number" value={form.shelves} onChange={e => setForm({...form, shelves: +e.target.value})} className="h-12 rounded-xl" />
                 </div>
               </div>
-              <Button type="submit" className="h-12 px-8 bg-slate-900 hover:bg-primary text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all">
-                Create Rack
-              </Button>
+              <div className="flex justify-end pt-2">
+                <Button type="submit" className="h-11 px-8 bg-slate-900 hover:bg-orange-600 text-white rounded-xl font-black uppercase tracking-widest text-[10px] transition-all shadow-md shadow-slate-200">
+                  Create Rack Unit
+                </Button>
+              </div>
             </motion.form>
           )}
         </AnimatePresence>
@@ -174,9 +176,9 @@ const Racks = () => {
                       )}
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteRack(rack._id); }}
-                        className="h-8 w-8 rounded-lg bg-slate-50 text-slate-400 hover:bg-rose/10 hover:text-rose flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
+                        className="h-9 w-9 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose/10 hover:text-rose flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </div>

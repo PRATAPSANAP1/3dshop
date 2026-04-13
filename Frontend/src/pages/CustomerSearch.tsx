@@ -371,7 +371,7 @@ const CustomerSearch: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col overflow-hidden bg-slate-50" style={{ height: 'calc(100dvh - 57px)' }}>
+    <div className="flex flex-col overflow-hidden bg-slate-50 h-full w-full">
       <AnimatePresence>
         {isLoading && (
           <motion.div
@@ -392,10 +392,10 @@ const CustomerSearch: React.FC = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-        className="relative z-50 bg-white/80 backdrop-blur-2xl border-b border-slate-100 shadow-sm"
-        style={{ padding: isMobile ? '10px 14px 12px 14px' : '14px 24px' }}
+        className="relative z-50 bg-white shadow-sm border-b border-slate-100 shrink-0"
+        style={{ padding: isMobile ? '8px 12px' : '14px 24px' }}
       >
-        <div className="flex items-center justify-between mb-3">
+        <div className={`flex items-center justify-between ${isMobile ? 'mb-2' : 'mb-3'}`}>
           <div className="relative">
             <button
               onClick={() => setShowShopDropdown(!showShopDropdown)}

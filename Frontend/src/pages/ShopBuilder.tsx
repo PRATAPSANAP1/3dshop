@@ -366,7 +366,7 @@ const ShopBuilder = () => {
                          <div className="h-9 w-9 bg-violet/10 text-violet rounded-xl flex items-center justify-center"><RotateCw size={18} strokeWidth={3} /></div>
                          <h3 className="font-heading text-sm font-black uppercase italic">Racks</h3>
                       </div>
-                      <button onClick={() => { setShowForm(!showForm); setEditingRack(null); setFormData({ rackName: '', positionX: 0, positionY: 1.5, positionZ: 0, rotation: 0, width: 2, height: 3, shelves: 4, columns: 3, color: '#EA580C' }); }} className="h-8 w-8 rounded-lg bg-violet text-white flex items-center justify-center">{showForm ? <X size={16} /> : <Plus size={16} />}</button>
+                      <button onClick={() => { setShowForm(!showForm); setEditingRack(null); setFormData({ rackName: '', positionX: 0, positionY: 1.5, positionZ: 0, rotation: 0, width: 2, height: 3, shelves: 4, columns: 3, color: '#EA580C' }); }} className="h-9 w-9 rounded-xl bg-violet text-white flex items-center justify-center shadow-sm transition-all active:scale-95 hover:bg-violet-600">{showForm ? <X size={16} /> : <Plus size={16} />}</button>
                    </div>
                    {showForm && (
                       <form onSubmit={handleRackSubmit} className="bg-white p-5 rounded-2xl border border-slate-100 mb-4 shadow-sm space-y-4 text-[10px]">
@@ -394,7 +394,7 @@ const ShopBuilder = () => {
                             <label className="text-[8px] font-black uppercase">Angle: {formData.rotation}°</label>
                             <input type="range" min="0" max="360" value={formData.rotation || 0} onChange={e => setFormData({...formData, rotation: parseInt(e.target.value)})} className="w-full accent-violet" />
                          </div>
-                         <Button type="submit" className="w-full h-12 bg-slate-900 text-white font-black tracking-widest text-[9px]">INITIALIZE UNIT</Button>
+                         <Button type="submit" className="w-full h-11 bg-slate-900 text-white font-black tracking-widest text-[10px] rounded-xl hover:bg-violet-600 transition-all">INITIALIZE UNIT</Button>
                       </form>
                    )}
                    <div className="space-y-3">

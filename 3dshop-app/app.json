@@ -38,14 +38,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "3Dshop needs camera access for the QR Scanner."
-        }
-      ]
-    ],
     "extra": {
       "eas": {
         "projectId": "f5f8de75-f2fe-43ae-bed0-78a24447c10c"
