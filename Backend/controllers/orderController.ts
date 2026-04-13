@@ -192,6 +192,42 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
   }
 };
 
+export const cancelOrder = async (req: Request, res: Response) => {
+  const order = await Order.findById(req.params.id);
+
+  if (order) {
+    // Permission check: only owner can cancel
+    if (order.user.toString() !== (req.user as any)._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to cancel this order' });
+    }
+
+    // Constraint check: cannot cancel if delivery is assigned
+    if (order.delivery && (order as any).delivery.assignedTo) {
+      return res.status(400).json({ message: 'Cannot cancel order once delivery is assigned' });
+    }
+
+    // Constraint check: cannot cancel if already delivered or shipped
+    if (['Shipped', 'OutForDelivery', 'Delivered'].includes(order.orderStatus)) {
+      return res.status(400).json({ message: 'Order is already in transit or delivered' });
+    }
+
+    order.orderStatus = 'Cancelled';
+    order.statusHistory.push({ status: 'Cancelled', comment: 'Cancelled by user', timestamp: new Date() });
+
+    const updatedOrder = await order.save();
+
+    await createAuditLog(req.user, 'ORDER_CANCEL', 'Order', 'Order cancelled by user', {
+      entityId: order._id.toString(),
+      entityName: 'Order ' + order._id,
+      changes: { status: 'Cancelled' }
+    });
+
+    res.json(updatedOrder);
+  } else {
+    res.status(404).json({ message: 'Order not found' });
+  }
+};
+
 export const requestReturnOrder = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { reason } = req.body;

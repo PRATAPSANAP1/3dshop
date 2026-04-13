@@ -273,6 +273,13 @@ const Delivery = () => {
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Order ID</p>
                         <p className="text-[10px] font-black text-slate-900 leading-none">#{order._id.slice(-6).toUpperCase()}</p>
                       </div>
+
+                      <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-50">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Status</p>
+                        <p className={`text-[10px] font-black uppercase leading-none px-2 py-1 rounded-md ${cfg.color}`}>
+                          {cfg.label}
+                        </p>
+                      </div>
                       
                       <div className="space-y-3 mt-4">
                         <div className="flex items-center gap-3">
@@ -504,6 +511,19 @@ const Delivery = () => {
                           <Button onClick={() => handleDeliveryStatus("Failed")} className="bg-rose-500 hover:bg-rose-600 h-11 rounded-xl font-bold text-xs uppercase tracking-wide">
                             ✗ Failed
                           </Button>
+                        </div>
+
+                        <div className="pt-2">
+                           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Update status manually</p>
+                           <select 
+                             className="w-full h-11 px-3 rounded-xl bg-slate-800 text-white text-xs font-bold border-none"
+                             value={selectedOrder.delivery?.status || "Pending"}
+                             onChange={(e) => handleDeliveryStatus(e.target.value)}
+                           >
+                             {Object.keys(deliveryStatusConfig).map(k => (
+                               <option key={k} value={k}>{deliveryStatusConfig[k].label}</option>
+                             ))}
+                           </select>
                         </div>
                       </div>
                     )}

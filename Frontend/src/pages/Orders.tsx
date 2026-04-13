@@ -522,6 +522,34 @@ const Orders = () => {
                             </div>
                           </div>
                         )}
+                        {selectedOrder.orderStatus !== 'Cancelled' && 
+                         selectedOrder.orderStatus !== 'Delivered' && 
+                         !selectedOrder.isReturnRequested &&
+                         !selectedOrder.delivery?.assignedTo && (
+                          <Button 
+                            onClick={async () => {
+                              if (window.confirm("Are you sure you want to cancel this order?")) {
+                                try {
+                                  await api.put(`/orders/${selectedOrder._id}/cancel`);
+                                  toast({ title: "Order Cancelled", description: "Your order has been cancelled successfully." });
+                                  setSelectedOrder(null);
+                                  fetchOrders();
+                                } catch (err) {
+                                  toast({ variant: "destructive", title: "Cancellation Failed", description: "Please try again later." });
+                                }
+                              }
+                            }}
+                            className="w-full h-14 mt-4 rounded-2xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white font-black uppercase tracking-widest text-[10px] transition-all"
+                          >
+                            CANCEL THIS ORDER
+                          </Button>
+                        )}
+                        <Button 
+                          onClick={() => navigate('/help')}
+                          className="w-full h-14 mt-4 rounded-2xl bg-slate-900 text-white hover:bg-orange-600 font-black uppercase tracking-widest text-[10px] transition-all"
+                        >
+                          NEED HELP?
+                        </Button>
                       </div>
                     )}
                   </div>

@@ -13,7 +13,8 @@ import {
   verifyDeliveryOtp,
   updateDeliveryStatus,
   getPaymentStats,
-  fetchPaymentDetails
+  fetchPaymentDetails,
+  cancelOrder
 } from '../controllers/orderController';
 import { protect, admin } from '../middleware/auth';
 import { paymentLimiter } from '../middleware/security';
@@ -33,8 +34,9 @@ router.route('/payments/stats').get(protect, admin, getPaymentStats);
 router.route('/payments/:paymentId').get(protect, admin, fetchPaymentDetails);
 
 router.route('/:id').get(protect, getOrderById);
-router.route('/:id/status').put(protect, admin, updateOrderStatus);
-router.route('/:id/delivery').put(protect, admin, updateDeliveryDetails);
+router.put('/:id/status', protect, admin, updateOrderStatus);
+router.put('/:id/cancel', protect, cancelOrder);
+router.put('/:id/delivery', protect, admin, updateDeliveryDetails);
 router.route('/:id/delivery/verify-otp').post(protect, admin, verifyDeliveryOtp);
 router.route('/:id/delivery/status').put(protect, admin, updateDeliveryStatus);
 router.route('/:id/return').post(protect, requestReturnOrder);
