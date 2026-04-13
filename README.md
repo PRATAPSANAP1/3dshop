@@ -340,8 +340,8 @@ NODE_ENV=development
 
 ### Environment Variables (Frontend `.env`)
 ```env
-VITE_API_URL=https://threedshop-dg44.onrender.com/api
-VITE_RAZORPAY_KEY_ID=rzp_test_xxxxx
+API_URL=https://threedshop-dg44.onrender.com/api
+RAZORPAY_KEY_ID=rzp_test_xxxxx
 ```
 
 ---

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://threedshop-dg44.onrender.com/api',
+  baseURL: import.meta.env.API_URL || 'https://threedshop-dg44.onrender.com/api',
   withCredentials: true,
 });
 
@@ -25,15 +25,15 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (
-      error.response?.status === 401 && 
+      error.response?.status === 401 &&
       !originalRequest._retry &&
       !originalRequest.url.includes('/login') &&
       !originalRequest.url.includes('/refresh') &&
       !originalRequest.url.includes('/auth/me')
     ) {
-      
+
       if (isRefreshing) {
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
           failedQueue.push({ resolve, reject });
         }).then(token => {
           return api(originalRequest);
@@ -46,16 +46,16 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await axios.post(`${import.meta.env.VITE_API_URL || 'https://threedshop-dg44.onrender.com/api'}/auth/refresh`, {}, { withCredentials: true });
-        
+        await axios.post(`${import.meta.env.API_URL || 'https://threedshop-dg44.onrender.com/api'}/auth/refresh`, {}, { withCredentials: true });
+
         isRefreshing = false;
         processQueue(null, 'Refreshed');
-        
+
         return api(originalRequest);
       } catch (refreshError) {
         isRefreshing = false;
         processQueue(refreshError, null);
-        
+
         localStorage.removeItem('user');
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';

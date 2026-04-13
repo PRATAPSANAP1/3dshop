@@ -43,7 +43,7 @@ This guide follows the **Best Approach** used by real startups: One backend serv
 3. **Environment Variables**:
    | Key | Value |
    | :--- | :--- |
-   | `VITE_API_URL` | `https://your-backend.onrender.com/api` |
+   | `API_URL` | `https://your-backend.onrender.com/api` |
 
 ---
 

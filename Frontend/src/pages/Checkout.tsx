@@ -107,7 +107,7 @@ const Checkout = () => {
       }
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_yourkey",
+        key: import.meta.env.RAZORPAY_KEY_ID || "rzp_test_yourkey",
         amount: rzpOrder.amount,
         currency: rzpOrder.currency,
         name: "3Dshop Professional",
