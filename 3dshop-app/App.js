@@ -28,6 +28,14 @@ export default function App() {
     return () => subscription.remove();
   }, [canGoBack]);
 
+  // Timeout safety: Force hide loading after 10 seconds to prevent stuck screen
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleRetry = () => {
     setHasError(false);
     setIsLoading(true);
@@ -65,7 +73,7 @@ export default function App() {
         {isLoading && (
           <View style={styles.loadingOverlay}>
             <ActivityIndicator size="large" color="#EA580C" />
-            <Text style={styles.loadingText}>Loading 3Dshop...</Text>
+            <Text style={styles.loadingText}>Starting 3D Experience...</Text>
           </View>
         )}
 
@@ -73,9 +81,10 @@ export default function App() {
           ref={webViewRef}
           source={{ uri: PRODUCTION_URL }}
           style={styles.webview}
-          startInLoadingState={false}
+          startInLoadingState={true}
           javaScriptEnabled={true}
           domStorageEnabled={true}
+          originWhitelist={['*']}
           allowsBackForwardNavigationGestures={true}
           allowsInlineMediaPlayback={true}
           mediaPlaybackRequiresUserAction={false}
@@ -93,7 +102,17 @@ export default function App() {
             setCanGoBack(navState.canGoBack);
           }}
           // Loading state
-          onLoadStart={() => setIsLoading(true)}
+          onLoadStart={() => {
+            console.log("Loading started...");
+            setIsLoading(true);
+          }}
+          onLoadProgress={({ nativeEvent }) => {
+            console.log("Loading progress:", nativeEvent.progress);
+          }}
+          onLoad={() => {
+            console.log("Loading complete!");
+            setIsLoading(false);
+          }}
           onLoadEnd={() => setIsLoading(false)}
           // Error handling
           onError={() => {
