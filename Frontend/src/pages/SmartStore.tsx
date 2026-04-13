@@ -103,8 +103,8 @@ const SmartStore = () => {
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={data?.zoneTraffic || []}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(220,13%,95%)" />
-                <XAxis dataKey="zoneName" fontSize={10} fontWeight={700} stroke="hsl(220,10%,60%)" axisLine={false} tickLine={false} />
-                <YAxis fontSize={10} fontWeight={700} stroke="hsl(220,10%,60%)" axisLine={false} tickLine={false} />
+                <XAxis dataKey="zoneName" fontSize={10} fontWeight={700} stroke="hsl(220,10%,60%)" axisLine={false} tickLine={false} label={{ value: 'Store Zones', position: 'insideBottom', offset: -5, fontSize: 10, fontWeight: 900, textTransform: 'uppercase', fill: '#64748b' }} height={50} />
+                <YAxis fontSize={10} fontWeight={700} stroke="hsl(220,10%,60%)" axisLine={false} tickLine={false} label={{ value: 'Visitor Score', angle: -90, position: 'insideLeft', fontSize: 10, fontWeight: 900, textTransform: 'uppercase', fill: '#64748b' }} />
                 <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', fontWeight: 'bold' }} />
                 <Bar dataKey="visitors" fill="#EA580C" radius={[6, 6, 0, 0]} barSize={40} />
               </BarChart>
@@ -121,8 +121,8 @@ const SmartStore = () => {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(220,13%,95%)" />
-                <XAxis dataKey="time" fontSize={10} fontWeight={700} stroke="hsl(220,10%,60%)" axisLine={false} tickLine={false} />
-                <YAxis fontSize={10} fontWeight={700} stroke="hsl(220,10%,60%)" axisLine={false} tickLine={false} />
+                <XAxis dataKey="time" fontSize={10} fontWeight={700} stroke="hsl(220,10%,60%)" axisLine={false} tickLine={false} label={{ value: 'Time of Day', position: 'insideBottom', offset: -5, fontSize: 10, fontWeight: 900, textTransform: 'uppercase', fill: '#64748b' }} height={50} />
+                <YAxis fontSize={10} fontWeight={700} stroke="hsl(220,10%,60%)" axisLine={false} tickLine={false} label={{ value: 'Active Users', angle: -90, position: 'insideLeft', fontSize: 10, fontWeight: 900, textTransform: 'uppercase', fill: '#64748b' }} />
                 <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', fontWeight: 'bold' }} />
                 <Area type="monotone" dataKey="visitors" stroke="#10B981" strokeWidth={4} fill="url(#colorVis)" />
               </AreaChart>
@@ -155,8 +155,8 @@ const SmartStore = () => {
             <ResponsiveContainer width="100%" height={260}>
               <LineChart data={data?.rackPerformance || []}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(220,13%,95%)" />
-                <XAxis dataKey="rackName" fontSize={10} fontWeight={700} stroke="hsl(220,10%,60%)" axisLine={false} tickLine={false} />
-                <YAxis fontSize={10} fontWeight={700} stroke="hsl(220,10%,60%)" axisLine={false} tickLine={false} />
+                <XAxis dataKey="rackName" fontSize={10} fontWeight={700} stroke="hsl(220,10%,60%)" axisLine={false} tickLine={false} label={{ value: 'Racks', position: 'insideBottom', offset: -5, fontSize: 10, fontWeight: 900, textTransform: 'uppercase', fill: '#64748b' }} height={50} />
+                <YAxis fontSize={10} fontWeight={700} stroke="hsl(220,10%,60%)" axisLine={false} tickLine={false} label={{ value: 'Revenue (₹)', angle: -90, position: 'insideLeft', fontSize: 10, fontWeight: 900, textTransform: 'uppercase', fill: '#64748b' }} />
                 <Tooltip contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', fontWeight: 'bold' }} />
                 <Line type="stepAfter" dataKey="sales" stroke="#F59E0B" strokeWidth={4} dot={false} />
               </LineChart>
