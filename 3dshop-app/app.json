@@ -1,31 +1,51 @@
 {
   "expo": {
-    "name": "3dshop-app",
+    "name": "3Dshop",
     "slug": "3dshop-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "threedshop",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0f172a"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pratap.threedshop",
+      "infoPlist": {
+        "NSCameraUsageDescription": "3Dshop needs camera access for the QR Scanner to scan product barcodes.",
+        "NSPhotoLibraryUsageDescription": "3Dshop needs photo library access to upload product images."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0f172a"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.pratap.threedshop"
+      "package": "com.pratap.threedshop",
+      "permissions": [
+        "CAMERA",
+        "VIBRATE",
+        "ACCESS_NETWORK_STATE",
+        "INTERNET"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "3Dshop needs camera access for the QR Scanner."
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "f5f8de75-f2fe-43ae-bed0-78a24447c10c"
