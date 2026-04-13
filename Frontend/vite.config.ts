@@ -19,4 +19,5 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
   },
+  envPrefix: ['API_URL', 'GOOGLE_CLIENT_ID', 'RAZORPAY_KEY_ID'],
 }));
