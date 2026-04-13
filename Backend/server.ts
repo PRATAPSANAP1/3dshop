@@ -115,9 +115,23 @@ app.use('/api/audit-logs', auditLogRoutes);
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'ok', 
-    uptime: process.uptime(),
+    uptime: Math.floor(process.uptime()),
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    version: '1.2.0'
+  });
+});
+
+app.get('/heartbeat', (req, res) => {
+  console.log('💓 Heartbeat verified at', new Date().toLocaleString());
+  res.send('Server is alive and pumping! 👍');
+});
+
+app.get('/api/test', (req, res) => {
+  res.json({ 
+    message: "Backend is operational!",
+    service: "3Dshop-API",
+    status: "Healthy"
   });
 });
 
