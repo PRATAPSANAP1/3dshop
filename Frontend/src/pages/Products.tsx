@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Search, Package, AlertTriangle, X, IndianRupee, Layers, Tag, TrendingUp, ShoppingBag, Edit2, Trash2, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -334,73 +335,76 @@ const Products = () => {
         )}
 
         {/* Add Modal */}
-        <AnimatePresence>
-          {showAddModal && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/30 backdrop-blur-sm p-4"
-              onClick={() => setShowAddModal(false)}
-            >
+        {createPortal(
+          <AnimatePresence>
+            {showAddModal && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 30 }}
-                onClick={(e) => e.stopPropagation()}
-                className="w-full max-w-lg bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 sm:p-10 relative overflow-visible"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/30 backdrop-blur-sm p-4"
+                onClick={() => setShowAddModal(false)}
               >
-                <button onClick={() => setShowAddModal(false)} className="absolute top-5 right-5 h-8 w-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 hover:border-rose-200 hover:rotate-90 transition-all">
-                  <X size={14} />
-                </button>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 30 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full max-w-lg max-h-[95vh] overflow-y-auto bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 sm:p-10 relative overflow-visible"
+                >
+                  <button onClick={() => setShowAddModal(false)} className="absolute top-5 right-5 h-8 w-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 hover:border-rose-200 hover:rotate-90 transition-all">
+                    <X size={14} />
+                  </button>
 
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="h-14 w-14 rounded-2xl flex items-center justify-center text-white shadow-sm" style={{ background: 'linear-gradient(135deg, #EA580C 0%, #D97706 100%)' }}>
-                    {editingProduct ? <Edit2 size={24} /> : <Plus size={28} strokeWidth={3} />}
-                  </div>
-                  <div>
-                    <h2 className="font-heading text-xl font-black text-slate-900 tracking-tight uppercase italic leading-none">
-                      {editingProduct ? 'Edit' : 'Add'} <span className="text-orange-500 not-italic">Product</span>
-                    </h2>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{editingProduct ? 'Update SKU details' : 'Register new SKU'}</p>
-                  </div>
-                </div>
-                
-                <form onSubmit={handleAddProduct} className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Product Name</label>
-                       <Input value={form.productName} onChange={(e) => setForm({...form, productName: e.target.value})} placeholder="Full Product Name" className="h-12 rounded-xl" required />
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="h-14 w-14 rounded-2xl flex items-center justify-center text-white shadow-sm" style={{ background: 'linear-gradient(135deg, #EA580C 0%, #D97706 100%)' }}>
+                      {editingProduct ? <Edit2 size={24} /> : <Plus size={28} strokeWidth={3} />}
                     </div>
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Category</label>
-                       <Input value={form.category} onChange={(e) => setForm({...form, category: e.target.value})} placeholder="e.g. Electronics" className="h-12 rounded-xl" required />
+                    <div>
+                      <h2 className="font-heading text-xl font-black text-slate-900 tracking-tight uppercase italic leading-none">
+                        {editingProduct ? 'Edit' : 'Add'} <span className="text-orange-500 not-italic">Product</span>
+                      </h2>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{editingProduct ? 'Update SKU details' : 'Register new SKU'}</p>
                     </div>
                   </div>
+                  
+                  <form onSubmit={handleAddProduct} className="space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-2">
+                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Product Name</label>
+                         <Input value={form.productName} onChange={(e) => setForm({...form, productName: e.target.value})} placeholder="Full Product Name" className="h-12 rounded-xl" required />
+                      </div>
+                      <div className="space-y-2">
+                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Category</label>
+                         <Input value={form.category} onChange={(e) => setForm({...form, category: e.target.value})} placeholder="e.g. Electronics" className="h-12 rounded-xl" required />
+                      </div>
+                    </div>
 
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Price (₹)</label>
-                      <Input type="number" value={form.price} onChange={(e) => setForm({...form, price: e.target.value})} placeholder="0" className="h-12 rounded-xl" required />
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Price (₹)</label>
+                        <Input type="number" value={form.price} onChange={(e) => setForm({...form, price: e.target.value})} placeholder="0" className="h-12 rounded-xl" required />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Qty</label>
+                        <Input type="number" value={form.quantity} onChange={(e) => setForm({...form, quantity: e.target.value})} placeholder="0" className="h-12 rounded-xl" required />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Min Alert</label>
+                        <Input type="number" value={form.minStockLevel} onChange={(e) => setForm({...form, minStockLevel: e.target.value})} placeholder="5" className="h-12 rounded-xl" required />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Qty</label>
-                      <Input type="number" value={form.quantity} onChange={(e) => setForm({...form, quantity: e.target.value})} placeholder="0" className="h-12 rounded-xl" required />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Min Alert</label>
-                      <Input type="number" value={form.minStockLevel} onChange={(e) => setForm({...form, minStockLevel: e.target.value})} placeholder="5" className="h-12 rounded-xl" required />
-                    </div>
-                  </div>
 
-                  <Button type="submit" className="w-full h-14 rounded-2xl text-white font-black uppercase tracking-[0.2em] shadow-sm transition-all active:scale-95 text-[10px] border-none" style={{ background: 'linear-gradient(135deg, #EA580C 0%, #D97706 100%)' }}>
-                    {editingProduct ? 'Save Changes' : 'Add to Catalog'}
-                  </Button>
-                </form>
+                    <Button type="submit" className="w-full h-14 rounded-2xl text-white font-black uppercase tracking-[0.2em] shadow-sm transition-all active:scale-95 text-[10px] border-none" style={{ background: 'linear-gradient(135deg, #EA580C 0%, #D97706 100%)' }}>
+                      {editingProduct ? 'Save Changes' : 'Add to Catalog'}
+                    </Button>
+                  </form>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
 
         {/* QR Label Modal (Print / PDF at 2×2cm) */}
         <QRLabelModal
