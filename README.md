@@ -381,4 +381,31 @@ VITE_RAZORPAY_KEY_ID=rzp_test_xxxxx
 
 ---
 
+## 📱 Mobile App (3Dshop Mobile)
+The mobile version of 3Dshop is built using **Expo (React Native)**. It provides a native wrapper around the web experience, ensuring a fast and installable app (APK/IPA) for customers.
+
+### Features
+- **WebView Integration** — Loads the full 3D store experience in a native container
+- **APK Ready** — Can be built for Android distribution
+- **Fast Performance** — Lightweight wrapper with direct API potential
+
+### How to Run
+```bash
+cd 3dshop-app
+npx expo start
+```
+Scan the QR code in the **Expo Go** app on your phone.
+
+---
+
+## 🏗️ Startup Architecture (Production Ready)
+We follow the "One Backend" rule to minimize maintenance and maximize scale:
+
+1. **Frontend (Website)** → **Vercel**
+2. **Mobile App (Android/iOS)** → **Expo**
+3. **Backend API (Node.js)** → **Render**
+4. **Database (Cloud)** → **MongoDB Atlas**
+
+---
+
 © 2026 **3Dshop Premium Suite v2**. All Rights Reserved. Crafted for the future of spatial commerce.
