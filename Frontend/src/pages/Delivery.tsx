@@ -332,10 +332,9 @@ const Delivery = () => {
                   initial={{ scale: 0.92, opacity: 0, y: 20 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.92, opacity: 0, y: 20 }}
-                  className="relative w-full max-w-5xl max-h-[90vh] bg-slate-50 rounded-[2.5rem] overflow-hidden shadow-xl flex flex-col md:flex-row"
+                  className="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-[2.5rem] shadow-2xl flex flex-col"
                 >
-                  {/* LEFT — Order & Address Info */}
-                  <div className="w-full md:w-1/2 p-8 overflow-y-auto bg-white">
+                  <div className="overflow-y-auto p-8 custom-scrollbar">
                     <div className="flex items-center justify-between mb-8">
                       <div>
                         <h2 className="text-2xl font-black italic tracking-tighter text-slate-900 uppercase leading-none">

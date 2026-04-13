@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Users,
   ScrollText,
+  Warehouse,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -28,6 +29,7 @@ const navItems = [
   { to: "/products",    icon: Package,        label: "Products",     desc: "Manage SKUs",          color: "text-orange-500", bg: "bg-orange-500/10" },
   { to: "/racks",       icon: Box,            label: "Racks",        desc: "Spatial mapping",      color: "text-amber-600",  bg: "bg-amber-500/10" },
   { to: "/shop-builder",icon: Store,          label: "3D Builder",   desc: "Store design",         color: "text-amber-600",  bg: "bg-amber-500/10" },
+  { to: "/godown",      icon: Warehouse,      label: "Godown",       desc: "Private warehouse",    color: "text-orange-600", bg: "bg-orange-500/10" },
   { to: "/scanner",     icon: ScanLine,       label: "QR Scanner",   desc: "Batch operations",     color: "text-orange-500", bg: "bg-orange-500/10" },
   { to: "/delivery",    icon: Truck,          label: "Delivery Hub", desc: "Assign & verify",      color: "text-amber-600",  bg: "bg-amber-500/10" },
   { to: "/logistics",   icon: Truck,          label: "Logistics",    desc: "Fleet overview",       color: "text-blue-500",   bg: "bg-blue-500/10" },

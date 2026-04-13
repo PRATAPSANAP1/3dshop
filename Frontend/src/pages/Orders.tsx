@@ -399,9 +399,9 @@ const Orders = () => {
                   initial={{ scale: 0.9, opacity: 0, y: 20 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                  className="relative w-full max-w-5xl max-h-[90vh] bg-slate-50 rounded-[3rem] overflow-hidden shadow-sm flex flex-col md:flex-row"
+                  className="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-[3rem] shadow-2xl flex flex-col"
                 >
-                  <div className="w-full md:w-3/5 p-8 overflow-y-auto bg-white">
+                  <div className="overflow-y-auto p-6 md:p-10 custom-scrollbar">
                     <div className="flex items-center justify-between mb-10">
                       <div>
                         <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 uppercase leading-none">ORDER <span className="text-orange-500 not-italic">DETAILS.</span></h2>

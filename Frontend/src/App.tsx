@@ -44,6 +44,17 @@ const Users = lazy(() => import("./pages/Users"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const HelpCenter = lazy(() => import("./pages/HelpCenter"));
 
+// Godown lazy imports
+const GodownLayout = lazy(() => import("./components/GodownLayout"));
+const GodownOverview = lazy(() => import("./pages/Godown/Overview"));
+const GodownBuilder = lazy(() => import("./pages/Godown/Builder"));
+const ManageRacks = lazy(() => import("./pages/Godown/ManageRacks"));
+const ManageShelves = lazy(() => import("./pages/Godown/ManageShelves"));
+const GodownStock = lazy(() => import("./pages/Godown/Stock"));
+const StockTransfer = lazy(() => import("./pages/Godown/Transfer"));
+const GodownReports = lazy(() => import("./pages/Godown/Reports"));
+const GodownSettings = lazy(() => import("./pages/Godown/Settings"));
+
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -89,6 +100,19 @@ const AnimatedRoutes = () => {
             <Route path="/billing" element={<AdminRoute><Billing /></AdminRoute>} />
             <Route path="/audit-logs" element={<AdminRoute><AuditLogs /></AdminRoute>} />
             <Route path="/logistics" element={<AdminRoute><Logistics /></AdminRoute>} />
+
+            {/* Godown Routes */}
+            <Route path="/godown" element={<AdminRoute><GodownLayout /></AdminRoute>}>
+              <Route index element={<Navigate to="overview" replace />} />
+              <Route path="overview" element={<GodownOverview />} />
+              <Route path="builder" element={<GodownBuilder />} />
+              <Route path="racks" element={<ManageRacks />} />
+              <Route path="shelves" element={<ManageShelves />} />
+              <Route path="stock" element={<GodownStock />} />
+              <Route path="transfer" element={<StockTransfer />} />
+              <Route path="reports" element={<GodownReports />} />
+              <Route path="settings" element={<GodownSettings />} />
+            </Route>
 
             {/* Root → HomePage for guests, CustomerSearch for logged-in users */}
             <Route path="/" element={<GuestOrStoreRoute />} />
