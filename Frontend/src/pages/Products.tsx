@@ -36,7 +36,17 @@ const Products = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
-  const [form, setForm] = useState({ productName: '', category: '', price: '', quantity: '', minStockLevel: '' });
+  const [racks, setRacks] = useState<any[]>([]);
+  const [form, setForm] = useState({ 
+    productName: '', 
+    category: '', 
+    price: '', 
+    quantity: '', 
+    minStockLevel: '',
+    rackId: '',
+    shelfNumber: '',
+    columnNumber: ''
+  });
   const [qrProduct, setQrProduct] = useState<any>(null);
   const { toast } = useToast();
 
@@ -45,18 +55,22 @@ const Products = () => {
     return ["All", ...Array.from(cats) as string[]];
   }, [products]);
 
-  const fetchProducts = async () => {
+  const fetchData = async () => {
     try {
-      const { data } = await api.get('/products');
-      setProducts(data);
+      const [pRes, rRes] = await Promise.all([
+        api.get('/products'),
+        api.get('/racks')
+      ]);
+      setProducts(pRes.data);
+      setRacks(rRes.data);
     } catch (err) {
-      toast({ variant: "destructive", title: "Fetch Error", description: "Failed to load products" });
+      toast({ variant: "destructive", title: "Fetch Error", description: "Failed to load data" });
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchProducts(); }, []);
+  useEffect(() => { fetchData(); }, []);
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,8 +84,8 @@ const Products = () => {
       }
       setShowAddModal(false);
       setEditingProduct(null);
-      setForm({ productName: '', category: '', price: '', quantity: '', minStockLevel: '' });
-      fetchProducts();
+      setForm({ productName: '', category: '', price: '', quantity: '', minStockLevel: '', rackId: '', shelfNumber: '', columnNumber: '' });
+      fetchData();
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: editingProduct ? "Could not update product" : "Could not add product" });
     }
@@ -82,7 +96,7 @@ const Products = () => {
     try {
       await api.delete(`/products/${id}`);
       toast({ variant: "success", title: "Deleted", description: `${name} removed from catalog` });
-      fetchProducts();
+      fetchData();
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: "Could not delete product" });
     }
@@ -96,6 +110,9 @@ const Products = () => {
       price: String(product.price || ''),
       quantity: String(product.quantity || ''),
       minStockLevel: String(product.minStockLevel || ''),
+      rackId: product.rackId?._id || product.rackId || '',
+      shelfNumber: String(product.shelfNumber || ''),
+      columnNumber: String(product.columnNumber || ''),
     });
     setShowAddModal(true);
   };
@@ -139,7 +156,7 @@ const Products = () => {
             </h1>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{products.length} SKUs Registered</p>
           </div>
-          <Button onClick={() => { setEditingProduct(null); setForm({ productName: '', category: '', price: '', quantity: '', minStockLevel: '' }); setShowAddModal(true); }} className="gap-2 h-12 px-6 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-sm shadow-orange-500/20 border-none text-white" style={{ background: 'linear-gradient(135deg, #EA580C 0%, #D97706 100%)' }}>
+          <Button onClick={() => { setEditingProduct(null); setForm({ productName: '', category: '', price: '', quantity: '', minStockLevel: '', rackId: '', shelfNumber: '', columnNumber: '' }); setShowAddModal(true); }} className="gap-2 h-12 px-6 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-sm shadow-orange-500/20 border-none text-white" style={{ background: 'linear-gradient(135deg, #EA580C 0%, #D97706 100%)' }}>
             <Plus className="h-4 w-4" strokeWidth={3} />
             Add Product
           </Button>
@@ -367,6 +384,30 @@ const Products = () => {
                       <div className="space-y-2">
                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Category</label>
                          <Input value={form.category} onChange={(e) => setForm({...form, category: e.target.value})} placeholder="e.g. Electronics" className="h-12 rounded-xl" required />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assigned Rack</label>
+                        <select 
+                          value={form.rackId} 
+                          onChange={(e) => setForm({...form, rackId: e.target.value})}
+                          className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-sm font-bold focus:outline-none focus:border-orange-400"
+                        >
+                          <option value="">Unassigned</option>
+                          {racks.map(r => <option key={r._id} value={r._id}>{r.rackName}</option>)}
+                        </select>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Shelf #</label>
+                          <Input type="number" value={form.shelfNumber} onChange={(e) => setForm({...form, shelfNumber: e.target.value})} placeholder="1" className="h-12 rounded-xl" />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Col #</label>
+                          <Input type="number" value={form.columnNumber} onChange={(e) => setForm({...form, columnNumber: e.target.value})} placeholder="1" className="h-12 rounded-xl" />
+                        </div>
                       </div>
                     </div>
 

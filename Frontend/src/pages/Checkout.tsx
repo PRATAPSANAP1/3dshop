@@ -314,7 +314,6 @@ const Checkout = () => {
                     {[
                       { id: 'COD', name: 'Cash on Delivery', icon: <Truck size={20} /> },
                       { id: 'UPI', name: 'UPI / QR Payment', icon: <ScanLine size={20} /> },
-                      { id: 'Card', name: 'Credit/Debit Card', icon: <CreditCard size={20} /> },
                     ].map((m: any) => (
                       <div
                         key={m.id}

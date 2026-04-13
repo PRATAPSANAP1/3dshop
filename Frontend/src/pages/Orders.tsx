@@ -468,8 +468,8 @@ const Orders = () => {
                           <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">TOTAL PAYABLE</p>
                           <p className="text-4xl font-black italic text-orange-500 tracking-tighter leading-none">₹{selectedOrder.totalPrice.toLocaleString()}</p>
                         </div>
-                        <Button onClick={() => downloadInvoice(selectedOrder)} className="h-14 px-8 rounded-2xl bg-white text-slate-900 hover:bg-orange-500 hover:text-white font-black uppercase tracking-widest text-[10px] gap-2 transition-all shadow-sm leading-none">
-                          <Printer size={16} /> DOWNLOAD INVOICE
+                        <Button onClick={() => downloadInvoice(selectedOrder)} className="h-12 md:h-14 px-5 md:px-8 rounded-2xl bg-white text-slate-900 hover:bg-orange-500 hover:text-white font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 transition-all shadow-sm leading-none shrink-0">
+                          <Printer size={16} /> <span className="hidden sm:inline">DOWNLOAD INVOICE</span><span className="sm:hidden">INVOICE</span>
                         </Button>
                       </div>
                     </div>

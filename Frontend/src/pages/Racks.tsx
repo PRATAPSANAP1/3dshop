@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Box, Plus, Package, Trash2, X } from "lucide-react";
+import { Box, Plus, Package, Trash2, X, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/PageTransition";
@@ -24,7 +24,18 @@ const Racks = () => {
   const [racks, setRacks] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ rackName: '', positionX: 0, positionY: 1.5, positionZ: 0, width: 2, height: 3, shelves: 4, columns: 3 });
+  const [editingRack, setEditingRack] = useState<any>(null);
+  const [form, setForm] = useState({ 
+    rackName: '', 
+    positionX: 0, 
+    positionY: 1.5, 
+    positionZ: 0, 
+    width: 2, 
+    height: 3, 
+    shelves: 4, 
+    columns: 3,
+    color: '#EA580C'
+  });
   const { toast } = useToast();
 
   const fetchData = async () => {
@@ -47,14 +58,36 @@ const Racks = () => {
   const handleAddRack = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post('/racks', form);
-      toast({ variant: "success", title: "Rack Created", description: `${form.rackName} has been added to your store` });
+      if (editingRack) {
+        await api.put(`/racks/${editingRack._id}`, form);
+        toast({ title: "Rack Updated", description: "Configuration saved successfully" });
+      } else {
+        await api.post('/racks', form);
+        toast({ variant: "success", title: "Rack Created", description: `${form.rackName} added` });
+      }
       setShowAdd(false);
-      setForm({ rackName: '', positionX: 0, positionY: 1.5, positionZ: 0, width: 2, height: 3, shelves: 4, columns: 3 });
+      setEditingRack(null);
+      setForm({ rackName: '', positionX: 0, positionY: 1.5, positionZ: 0, width: 2, height: 3, shelves: 4, columns: 3, color: '#EA580C' });
       fetchData();
     } catch (err) {
-      toast({ variant: "destructive", title: "Error", description: "Failed to create rack" });
+      toast({ variant: "destructive", title: "Error", description: editingRack ? "Update failed" : "Creation failed" });
     }
+  };
+
+  const openEdit = (rack: any) => {
+    setEditingRack(rack);
+    setForm({
+      rackName: rack.rackName || '',
+      positionX: rack.positionX || 0,
+      positionY: rack.positionY || 1.5,
+      positionZ: rack.positionZ || 0,
+      width: rack.width || 2,
+      height: rack.height || 3,
+      shelves: rack.shelves || 4,
+      columns: rack.columns || 3,
+      color: rack.color || '#EA580C'
+    });
+    setShowAdd(true);
   };
 
   const handleDeleteRack = async (id: string) => {
@@ -96,7 +129,7 @@ const Racks = () => {
             Rack<span className="text-slate-900 not-italic">Manager</span>
             <span className="text-slate-400 not-italic font-normal lowercase tracking-widest text-lg ml-2">/ {racks.length} units</span>
           </h1>
-          <Button onClick={() => setShowAdd(!showAdd)} className="gap-2 h-11 px-5 bg-primary hover:bg-primary/90 text-white rounded-xl font-black uppercase tracking-widest text-[10px] shadow-sm transition-all active:scale-95">
+          <Button onClick={() => { if(showAdd) setEditingRack(null); setShowAdd(!showAdd); setForm({ rackName: '', positionX: 0, positionY: 1.5, positionZ: 0, width: 2, height: 3, shelves: 4, columns: 3, color: '#EA580C' }); }} className="gap-2 h-11 px-5 bg-primary hover:bg-primary/90 text-white rounded-xl font-black uppercase tracking-widest text-[10px] shadow-sm transition-all active:scale-95">
             {showAdd ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
             {showAdd ? "Cancel" : "Add Rack"}
           </Button>
@@ -110,30 +143,55 @@ const Racks = () => {
               exit={{ opacity: 0, height: 0 }}
               onSubmit={handleAddRack}
               className="stat-card border-l-4 p-8 space-y-6 overflow-hidden"
-              style={{ borderLeftColor: '#EA580C' }}
+               style={{ borderLeftColor: editingRack ? '#8B5CF6' : '#EA580C' }}
             >
-              <h3 className="font-heading text-lg font-black text-slate-900 uppercase tracking-tight">New Rack Configuration</h3>
+              <h3 className="font-heading text-lg font-black text-slate-900 uppercase tracking-tight">
+                {editingRack ? `Edit ${editingRack.rackName}` : 'New Rack Configuration'}
+              </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Rack Name</label>
-                  <Input value={form.rackName} onChange={e => setForm({...form, rackName: e.target.value})} placeholder="Rack A1" className="h-12 rounded-xl" required />
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Identity</label>
+                  <Input value={form.rackName} onChange={e => setForm({...form, rackName: e.target.value})} placeholder="Rack ID" className="h-12 rounded-xl" required />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Position X</label>
-                  <Input type="number" value={form.positionX} onChange={e => setForm({...form, positionX: +e.target.value})} className="h-12 rounded-xl" />
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Spatial X</label>
+                  <Input type="number" step="0.1" value={form.positionX} onChange={e => setForm({...form, positionX: +e.target.value})} className="h-12 rounded-xl" />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Position Z</label>
-                  <Input type="number" value={form.positionZ} onChange={e => setForm({...form, positionZ: +e.target.value})} className="h-12 rounded-xl" />
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Spatial Z</label>
+                  <Input type="number" step="0.1" value={form.positionZ} onChange={e => setForm({...form, positionZ: +e.target.value})} className="h-12 rounded-xl" />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Shelves</label>
-                  <Input type="number" value={form.shelves} onChange={e => setForm({...form, shelves: +e.target.value})} className="h-12 rounded-xl" />
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Theme Color</label>
+                  <div className="flex gap-2 h-12">
+                    <input type="color" value={form.color} onChange={e => setForm({...form, color: e.target.value})} className="h-12 w-12 rounded-xl border-none p-0 overflow-hidden cursor-pointer" />
+                    <Input value={form.color} onChange={e => setForm({...form, color: e.target.value})} className="flex-1 h-12 rounded-xl uppercase font-mono" />
+                  </div>
                 </div>
               </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-50 pt-4">
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Width (units)</label>
+                  <Input type="number" step="0.1" value={form.width} onChange={e => setForm({...form, width: +e.target.value})} className="h-12 rounded-xl" />
+                </div>
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Height (units)</label>
+                  <Input type="number" step="0.1" value={form.height} onChange={e => setForm({...form, height: +e.target.value})} className="h-12 rounded-xl" />
+                </div>
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Shelves</label>
+                  <Input type="number" value={form.shelves} onChange={e => setForm({...form, shelves: +e.target.value})} className="h-12 rounded-xl" />
+                </div>
+                <div className="space-y-1.5 text-left">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Columns</label>
+                  <Input type="number" value={form.columns} onChange={e => setForm({...form, columns: +e.target.value})} className="h-12 rounded-xl" />
+                </div>
+              </div>
+
               <div className="flex justify-end pt-2">
                 <Button type="submit" className="h-11 px-8 bg-slate-900 hover:bg-orange-600 text-white rounded-xl font-black uppercase tracking-widest text-[10px] transition-all shadow-md shadow-slate-200">
-                  Create Rack Unit
+                  {editingRack ? 'Save Configuration' : 'Create Rack Unit'}
                 </Button>
               </div>
             </motion.form>
@@ -174,12 +232,20 @@ const Racks = () => {
                           {lowStock} Low
                         </span>
                       )}
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleDeleteRack(rack._id); }}
-                        className="h-9 w-9 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose/10 hover:text-rose flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); openEdit(rack); }}
+                          className="h-9 w-9 rounded-xl bg-slate-50 text-slate-400 hover:bg-violet-50 hover:text-violet-600 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleDeleteRack(rack._id); }}
+                          className="h-9 w-9 rounded-xl bg-slate-50 text-slate-400 hover:bg-rose/10 hover:text-rose flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <h3 className="mt-4 font-heading text-lg font-black text-slate-900 leading-tight">{rack.rackName}</h3>
