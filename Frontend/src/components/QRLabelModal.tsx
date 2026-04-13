@@ -165,7 +165,7 @@ const QRLabelModal = ({ open, onClose, product }: QRLabelModalProps) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 30 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm bg-white rounded-[2.5rem] border border-slate-100 shadow-xl p-8 relative"
+            className="w-full max-w-sm max-h-[90vh] overflow-y-auto bg-white rounded-[2.5rem] border border-slate-100 shadow-xl p-6 relative flex flex-col"
           >
             {/* Close Button */}
             <button
@@ -176,7 +176,7 @@ const QRLabelModal = ({ open, onClose, product }: QRLabelModalProps) => {
             </button>
 
             {/* Header */}
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-4">
               <div
                 className="h-12 w-12 rounded-2xl flex items-center justify-center text-white shadow-sm"
                 style={{ background: "linear-gradient(135deg, #EA580C 0%, #D97706 100%)" }}
@@ -202,16 +202,13 @@ const QRLabelModal = ({ open, onClose, product }: QRLabelModalProps) => {
             </div>
 
             {/* Label Preview */}
-            <div className="flex flex-col items-center mb-6">
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">
-                Label Preview (2×2cm)
-              </p>
-              <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-3 bg-white">
+            <div className="flex flex-col items-center mb-4 mt-2">
+              <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-2 bg-white flex justify-center items-center">
                 <canvas
                   ref={canvasRef}
                   width={PREVIEW_PX}
                   height={PREVIEW_PX}
-                  className="block"
+                  className="block max-w-full h-auto max-h-[160px] object-contain"
                   style={{ width: PREVIEW_PX, height: PREVIEW_PX }}
                 />
                 {/* Corner dimension marks */}
@@ -222,7 +219,7 @@ const QRLabelModal = ({ open, onClose, product }: QRLabelModalProps) => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-3 mt-auto pt-2">
               <Button
                 onClick={handlePrint}
                 className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-2 shadow-sm border-2 border-slate-900 bg-slate-900 hover:bg-slate-800 text-white transition-all active:scale-95"
