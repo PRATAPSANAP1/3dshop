@@ -33,7 +33,7 @@ const Scanner = () => {
   const openCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
+        video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }
       });
       streamRef.current = stream;
       if (videoRef.current) {
@@ -335,9 +335,10 @@ const Scanner = () => {
               <Button onClick={openCamera} className="gap-2 h-12 bg-primary hover:bg-primary/90 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-sm">
                 <Camera className="h-4 w-4" /> Open Camera
               </Button>
-              <div className="flex gap-2 flex-1">
-                <Input value={manualCode} onChange={(e) => setManualCode(e.target.value)} placeholder="Enter QR code manually..." className="h-12 rounded-xl font-bold" onKeyDown={(e) => e.key === 'Enter' && handleScanItem(manualCode)} />
-                <div className="flex items-center gap-1 bg-slate-50 rounded-xl px-2 shrink-0">
+              <div className="flex flex-col sm:flex-row gap-2 flex-1">
+                <Input value={manualCode} onChange={(e) => setManualCode(e.target.value)} placeholder="Enter QR code manually..." className="h-12 w-full rounded-xl font-bold" onKeyDown={(e) => e.key === 'Enter' && handleScanItem(manualCode)} />
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-1 sm:flex-none items-center justify-between gap-1 bg-slate-50 rounded-xl px-2 shrink-0">
                   <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:border-primary">
                     <Minus size={14} />
                   </button>
@@ -346,9 +347,10 @@ const Scanner = () => {
                     <Plus size={14} />
                   </button>
                 </div>
-                <Button onClick={() => handleScanItem(manualCode)} disabled={loading || !manualCode.trim()} className="h-12 px-6 bg-slate-900 hover:bg-primary text-white rounded-xl font-black text-xs transition-all shrink-0">
+                <Button onClick={() => handleScanItem(manualCode)} disabled={loading || !manualCode.trim()} className="h-12 flex-1 sm:flex-none sm:px-6 bg-slate-900 hover:bg-primary text-white rounded-xl font-black text-xs transition-all shrink-0">
                   {loading ? "..." : "Add"}
                 </Button>
+                </div>
               </div>
             </div>
           </div>
