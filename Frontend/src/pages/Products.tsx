@@ -290,16 +290,6 @@ const Products = () => {
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                         {product.rackId?.rackName || "Unassigned"} • Shelf {product.shelfNumber || "—"}
                       </p>
-                      {product.qrCode && (
-                        <button
-                          onClick={e => { e.stopPropagation(); setQrProduct(product); }}
-                          className="ml-auto h-9 px-3 rounded-xl bg-violet-50 border border-violet-100 flex items-center gap-1.5 text-violet-600 hover:bg-violet-100 transition-colors shadow-sm"
-                          title="Generate QR Label"
-                        >
-                          <QrCode size={16} />
-                          <span className="text-[10px] font-black uppercase tracking-wider">QR Code</span>
-                        </button>
-                      )}
                     </div>
 
                     <div className="mt-auto grid grid-cols-2 gap-3">

@@ -214,7 +214,7 @@ const QRLabelModal = ({ open, onClose, product }: QRLabelModalProps) => {
                 />
                 {/* Corner dimension marks */}
                 <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[8px] font-black text-slate-300 uppercase tracking-widest">
-                  2cm × 2cm
+                 
                 </div>
               </div>
             </div>
