@@ -54,7 +54,17 @@ export const register = async (req: Request, res: Response) => {
     setCookies(res, accessToken, refreshToken);
 
     await createAuditLog(user, 'AUTH_REGISTER', 'User', 'New user registered');
-    res.status(201).json({ _id: user._id, name, email, shopName, role: user.role });
+    
+    // Return user data + tokens (for mobile storage)
+    res.status(201).json({ 
+      _id: user._id, 
+      name, 
+      email, 
+      shopName, 
+      role: user.role,
+      accessToken,
+      refreshToken
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error });
   }
@@ -80,7 +90,17 @@ export const login = async (req: Request, res: Response) => {
       setCookies(res, accessToken, refreshToken);
 
       await createAuditLog(user, 'AUTH_LOGIN', 'User', 'User logged in');
-      res.json({ _id: user._id, name: user.name, email: user.email, shopName: user.shopName, role: user.role });
+      
+      // Return user data + tokens (for mobile storage)
+      res.json({ 
+        _id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        shopName: user.shopName, 
+        role: user.role,
+        accessToken,
+        refreshToken
+      });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
     }
@@ -109,16 +129,12 @@ export const refresh = async (req: Request, res: Response) => {
     user.token = accessToken;
     await user.save();
 
-    res.cookie('jwt', accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 15 * 60 * 1000, // 15 mins
+    res.json({ 
+      message: 'Token refreshed',
+      accessToken 
     });
-
-    res.json({ message: 'Token refreshed' });
   } catch (error) {
-    res.status(401).json({ message: 'Not authorized, refresh token failed' });
+    res.status(401).json({ message: 'Refresh session expired. Please log in again.' });
   }
 };
 
