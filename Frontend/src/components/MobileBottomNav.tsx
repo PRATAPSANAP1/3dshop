@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, ShoppingBag, Heart, Package, User } from 'lucide-react';
+import { Home, ShoppingBag, ShoppingCart, Package, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const NAV_ITEMS = [
   { to: '/home',    icon: Home,         label: 'Home' },
   { to: '/catalog', icon: ShoppingBag,  label: 'Shop' },
-  { to: '/wishlist',icon: Heart,        label: 'Wishlist' },
+  { to: '/cart',    icon: ShoppingCart, label: 'Cart' },
   { to: '/orders',  icon: Package,      label: 'Orders' },
   { to: '/profile', icon: User,         label: 'Profile' },
 ];
