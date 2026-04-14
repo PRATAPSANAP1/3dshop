@@ -55,7 +55,7 @@ router.get('/dashboard-data', protect, async (req, res) => {
       return { time: `${hour} AM`, visitors: count * 10 + Math.floor(Math.random() * 5) };
     });
 
-    dataset = await SmartStoreDataset.findOneAndUpdate(
+    const dataset = await SmartStoreDataset.findOneAndUpdate(
       { shopId: req.user._id },
       {
         shopId: req.user._id,

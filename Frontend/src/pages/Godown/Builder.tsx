@@ -237,7 +237,6 @@ const GodownBuilder = () => {
               sectionThickness={1.5} 
               cellColor="#312e81" 
               cellThickness={1}
-              opacity={0.15}
             />
 
             {racks.map(rack => (
