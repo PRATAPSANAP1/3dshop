@@ -199,41 +199,48 @@ const Orders = () => {
         <head>
           <title>Invoice - ${order._id}</title>
           <style>
-            body { font-family: system-ui, -apple-system, sans-serif; padding: 40px; color: #1e293b; line-height: 1.5; }
+            body { font-family: system-ui, -apple-system, sans-serif; padding: 40px; background-color: #ffffff !important; color: #000000 !important; line-height: 1.5; }
+            .no-print-bar { display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
+            .btn-back { padding: 8px 16px; background: #333; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+            .btn-print { padding: 8px 16px; background: #f97316; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
             .header { display: flex; justify-content: space-between; border-bottom: 2px solid #f1f5f9; padding-bottom: 30px; margin-bottom: 30px; }
             .brand { font-size: 24px; font-weight: 900; color: #f97316; }
-            .meta { text-align: right; }
+            .meta { text-align: right; color: #000; }
             .grid { display: grid; grid-template-cols: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
-            .label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin-bottom: 4px; }
-            .val { font-size: 14px; font-weight: 700; }
+            .label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: #555; margin-bottom: 4px; }
+            .val { font-size: 14px; font-weight: 700; color: #000; }
             table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
-            th { text-align: left; background: #f8fafc; padding: 12px; font-size: 11px; font-weight: 900; text-transform: uppercase; color: #64748b; }
-            td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; font-weight: 500; }
+            th { text-align: left; background: #f8fafc; padding: 12px; font-size: 11px; font-weight: 900; text-transform: uppercase; color: #333; }
+            td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; font-weight: 500; color: #000; }
             .totals { float: right; width: 250px; }
-            .total-row { display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid #f1f5f9; font-size: 13px; font-weight: 700; }
+            .total-row { display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid #f1f5f9; font-size: 13px; font-weight: 700; color: #000; }
             .grand-total { font-size: 18px; font-weight: 900; color: #f97316; border-top: 2px solid #f1f5f9; margin-top: 10px; padding-top: 10px; }
+            @media print { .no-print-bar { display: none; } }
           </style>
         </head>
         <body>
+          <div class="no-print-bar">
+            <button class="btn-back" onclick="window.close()">← Go Back</button>
+            <button class="btn-print" onclick="window.print()">Print Invoice</button>
+          </div>
           <div class="header">
             <div class="brand">3Dshop EXCLUSIVE INVOICE</div>
             <div class="meta"><div class="label">Invoice No</div><div class="val">#${order._id.slice(-8).toUpperCase()}</div></div>
           </div>
           <div class="grid">
             <div><div class="label">Billed To</div><div class="val">${order.user?.name || "Customer"}</div><div class="val" style="font-weight: 500; font-size: 12px;">${order.user?.email || ""}</div></div>
-            <div><div class="label">Shipping Address</div><div class="val">${order.shippingAddress?.street || order.shippingAddress?.address}</div><div class="val">${order.shippingAddress?.city}, ${order.shippingAddress?.state || ""} ${order.shippingAddress?.postalCode}</div></div>
+            <div><div class="label">Shipping Address</div><div class="val">${order.shippingAddress?.street || order.shippingAddress?.address}</div><div class="val">${order.shippingAddress?.city}, ${order.shippingAddress?.state || ""} ${order.shippingAddress?.pinCode || order.shippingAddress?.postalCode || ""}</div></div>
           </div>
           <table>
             <thead><tr><th>Product Name</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
             <tbody>${itemsHtml}</tbody>
           </table>
           <div class="totals">
-            <div class="total-row"><span>Order Value</span><span>₹${order.totalPrice - order.taxPrice}</span></div>
-            <div class="total-row"><span>Tax (GST 18%)</span><span>₹${order.taxPrice.toFixed(0)}</span></div>
+            <div class="total-row"><span>Order Value</span><span>₹${order.totalPrice - (order.taxPrice || 0)}</span></div>
+            <div class="total-row"><span>Delivery Charge</span><span>₹60</span></div>
             <div class="total-row grand-total"><span>Grand Total</span><span>₹${order.totalPrice}</span></div>
           </div>
-          <div style="margin-top: 100px; text-align: center; color: #94a3b8; font-size: 11px;">Computer generated receipt. No signature required.</div>
-          <script>window.onload = function() { window.print(); }</script>
+          <div style="margin-top: 100px; text-align: center; color: #555; font-size: 11px;">Computer generated receipt. No signature required.</div>
         </body>
       </html>
     `);
@@ -399,9 +406,9 @@ const Orders = () => {
                   initial={{ scale: 0.9, opacity: 0, y: 20 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                  className="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-[3rem] shadow-2xl flex flex-col"
+                  className="relative w-full max-w-2xl max-h-[90vh] bg-white text-slate-900 rounded-[3rem] shadow-2xl flex flex-col overflow-y-auto custom-scrollbar"
                 >
-                  <div className="overflow-y-auto p-6 md:p-10 custom-scrollbar">
+                  <div className="p-6 md:p-10 shrink-0">
                     <div className="flex items-center justify-between mb-10">
                       <div>
                         <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 uppercase leading-none">ORDER <span className="text-orange-500 not-italic">DETAILS.</span></h2>
@@ -459,7 +466,7 @@ const Orders = () => {
                     </div>
                   </div>
 
-                  <div className="w-full md:w-2/5 p-8 bg-slate-50 border-l border-slate-100 flex flex-col overflow-y-auto">
+                  <div className="w-full p-8 md:p-10 bg-slate-50 border-t border-slate-100 flex flex-col shrink-0">
                     {user?.role === 'admin' ? (
                       <div className="flex flex-col items-center justify-center flex-1 text-center py-20 space-y-8">
                         <div className="h-24 w-24 rounded-[2.5rem] bg-orange-100 flex items-center justify-center text-orange-500 shadow-sm border border-orange-200">
