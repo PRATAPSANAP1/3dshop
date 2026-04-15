@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { StyleSheet, Platform, BackHandler, ActivityIndicator, View, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { StyleSheet, Platform, BackHandler, ActivityIndicator, View, Text, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -82,9 +82,9 @@ export default function App() {
         {isLoading && (
           <View style={styles.loadingOverlay}>
             <View style={styles.loadingContent}>
+              <Image source={require('./assets/adaptive-icon.png')} style={{ width: 150, height: 150, marginBottom: 20 }} resizeMode="contain" />
               <ActivityIndicator size="large" color="#EA580C" />
-              <Text style={styles.loadingTitle}>Initializing 3D World</Text>
-              <Text style={styles.loadingSubtitle}>Optimizing assets for your device...</Text>
+              <Text style={styles.loadingTitle}>3D SHOP</Text>
               
               {/* Progress indicator (optional but helpful) */}
               <View style={styles.progressContainer}>
