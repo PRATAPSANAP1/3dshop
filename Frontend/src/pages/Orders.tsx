@@ -376,6 +376,29 @@ const Orders = () => {
                         <p className="text-xl font-black italic text-slate-900 tracking-tighter">₹{order.totalPrice.toLocaleString()}</p>
                       </div>
                       <div className="flex gap-2">
+                        {order.orderStatus !== 'Cancelled' && 
+                         order.orderStatus !== 'Delivered' && 
+                         !order.isReturnRequested &&
+                         !order.delivery?.assignedTo && (
+                           <button
+                             onClick={async (e) => {
+                               e.stopPropagation();
+                               if (window.confirm("Are you sure you want to cancel this order?")) {
+                                 try {
+                                   await api.put(`/orders/${order._id}/cancel`);
+                                   toast({ title: "Order Cancelled", description: "Your order has been cancelled successfully." });
+                                   fetchOrders();
+                                 } catch (err) {
+                                   toast({ variant: "destructive", title: "Cancellation Failed", description: "Please try again later." });
+                                 }
+                               }
+                             }}
+                             className="h-9 px-3 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center text-[8px] font-black uppercase tracking-widest gap-2"
+                             title="Cancel Order"
+                           >
+                             <RotateCcw size={14} /> CANCEL
+                           </button>
+                         )}
                         <button className="h-9 w-9 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center">
                           <Eye size={16} />
                         </button>
