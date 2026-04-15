@@ -238,12 +238,21 @@ export const forgotPassword = async (req: Request, res: Response) => {
     await user.save();
 
     // Send Email
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('[MAIL_ERROR]: Gmail credentials missing in environment variables.');
+      return res.status(500).json({ message: 'Mail server unconfigured. Please contact administrator.' });
+    }
+
     const transporter = nodemailer.createTransport({
-      service: 'gmail', // You can change this to your provider
+      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
-        user: process.env.EMAIL_USER || 'your-email@gmail.com',
-        pass: process.env.EMAIL_PASS || 'your-app-password'
-      }
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      },
+      pool: true // Use pooled connections for better stability
     });
 
     const mailOptions = {
@@ -263,12 +272,25 @@ export const forgotPassword = async (req: Request, res: Response) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(`[PASS_RESET] OTP sent to ${email}`);
+    console.log(`[PASS_RESET] OTP sent successfully to ${email}`);
     
     res.json({ message: 'OTP sent to your email address' });
   } catch (error: any) {
-    console.error('ForgotPassword Error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error('ForgotPassword System Error:', {
+      message: error.message,
+      code: error.code,
+      command: error.command
+    });
+    
+    // Provide user-friendly hints for common Gmail errors
+    let userMessage = 'Failed to send OTP. Please try again later.';
+    if (error.code === 'EAUTH') userMessage = 'SMTP Authentication failed. Check your App Password.';
+    if (error.code === 'ECONNREFUSED') userMessage = 'Connection to mail server failed.';
+
+    res.status(500).json({ 
+      message: userMessage, 
+      error: process.env.NODE_ENV === 'production' ? undefined : error.message 
+    });
   }
 };
 
