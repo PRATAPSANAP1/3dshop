@@ -406,7 +406,7 @@ const Orders = () => {
                   initial={{ scale: 0.9, opacity: 0, y: 20 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                  className="relative w-full max-w-2xl max-h-[90vh] bg-white text-slate-900 rounded-[3rem] shadow-2xl flex flex-col overflow-y-auto custom-scrollbar"
+                  className="relative w-full max-w-3xl max-h-[90vh] bg-white text-slate-900 rounded-[3rem] shadow-2xl flex flex-col overflow-y-auto custom-scrollbar"
                 >
                   <div className="p-6 md:p-10 shrink-0">
                     <div className="flex items-center justify-between mb-10">
@@ -442,7 +442,7 @@ const Orders = () => {
                       ))}
                     </div>
 
-                    <div className="p-8 rounded-[2rem] bg-slate-900 text-white shadow-sm space-y-6">
+                    <div className="p-8 md:p-10 rounded-[2.5rem] bg-slate-900 text-white shadow-xl space-y-6">
                       <div className="flex justify-between items-center text-slate-400">
                         <span className="text-[10px] font-black uppercase tracking-widest leading-none">Shipping Destination</span>
                         <span className="text-xs font-bold leading-none">{selectedOrder.shippingAddress?.street}, {selectedOrder.shippingAddress?.city}</span>
@@ -454,13 +454,13 @@ const Orders = () => {
                           {selectedOrder.isPaid ? <CheckCircle2 size={14} className="text-emerald-500" /> : <Clock size={14} className="text-amber-500" />}
                         </span>
                       </div>
-                      <div className="pt-6 border-t border-white/10 flex justify-between items-end">
+                      <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
                         <div>
                           <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">TOTAL PAYABLE</p>
-                          <p className="text-4xl font-black italic text-orange-500 tracking-tighter leading-none">₹{selectedOrder.totalPrice.toLocaleString()}</p>
+                          <p className="text-5xl font-black italic text-orange-500 tracking-tighter leading-none">₹{selectedOrder.totalPrice.toLocaleString()}</p>
                         </div>
-                        <Button onClick={() => downloadInvoice(selectedOrder)} className="h-12 md:h-14 px-5 md:px-8 rounded-2xl bg-white text-slate-900 hover:bg-orange-500 hover:text-white font-black uppercase tracking-widest text-[9px] md:text-[10px] gap-2 transition-all shadow-sm leading-none shrink-0">
-                          <Printer size={16} /> <span className="hidden sm:inline">DOWNLOAD INVOICE</span><span className="sm:hidden">INVOICE</span>
+                        <Button onClick={() => downloadInvoice(selectedOrder)} className="w-full sm:w-auto h-14 px-8 rounded-2xl bg-white text-slate-900 hover:bg-orange-500 hover:text-white font-black uppercase tracking-widest text-xs gap-3 transition-all shadow-lg leading-none shrink-0">
+                          <Printer size={18} /> DOWNLOAD INVOICE
                         </Button>
                       </div>
                     </div>

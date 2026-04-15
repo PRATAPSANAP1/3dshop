@@ -332,9 +332,9 @@ const Delivery = () => {
                   initial={{ scale: 0.92, opacity: 0, y: 20 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.92, opacity: 0, y: 20 }}
-                  className="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-[2.5rem] shadow-2xl flex flex-col"
+                  className="relative w-full max-w-2xl max-h-[90vh] bg-white rounded-[2.5rem] shadow-2xl flex flex-col overflow-y-auto custom-scrollbar"
                 >
-                  <div className="overflow-y-auto p-8 custom-scrollbar">
+                  <div className="p-8 shrink-0">
                     <div className="flex items-center justify-between mb-8">
                       <div>
                         <h2 className="text-2xl font-black italic tracking-tighter text-slate-900 uppercase leading-none">
@@ -423,8 +423,7 @@ const Delivery = () => {
                     </div>
                   </div>
 
-                  {/* RIGHT — Action Panel */}
-                  <div className="w-full md:w-1/2 p-8 bg-slate-50 border-l border-slate-100 overflow-y-auto flex flex-col gap-5">
+                  <div className="w-full p-8 md:p-10 bg-slate-50 border-t border-slate-100 flex flex-col gap-5 shrink-0">
                     <h3 className="text-xl font-black italic tracking-tighter text-slate-900 uppercase">
                       {isAdmin ? "ACTIONS" : isStaff ? "MY TASK" : "STATUS"}
                       <span className="text-orange-500 not-italic">.</span>
