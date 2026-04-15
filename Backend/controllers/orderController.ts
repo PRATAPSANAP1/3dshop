@@ -25,6 +25,18 @@ export const addOrderItems = async (req: Request, res: Response) => {
     return;
   }
 
+  // Prevent duplicate orders within 5 seconds
+  const existingOrder = await Order.findOne({
+    user: (req.user as any)._id,
+    totalPrice: totalPrice,
+    createdAt: { $gte: new Date(Date.now() - 5000) }
+  });
+
+  if (existingOrder) {
+    res.status(200).json(existingOrder);
+    return;
+  }
+
   const order = new Order({
     user: (req.user as any)._id,
     orderItems,

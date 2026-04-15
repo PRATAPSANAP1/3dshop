@@ -18,6 +18,7 @@ const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [savingAddress, setSavingAddress] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [addressForm, setAddressForm] = useState({
     label: 'Home', fullName: '', phone: '', street: '', landmark: '',
     city: '', state: '', postalCode: '', isDefault: false,
@@ -71,6 +72,9 @@ const Checkout = () => {
   };
 
   const placeOrder = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
     if (paymentMethod === 'COD') {
       await processDbOrder();
       return;
@@ -88,9 +92,9 @@ const Checkout = () => {
         shippingAddress: selectedAddress,
         paymentMethod,
         itemsPrice: totalPrice,
-        taxPrice: totalPrice * 0.18,
+        taxPrice: Number((totalPrice * 0.18).toFixed(2)),
         shippingPrice: 0,
-        totalPrice: Math.round(totalPrice * 1.18)
+        totalPrice: Number((totalPrice * 1.18).toFixed(2))
       };
 
       const { data: dbOrder } = await api.post("/orders", orderData);
@@ -103,6 +107,7 @@ const Checkout = () => {
       const res = await loadRazorpay();
       if (!res) {
         toast({ variant: "destructive", title: "SDK Load Failed", description: "Payment gateway unavailable" });
+        setIsProcessing(false);
         return;
       }
 
@@ -126,6 +131,14 @@ const Checkout = () => {
             }
           } catch (err) {
             toast({ variant: "destructive", title: "Verification Failed", description: "Please contact support" });
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        modal: {
+          ondismiss: function() {
+            setIsProcessing(false);
+            api.put(`/orders/${dbOrder._id}/cancel`).catch(() => {});
           }
         },
         prefill: {
@@ -141,6 +154,7 @@ const Checkout = () => {
 
     } catch (err) {
       toast({ variant: "destructive", title: "Order Failed", description: "Something went wrong" });
+      setIsProcessing(false);
     }
   };
 
@@ -159,7 +173,7 @@ const Checkout = () => {
         itemsPrice: totalPrice,
         taxPrice: totalPrice * 0.18,
         shippingPrice: 0,
-        totalPrice: totalPrice * 1.18
+        totalPrice: Math.round(totalPrice * 1.18)
       };
       await api.post("/orders", orderData);
       await api.delete("/cart");
@@ -167,6 +181,8 @@ const Checkout = () => {
       toast({ title: "Order Placed!", description: "Pay when you receive the items." });
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: "Order failed" });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -341,7 +357,7 @@ const Checkout = () => {
                     </div>
                     <div className="flex justify-between items-center text-slate-400">
                       <span className="font-bold text-xs uppercase tracking-widest leading-none">GST (18%)</span>
-                      <span className="font-black italic">₹{(totalPrice * 0.18).toFixed(0)}</span>
+                      <span className="font-black italic">₹{(totalPrice * 0.18).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center text-slate-400">
                       <span className="font-bold text-xs uppercase tracking-widest leading-none">Shipping</span>
@@ -349,12 +365,12 @@ const Checkout = () => {
                     </div>
                     <div className="pt-6 border-t border-white/10 flex justify-between items-center">
                       <span className="font-black text-xl italic tracking-tighter leading-none">GRAND TOTAL</span>
-                      <span className="text-3xl font-black text-orange-500 italic leading-none">₹{(totalPrice * 1.18).toFixed(0)}</span>
+                      <span className="text-3xl font-black text-orange-500 italic leading-none">₹{(totalPrice * 1.18).toFixed(2)}</span>
                     </div>
                   </div>
 
-                  <Button onClick={placeOrder} className="w-full h-16 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black uppercase tracking-widest text-sm  gap-3 group">
-                    COMPLETE ORDER <ShoppingBag size={18} className="group-hover:rotate-12 transition-transform" />
+                  <Button onClick={placeOrder} disabled={isProcessing} className="w-full h-16 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black uppercase tracking-widest text-sm  gap-3 group">
+                    {isProcessing ? 'PROCESSING...' : 'COMPLETE ORDER'} {!isProcessing && <ShoppingBag size={18} className="group-hover:rotate-12 transition-transform" />}
                   </Button>
                   <p className="mt-6 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 leading-none italic">
                     <ShieldCheck size={14} className="text-emerald-500" /> SECURE SSL ENCRYPTION
