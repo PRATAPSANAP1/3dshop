@@ -159,6 +159,7 @@ const CustomerSearch: React.FC = () => {
   const [shopName, setShopName] = useState('');
   const [shopSelected, setShopSelected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [shopConfig, setShopConfig] = useState<ShopConfig>({ width: 30, depth: 20 });
   const [doors, setDoors] = useState<Door[]>([]);
   const [racks, setRacks] = useState<Rack[]>([]);
@@ -230,6 +231,13 @@ const CustomerSearch: React.FC = () => {
 
   const autoLoadShop = async (name: string) => {
     try {
+      const interval = setInterval(() => {
+        setLoadingProgress((prev) => {
+          const next = prev + Math.random() * 15;
+          return next >= 85 ? 85 : next;
+        });
+      }, 150);
+
       const [configRes, doorsRes, racksRes] = await Promise.all([
         API.get(`/shop-config/public/${name}`),
         API.get(`/doors/public/${name}`),
@@ -258,9 +266,13 @@ const CustomerSearch: React.FC = () => {
       setRackProducts(productsMap);
       setAllProducts(allProductsList);
       setShopSelected(true);
+      
+      clearInterval(interval);
+      setLoadingProgress(100);
+      setTimeout(() => setIsLoading(false), 400);
     } catch (error) {
       toast({ variant: 'destructive', title: 'Error', description: 'Could not build 3D environment.' });
-    } finally {
+      setLoadingProgress(0);
       setIsLoading(false);
     }
   };
@@ -272,7 +284,15 @@ const CustomerSearch: React.FC = () => {
   const handleShopSelect = async () => {
     if (!shopName) return;
     setIsLoading(true);
+    setLoadingProgress(0);
     try {
+      const interval = setInterval(() => {
+        setLoadingProgress((prev) => {
+          const next = prev + Math.random() * 15;
+          return next >= 85 ? 85 : next;
+        });
+      }, 150);
+
       const [configRes, doorsRes, racksRes] = await Promise.all([
         API.get(`/shop-config/public/${shopName}`),
         API.get(`/doors/public/${shopName}`),
@@ -301,9 +321,13 @@ const CustomerSearch: React.FC = () => {
       setRackProducts(productsMap);
       setAllProducts(allProductsList);
       setShopSelected(true);
+      
+      clearInterval(interval);
+      setLoadingProgress(100);
+      setTimeout(() => setIsLoading(false), 400);
     } catch (error) {
       toast({ variant: 'destructive', title: 'Shop Not Found', description: 'Please check the name and try again.' });
-    } finally {
+      setLoadingProgress(0);
       setIsLoading(false);
     }
   };
@@ -378,11 +402,19 @@ const CustomerSearch: React.FC = () => {
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-white/60 backdrop-blur-sm"
           >
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative">
-                <div className="h-14 w-14 animate-spin rounded-2xl border-4 border-slate-200 border-t-orange-500" />
+            <div className="flex flex-col items-center max-w-xs w-full gap-4 p-8 bg-white rounded-3xl shadow-xl shadow-slate-200/50">
+              <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden mb-2">
+                <motion.div 
+                  initial={{ width: 0 }} 
+                  animate={{ width: `${loadingProgress}%` }} 
+                  transition={{ duration: 0.2 }}
+                  className="h-full bg-orange-500 rounded-full"
+                />
               </div>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Building 3D Map...</span>
+              <div className="flex w-full justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <span>{loadingProgress >= 100 ? 'Complete' : 'Loading Map...'}</span>
+                <span>{Math.floor(loadingProgress)}%</span>
+              </div>
             </div>
           </motion.div>
         )}
