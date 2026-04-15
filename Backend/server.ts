@@ -28,6 +28,7 @@ import publicRoutes from './routes/public';
 import cartRoutes from './routes/cart';
 import wishlistRoutes from './routes/wishlist';
 import auditLogRoutes from './routes/auditLogs';
+import couponRoutes from './routes/coupons';
 
 import { apiLimiter } from './middleware/security';
 
@@ -111,6 +112,7 @@ app.use('/api/public', publicRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/audit-logs', auditLogRoutes);
+app.use('/api/coupons', couponRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ 

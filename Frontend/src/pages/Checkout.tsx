@@ -19,9 +19,13 @@ const Checkout = () => {
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [savingAddress, setSavingAddress] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState("");
   const [addressForm, setAddressForm] = useState({
     label: 'Home', fullName: '', phone: '', street: '', landmark: '',
-    city: '', state: '', postalCode: '', isDefault: false,
+    city: '', state: '', pinCode: '', isDefault: false,
   });
   const { user, login } = useAuth();
   const { toast } = useToast();
@@ -47,8 +51,8 @@ const Checkout = () => {
   }, [user]);
 
   const handleAddAddress = async () => {
-    if (!addressForm.street || !addressForm.city || !addressForm.postalCode) {
-      toast({ variant: "destructive", title: "Missing Fields", description: "Street, city and postal code are required." });
+    if (!addressForm.street || !addressForm.city || !addressForm.pinCode) {
+      toast({ variant: "destructive", title: "Missing Fields", description: "Street, city and pin code are required." });
       return;
     }
     setSavingAddress(true);
@@ -63,7 +67,7 @@ const Checkout = () => {
       setSelectedAddress(addressForm);
       toast({ title: "Address Added", description: "New address saved and selected." });
       setShowAddressModal(false);
-      setAddressForm({ label: 'Home', fullName: '', phone: '', street: '', landmark: '', city: '', state: '', postalCode: '', isDefault: false });
+      setAddressForm({ label: 'Home', fullName: '', phone: '', street: '', landmark: '', city: '', state: '', pinCode: '', isDefault: false });
     } catch {
       toast({ variant: "destructive", title: "Error", description: "Failed to save address." });
     } finally {
@@ -92,10 +96,15 @@ const Checkout = () => {
         shippingAddress: selectedAddress,
         paymentMethod,
         itemsPrice: totalPrice,
-        taxPrice: Number((totalPrice * 0.18).toFixed(2)),
-        shippingPrice: 0,
-        totalPrice: Number((totalPrice * 1.18).toFixed(2))
+        taxPrice: 0,
+        shippingPrice: 60,
+        totalPrice: finalPrice
       };
+
+      // Ensure discount is recorded in order if backend supports it
+      if (discount > 0) {
+        (orderData as any).discountAmount = discountAmount;
+      }
 
       const { data: dbOrder } = await api.post("/orders", orderData);
 
@@ -171,10 +180,15 @@ const Checkout = () => {
         shippingAddress: selectedAddress,
         paymentMethod: 'COD',
         itemsPrice: totalPrice,
-        taxPrice: totalPrice * 0.18,
-        shippingPrice: 0,
-        totalPrice: Math.round(totalPrice * 1.18)
+        taxPrice: 0,
+        shippingPrice: 60,
+        totalPrice: finalPrice
       };
+
+      if (discount > 0) {
+        (orderData as any).discountAmount = discountAmount;
+      }
+
       await api.post("/orders", orderData);
       await api.delete("/cart");
       setStep(3);
@@ -187,6 +201,27 @@ const Checkout = () => {
   };
 
   const totalPrice = cart?.items?.reduce((acc: number, item: any) => acc + (item.product?.price || 0) * item.qty, 0) || 0;
+  
+  const discountAmount = Number((totalPrice * (discount / 100)).toFixed(2));
+  const finalPrice = Number((totalPrice - discountAmount + 60).toFixed(2));
+
+  const applyCoupon = async () => {
+    if (!couponCode) return;
+    setCouponLoading(true);
+    setCouponError("");
+    try {
+      const { data } = await api.post("/coupons/validate", { code: couponCode });
+      if (data.valid) {
+        setDiscount(data.discountPercentage);
+        toast({ title: "Coupon Applied", description: `You got ${data.discountPercentage}% off!` });
+      }
+    } catch {
+      setCouponError("Invalid or inactive coupon");
+      setDiscount(0);
+    } finally {
+      setCouponLoading(false);
+    }
+  };
 
   if (loading) return <div className="flex h-[60vh] items-center justify-center"><div className="page-loader" /></div>;
 
@@ -262,7 +297,7 @@ const Checkout = () => {
                           <Input placeholder="City *" value={addressForm.city} onChange={e => setAddressForm({ ...addressForm, city: e.target.value })} className="h-11 rounded-xl" />
                           <Input placeholder="State" value={addressForm.state} onChange={e => setAddressForm({ ...addressForm, state: e.target.value })} className="h-11 rounded-xl" />
                         </div>
-                        <Input placeholder="Postal Code *" value={addressForm.postalCode} onChange={e => setAddressForm({ ...addressForm, postalCode: e.target.value })} className="h-11 rounded-xl" />
+                        <Input placeholder="Pin Code *" value={addressForm.pinCode} onChange={e => setAddressForm({ ...addressForm, pinCode: e.target.value })} className="h-11 rounded-xl" />
                         <label className="flex items-center gap-3 cursor-pointer">
                           <div
                             onClick={() => setAddressForm({ ...addressForm, isDefault: !addressForm.isDefault })}
@@ -286,9 +321,9 @@ const Checkout = () => {
               </AnimatePresence>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {(user?.addresses || [
-                  { label: 'Home', street: '123 Main Street', city: 'Mumbai', state: 'MH', zipCode: '400001', isDefault: true },
-                  { label: 'Work', street: 'Office 45, Tech Park', city: 'Bengaluru', state: 'KA', zipCode: '560001' }
+                {(user?.addresses?.length ? user.addresses : [
+                  { label: 'Home', street: '123 Main Street', city: 'Mumbai', state: 'MH', zipCode: '400001', pinCode: '400001', isDefault: true },
+                  { label: 'Work', street: 'Office 45, Tech Park', city: 'Bengaluru', state: 'KA', zipCode: '560001', pinCode: '560001' }
                 ]).map((addr: any, idx: number) => (
                   <div
                     key={idx}
@@ -302,7 +337,7 @@ const Checkout = () => {
                       {selectedAddress?.label === addr.label && <CheckCircle2 size={24} className="text-orange-500" />}
                     </div>
                     <p className="font-black italic text-slate-900 mb-1">{addr.label}</p>
-                    <p className="text-sm font-medium text-slate-500 leading-relaxed">{addr.street}, {addr.city}, {addr.state} {addr.zipCode}</p>
+                    <p className="text-sm font-medium text-slate-500 leading-relaxed">{addr.street}, {addr.city}, {addr.state} {addr.pinCode || addr.zipCode || addr.postalCode}</p>
                   </div>
                 ))}
               </div>
@@ -350,22 +385,45 @@ const Checkout = () => {
 
                 <div className="bg-slate-900 rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 text-white shadow-sm h-fit">
                   <h3 className="text-xl font-black italic mb-8 border-b border-white/10 pb-4">ORDER SUMMARY</h3>
+                  
+                  <div className="mb-6 space-y-2">
+                    <div className="flex gap-2">
+                      <Input 
+                        placeholder="Coupon Code" 
+                        value={couponCode} 
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        className="h-12 bg-white/10 border-white/20 text-white placeholder:text-white/50 uppercase" 
+                      />
+                      <Button onClick={applyCoupon} disabled={couponLoading || !couponCode} className="h-12 px-6 bg-orange-500 hover:bg-orange-600 font-bold">
+                        {couponLoading ? '...' : 'Apply'}
+                      </Button>
+                    </div>
+                    {couponError && <p className="text-rose-400 text-xs font-bold px-1">{couponError}</p>}
+                    {discount > 0 && <p className="text-emerald-400 text-xs font-bold px-1">Coupon applied: {discount}% OFF</p>}
+                  </div>
+
                   <div className="space-y-4 mb-8">
                     <div className="flex justify-between items-center text-slate-400">
                       <span className="font-bold text-xs uppercase tracking-widest leading-none">Items Total</span>
                       <span className="font-black italic">₹{totalPrice}</span>
                     </div>
+                    {discount > 0 && (
+                      <div className="flex justify-between items-center text-emerald-400">
+                        <span className="font-bold text-xs uppercase tracking-widest leading-none">Discount ({discount}%)</span>
+                        <span className="font-black italic">-₹{discountAmount}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between items-center text-slate-400">
-                      <span className="font-bold text-xs uppercase tracking-widest leading-none">GST (18%)</span>
-                      <span className="font-black italic">₹{(totalPrice * 0.18).toFixed(2)}</span>
+                      <span className="font-bold text-xs uppercase tracking-widest leading-none">GST (0%)</span>
+                      <span className="font-black italic">₹0</span>
                     </div>
                     <div className="flex justify-between items-center text-slate-400">
                       <span className="font-bold text-xs uppercase tracking-widest leading-none">Shipping</span>
-                      <span className="font-black italic text-orange-500 italic">FREE</span>
+                      <span className="font-black italic text-orange-500">₹60</span>
                     </div>
                     <div className="pt-6 border-t border-white/10 flex justify-between items-center">
                       <span className="font-black text-xl italic tracking-tighter leading-none">GRAND TOTAL</span>
-                      <span className="text-3xl font-black text-orange-500 italic leading-none">₹{(totalPrice * 1.18).toFixed(2)}</span>
+                      <span className="text-3xl font-black text-orange-500 italic leading-none">₹{finalPrice}</span>
                     </div>
                   </div>
 
