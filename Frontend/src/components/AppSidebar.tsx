@@ -20,6 +20,7 @@ import {
   Users,
   ScrollText,
   Warehouse,
+  Ticket,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -38,6 +39,7 @@ const navItems = [
   { to: "/billing",     icon: Receipt,        label: "Billing",      desc: "Transactions",         color: "text-amber-600",  bg: "bg-amber-500/10" },
   { to: "/orders",      icon: ShoppingCart,   label: "Orders",       desc: "Manage fulfillment",   color: "text-orange-500", bg: "bg-orange-500/10" },
   { to: "/audit-logs",  icon: ScrollText,     label: "Audit Logs",   desc: "System activity",      color: "text-slate-600",  bg: "bg-slate-500/10" },
+  { to: "/coupons",     icon: Ticket,         label: "Coupons",      desc: "Marketing engine",     color: "text-rose-500",   bg: "bg-rose-500/10" },
 ];
 export const AppSidebarContent = () => {
   const location = useLocation();

@@ -42,6 +42,7 @@ const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const Users = lazy(() => import("./pages/Users"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
+const Coupons = lazy(() => import("./pages/Coupons"));
 const HelpCenter = lazy(() => import("./pages/HelpCenter"));
 
 // Godown lazy imports
@@ -99,6 +100,7 @@ const AnimatedRoutes = () => {
             <Route path="/smartstore" element={<AdminRoute><SmartStore /></AdminRoute>} />
             <Route path="/billing" element={<AdminRoute><Billing /></AdminRoute>} />
             <Route path="/audit-logs" element={<AdminRoute><AuditLogs /></AdminRoute>} />
+            <Route path="/coupons" element={<AdminRoute><Coupons /></AdminRoute>} />
             <Route path="/logistics" element={<AdminRoute><Logistics /></AdminRoute>} />
 
             {/* Godown Routes */}
