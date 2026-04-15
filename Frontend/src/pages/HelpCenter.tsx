@@ -115,8 +115,8 @@ export default function HelpCenter() {
           <p className="text-slate-400 font-medium mb-8">Our support team is available 24/7 to assist you.</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
-              { icon: Mail, label: 'Email Support', desc: 'support@3dshop.com', color: 'bg-purple-500' },
-              { icon: Phone, label: 'Phone Support', desc: '+91 1800-3D-SHOP', color: 'bg-emerald-500' },
+              { icon: Mail, label: 'Email Support', desc: 'pratapsanap14@gmail.com', color: 'bg-purple-500' },
+              { icon: Phone, label: 'Phone Support', desc: '+91 9370470692', color: 'bg-emerald-500' },
             ].map((c, i) => (
               <div key={i} className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors cursor-pointer">
                 <div className={`h-10 w-10 ${c.color} rounded-xl flex items-center justify-center shrink-0`}>
