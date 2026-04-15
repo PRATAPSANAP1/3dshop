@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
-  const [cart, setCart] = useState<any>(null);
+  const [cart, setCart] = useState<any>({ items: [] });
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -96,7 +96,7 @@ const Cart = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-12">
             <div className="lg:col-span-2 space-y-6">
               <AnimatePresence mode="popLayout">
-                {cart.items.map((item: any) => (
+                {cart?.items?.map((item: any) => (
                   <motion.div 
                     key={item.product?._id}
                     layout

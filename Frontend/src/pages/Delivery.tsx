@@ -148,7 +148,7 @@ const Delivery = () => {
   };
 
   // --- Filtering ---
-  const filteredOrders = orders.filter(o => {
+  const filteredOrders = (orders || []).filter(o => {
     if (filter === "all") return true;
     if (filter === "today") {
       const today = new Date().toISOString().slice(0, 10);
@@ -189,10 +189,10 @@ const Delivery = () => {
           {isAdmin && (
             <div className="flex gap-3">
               {[
-                { label: "Total", value: orders.length, color: "text-slate-900" },
-                { label: "Assigned", value: orders.filter(o => o.delivery?.status === "Assigned").length, color: "text-orange-500" },
-                { label: "In Transit", value: orders.filter(o => o.delivery?.status === "OutForDelivery").length, color: "text-amber-600" },
-                { label: "Delivered", value: orders.filter(o => o.delivery?.otpVerified).length, color: "text-emerald-500" },
+                { label: "Total", value: (orders || []).length, color: "text-slate-900" },
+                { label: "Assigned", value: (orders || []).filter(o => o.delivery?.status === "Assigned").length, color: "text-orange-500" },
+                { label: "In Transit", value: (orders || []).filter(o => o.delivery?.status === "OutForDelivery").length, color: "text-amber-600" },
+                { label: "Delivered", value: (orders || []).filter(o => o.delivery?.otpVerified).length, color: "text-emerald-500" },
               ].map(s => (
                 <div key={s.label} className="text-center px-4 py-2 bg-white rounded-2xl border border-slate-100 shadow-sm">
                   <p className={`text-xl font-black ${s.color}`}>{s.value}</p>

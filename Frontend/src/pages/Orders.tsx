@@ -328,7 +328,7 @@ const Orders = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <AnimatePresence mode="popLayout">
-              {orders.map((order, i) => {
+              {orders?.map?.((order: any, i: number) => {
                 const statusKey = order.orderStatus || (order.isDelivered ? 'Delivered' : (order.isPaid ? 'Shipped' : 'Ordered'));
                 const realStatus = order.isReturnRequested ? "ReturnRequested" : statusKey;
                 const cfg = statusConfig[realStatus] || statusConfig['Ordered'];
