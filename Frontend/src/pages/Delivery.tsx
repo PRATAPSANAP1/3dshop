@@ -15,14 +15,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useSocket } from "@/hooks/useSocket";
 
-const deliveryStatusConfig: Record<string, { icon: any; color: string; border: string; label: string }> = {
-  'Pending':        { icon: Clock,        color: "bg-emerald-50 text-emerald-600", border: "border-emerald-200", label: "Unassigned" },
-  'Assigned':       { icon: UserIcon,     color: "bg-orange-50 text-orange-600", border: "border-orange-200", label: "Assigned" },
-  'OutForDelivery': { icon: Truck,        color: "bg-amber-50 text-amber-700",   border: "border-amber-200",   label: "In Transit" },
-  'Delivered':      { icon: CheckCircle2, color: "bg-blue-50 text-blue-600", label: "border-blue-200", label: "Delivered" },
-  'Failed':         { icon: AlertCircle,  color: "bg-rose-50 text-rose-600",     border: "border-rose-200",     label: "Failed" },
-  'Rescheduled':    { icon: RotateCcw,    color: "bg-indigo-50 text-indigo-600",   border: "border-indigo-200",   label: "Rescheduled" },
-  'Cancelled':      { icon: X,            color: "bg-rose-100 text-rose-700",    border: "border-rose-400",    label: "Cancelled" },
+const deliveryStatusConfig: Record<string, { icon: any; color: string; border: string; bg: string; label: string }> = {
+  'Pending':        { icon: Clock,        color: "text-emerald-700", border: "border-emerald-300", bg: "bg-emerald-50", label: "Unassigned" },
+  'Assigned':       { icon: UserIcon,     color: "text-orange-600", border: "border-orange-200", bg: "bg-orange-50", label: "Assigned" },
+  'OutForDelivery': { icon: Truck,        color: "text-amber-800",   border: "border-amber-400",   bg: "bg-amber-100", label: "In Transit" },
+  'Delivered':      { icon: CheckCircle2, color: "text-blue-700", border: "border-blue-200", bg: "bg-blue-50", label: "Delivered" },
+  'Failed':         { icon: AlertCircle,  color: "text-rose-600",     border: "border-rose-200",     bg: "bg-rose-50", label: "Failed" },
+  'Rescheduled':    { icon: RotateCcw,    color: "text-indigo-600",   border: "border-indigo-200",   bg: "bg-indigo-50", label: "Rescheduled" },
+  'Cancelled':      { icon: X,            color: "text-rose-800",    border: "border-rose-400",    bg: "bg-rose-100", label: "Cancelled" },
 };
 
 const Delivery = () => {
@@ -259,13 +259,13 @@ const Delivery = () => {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: i * 0.03 }}
                     onClick={() => setSelectedOrder(order)}
-                    className={`bg-white rounded-[2rem] border-2 p-6 cursor-pointer hover:shadow-xl hover:shadow-orange-500/5 transition-all group flex flex-col h-full ${cfg.border} border-l-[8px]`}
+                    className={`rounded-[2rem] border-2 p-6 cursor-pointer hover:shadow-xl hover:shadow-orange-500/5 transition-all group flex flex-col h-full ${cfg.border} border-l-[8px] ${cfg.bg}`}
                   >
                     <div className="flex items-center justify-between mb-4">
-                      <div className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${cfg.color}`}>
+                      <div className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 shadow-sm bg-white/50 ${cfg.color}`}>
                         <StatusIcon size={20} />
                       </div>
-                      <Badge className={`border-none text-[9px] font-black uppercase tracking-wider px-2 py-1 ${cfg.color} shadow-sm`}>
+                      <Badge className={`border-none text-[9px] font-black uppercase tracking-wider px-2 py-1 bg-white/50 ${cfg.color} shadow-sm`}>
                         {cfg.label}
                       </Badge>
                     </div>

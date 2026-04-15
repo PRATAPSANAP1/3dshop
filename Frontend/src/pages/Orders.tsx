@@ -19,16 +19,16 @@ import { useSocket } from "@/hooks/useSocket";
 import { useNavigate } from "react-router-dom";
 
 const statusConfig: any = {
-  'Ordered': { icon: Clock, color: "bg-orange-50 text-orange-600", border: "border-orange-200", label: "Confirmed" },
-  'Packed': { icon: Package, color: "bg-amber-50 text-amber-600", border: "border-amber-200", label: "Packed" },
-  'Shipped': { icon: Truck, color: "bg-orange-50 text-orange-600", border: "border-orange-500", label: "In Transit" },
-  'OutForDelivery': { icon: Truck, color: "bg-amber-50 text-amber-700", border: "border-amber-500", label: "Out for Delivery" },
-  'Delivered': { icon: CheckCircle2, color: "bg-emerald-50 text-emerald-600", border: "border-emerald-400", label: "Completed" },
-  'FailedDelivery': { icon: AlertCircle, color: "bg-rose-50 text-rose-600", border: "border-rose-400", label: "Failed Delivery" },
-  'Rescheduled': { icon: Clock, color: "bg-amber-50 text-amber-600", border: "border-amber-400", label: "Rescheduled" },
-  'Cancelled': { icon: AlertCircle, color: "bg-rose-100 text-rose-700", border: "border-rose-400", label: "Cancelled" },
-  'Returned': { icon: RotateCcw, color: "bg-rose-50 text-rose-500", border: "border-rose-300", label: "Returned" },
-  'ReturnRequested': { icon: AlertCircle, color: "bg-amber-50 text-amber-600", border: "border-amber-400", label: "Return Pending" },
+  'Ordered': { icon: Clock, color: "text-emerald-700", border: "border-emerald-300", bg: "bg-emerald-50", label: "Confirmed" },
+  'Packed': { icon: Package, color: "text-amber-700", border: "border-amber-300", bg: "bg-amber-50", label: "Packed" },
+  'Shipped': { icon: Truck, color: "text-orange-700", border: "border-orange-300", bg: "bg-orange-50", label: "In Transit" },
+  'OutForDelivery': { icon: Truck, color: "text-orange-800", border: "border-orange-400", bg: "bg-orange-100", label: "Out for Delivery" },
+  'Delivered': { icon: CheckCircle2, color: "text-blue-700", border: "border-blue-300", bg: "bg-blue-50", label: "Completed" },
+  'FailedDelivery': { icon: AlertCircle, color: "text-rose-700", border: "border-rose-300", bg: "bg-rose-50", label: "Failed Delivery" },
+  'Rescheduled': { icon: Clock, color: "text-amber-700", border: "border-amber-300", bg: "bg-amber-50", label: "Rescheduled" },
+  'Cancelled': { icon: AlertCircle, color: "text-rose-800", border: "border-rose-400", bg: "bg-rose-100", label: "Cancelled" },
+  'Returned': { icon: RotateCcw, color: "text-rose-700", border: "border-rose-300", bg: "bg-rose-50", label: "Returned" },
+  'ReturnRequested': { icon: AlertCircle, color: "text-amber-700", border: "border-amber-300", bg: "bg-amber-50", label: "Return Pending" },
 };
 
 const Orders = () => {
@@ -342,10 +342,10 @@ const Orders = () => {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: i * 0.04 }}
                     onClick={() => setSelectedOrder(order)}
-                    className={`group relative flex flex-col p-6 rounded-[2rem] border-2 transition-all cursor-pointer hover:shadow-xl hover:shadow-orange-500/5 ${cfg.border} border-l-[8px] h-full ${statusKey === 'Cancelled' ? 'bg-rose-50/30' : 'bg-white'}`}
+                    className={`group relative flex flex-col p-6 rounded-[2rem] border-2 transition-all cursor-pointer hover:shadow-xl hover:shadow-orange-500/5 ${cfg.border} border-l-[8px] h-full ${cfg.bg}`}
                   >
                     <div className="flex items-center justify-between mb-4">
-                      <div className={`h-11 w-11 rounded-xl flex items-center justify-center shadow-sm ${cfg.color}`}>
+                      <div className={`h-11 w-11 rounded-xl flex items-center justify-center shadow-sm bg-white/50 ${cfg.color}`}>
                         <Icon size={20} />
                       </div>
                       <div className="text-right">
