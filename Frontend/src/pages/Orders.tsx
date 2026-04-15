@@ -393,7 +393,7 @@ const Orders = () => {
                                  }
                                }
                              }}
-                             className="h-9 px-3 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center text-[8px] font-black uppercase tracking-widest gap-2"
+                             className="h-9 px-3 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-rose-50 transition-all flex items-center justify-center text-[8px] font-black uppercase tracking-widest gap-2"
                              title="Cancel Order"
                            >
                              <RotateCcw size={14} /> CANCEL
