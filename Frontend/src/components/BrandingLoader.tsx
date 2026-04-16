@@ -17,12 +17,7 @@ const BrandingLoader = () => {
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           className="relative h-32 w-32 bg-white border border-slate-100 rounded-[2.5rem] flex items-center justify-center shadow-xl"
         >
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
-            className="text-slate-900 font-black text-4xl italic tracking-tighter"
-          >
+
           {/* Removed 3D text */}
           <svg className="absolute inset-0 w-full h-full -rotate-90">
             <motion.circle
