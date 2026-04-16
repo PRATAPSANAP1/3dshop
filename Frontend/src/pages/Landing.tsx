@@ -140,7 +140,7 @@ export default function Landing() {
 
       <footer className="py-8 border-t border-slate-100">
         <div className="container mx-auto px-4 text-center text-sm text-slate-400 font-medium">
-          © 2026 3Dshop Premium Suite. All Rights Reserved.
+          © 2026 SmartStore Premium Suite. All Rights Reserved.
         </div>
       </footer>
     </div>

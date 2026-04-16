@@ -224,7 +224,7 @@ const Orders = () => {
             <button class="btn-print" onclick="window.print()">Print Invoice</button>
           </div>
           <div class="header">
-            <div class="brand">3Dshop EXCLUSIVE INVOICE</div>
+            <div class="brand">SmartStore EXCLUSIVE INVOICE</div>
             <div class="meta"><div class="label">Invoice No</div><div class="val">#${order._id.slice(-8).toUpperCase()}</div></div>
           </div>
           <div class="grid">

@@ -124,7 +124,7 @@ const Checkout = () => {
         key: import.meta.env.RAZORPAY_KEY_ID || "rzp_test_yourkey",
         amount: rzpOrder.amount,
         currency: rzpOrder.currency,
-        name: "3Dshop Professional",
+        name: "SmartStore Professional",
         description: "Transaction for Order #" + dbOrder._id.slice(-6),
         order_id: rzpOrder.id,
         handler: async (response: any) => {

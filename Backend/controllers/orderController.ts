@@ -80,7 +80,7 @@ export const createPaymentOrder = async (req: Request, res: Response) => {
       receipt,
       notes: {
         userId: (req.user as any)._id.toString(),
-        platform: '3Dshop'
+        platform: 'SmartStore'
       }
     };
     const order = await razorpay.orders.create(options);

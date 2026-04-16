@@ -43,7 +43,7 @@ export const useCartStore = create<CartStore>()(
       count: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
     }),
     {
-      name: '3dshop-cart-storage',
+      name: 'smartstore-cart-storage',
     }
   )
 );

@@ -8,7 +8,7 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { AnimatePresence } from "framer-motion";
 import Navbar from "./components/Navbar";
 import BrandingLoader from "./components/BrandingLoader";
-import { GoogleOAuthProvider } from '@react-oauth/google';
+
 
 // Eager imports (critical path)
 import Login from "./pages/Login";
@@ -151,21 +151,10 @@ const AppContent = () => (
   </div>
 );
 
-const GOOGLE_CLIENT_ID = import.meta.env.GOOGLE_CLIENT_ID || "";
-const IS_LOCALHOST = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-// Google OAuth is disabled on localhost unless you've added your dev origin
-// in Google Cloud Console → Credentials → OAuth Client → Authorized JavaScript origins.
-// To enable: add http://localhost:5173 in your Google Cloud Console.
-const GOOGLE_OAUTH_ENABLED = GOOGLE_CLIENT_ID && !IS_LOCALHOST;
-
-const GoogleWrapper = ({ children }: { children: React.ReactNode }) => {
-  if (!GOOGLE_OAUTH_ENABLED) return <>{children}</>;
-  return <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>{children}</GoogleOAuthProvider>;
-};
 
 const App = () => (
-  <GoogleWrapper>
+  <>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
@@ -182,7 +171,7 @@ const App = () => (
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
-  </GoogleWrapper>
+  </>
 );
 
 

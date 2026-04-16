@@ -62,7 +62,7 @@ const GodownSettings = () => {
                   </div>
                   <div className="space-y-2">
                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Official Email</label>
-                     <Input defaultValue="warehouse.mum@3dshop.com" className="h-14 rounded-2xl border-orange-100 font-bold" />
+                     <Input defaultValue="warehouse.mum@smartstore.com" className="h-14 rounded-2xl border-orange-100 font-bold" />
                   </div>
                </div>
             </section>

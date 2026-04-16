@@ -217,8 +217,8 @@ const Scanner = () => {
           >
             <div ref={billRef}>
               <div className="bill-header">
-                <h1>3Dshop</h1>
-                <p>Inventory Management System</p>
+                <h1>SmartStore</h1>
+                <p>Retail Management Suite</p>
               </div>
               <div className="bill-no">{generatedBill.billNo}</div>
               <div className="bill-date">{new Date(generatedBill.createdAt).toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' })}</div>

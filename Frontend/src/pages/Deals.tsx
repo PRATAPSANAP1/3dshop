@@ -82,7 +82,7 @@ const Deals = () => {
               </h1>
               
               <p className="text-lg text-slate-400 font-medium italic mb-10 max-w-lg leading-relaxed">
-                Unlock exclusive inventory access. These premium items are in high demand and won't last long in the 3Dshop registry.
+                Unlock exclusive inventory access. These premium items are in high demand and won't last long in the SmartStore registry.
               </p>
               
               <div className="flex gap-4">

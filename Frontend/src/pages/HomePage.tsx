@@ -485,7 +485,7 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-6 md:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16 mb-10 md:mb-24">
           <div className="col-span-2 md:col-span-2">
             <div className="h-10 w-10 md:h-12 md:w-12 bg-orange-500 rounded-xl md:rounded-2xl flex items-center justify-center font-black mb-5 md:mb-8 text-base md:text-xl text-white">3D</div>
-            <h2 className="text-2xl md:text-4xl font-black mb-3 md:mb-6 uppercase tracking-tighter">3Dshop.</h2>
+            <h2 className="text-2xl md:text-4xl font-black mb-3 md:mb-6 uppercase tracking-tighter">SmartStore.</h2>
             <p className="text-slate-400 text-sm md:text-base font-medium max-w-sm mb-6 md:mb-12">
               Your neighbourhood supermarket, now in 3D. Shop smarter, track live, receive securely.
             </p>
@@ -528,7 +528,7 @@ const HomePage = () => {
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-6 md:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100 pt-6 md:pt-12">
-          <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] text-center sm:text-left">© 2026 3Dshop Premium Suite · All Rights Reserved.</p>
+          <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] text-center sm:text-left">© 2026 SmartStore Premium Suite · All Rights Reserved.</p>
           <div className="flex items-center gap-4 md:gap-6 text-[10px] font-black text-slate-300 uppercase tracking-widest">
             <span className="cursor-pointer hover:text-slate-500">Privacy</span>
             <span className="cursor-pointer hover:text-slate-500">Terms</span>

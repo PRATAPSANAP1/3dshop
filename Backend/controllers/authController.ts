@@ -256,13 +256,13 @@ export const forgotPassword = async (req: Request, res: Response) => {
     });
 
     const mailOptions = {
-      from: `"3Dshop Security" <${process.env.EMAIL_USER || 'no-reply@3dshop.com'}>`,
+      from: `"SmartStore Security" <${process.env.EMAIL_USER || 'no-reply@smartstore.com'}>`,
       to: email,
-      subject: 'Your Password Reset OTP',
+      subject: 'Your Password Reset OTP - SmartStore',
       html: `
         <div style="font-family: sans-serif; padding: 20px; color: #334155;">
-          <h2 style="color: #EA580C;">Password Reset Request</h2>
-          <p>You requested a password reset for your 3Dshop account. Use the 6-digit OTP below to proceed:</p>
+          <h2 style="color: #EA580C;">SmartStore Security</h2>
+          <p>You requested a password reset for your SmartStore account. Use the 6-digit OTP below to proceed:</p>
           <div style="background: #f1f5f9; padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0;">
             <span style="font-size: 32px; font-weight: 900; letter-spacing: 5px; color: #0f172a;">${otp}</span>
           </div>

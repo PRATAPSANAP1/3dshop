@@ -70,7 +70,7 @@ const generateReceiptHTML = (bill: any) => {
 </head>
 <body>
   <div class="center">
-    <div class="shop-name">3Dshop</div>
+    <div class="shop-name">SmartStore</div>
     <div class="shop-sub">EXCLUSIVE INVOICE</div>
   </div>
   <hr class="divider">
@@ -92,7 +92,7 @@ const generateReceiptHTML = (bill: any) => {
   <div class="total-row"><span>TOTAL</span><span>₹${bill.totalAmount.toFixed(2)}</span></div>
   <div class="footer">
     <div class="thanks">Thank You!</div>
-    <div class="footer-sub">Visit Again • 3Dshop</div>
+    <div class="footer-sub">Visit Again • SmartStore</div>
     <div class="footer-sub" style="margin-top:3px">-- ${bill.items.length} item(s) --</div>
   </div>
   <script>window.onload = function() { window.print(); }</script>
@@ -181,7 +181,7 @@ const Billing = () => {
       // Header
       doc.setFont('courier', 'bold');
       doc.setFontSize(14);
-      doc.text('3Dshop', 3, y, { align: 'center' }); y += 0.4;
+      doc.text('SmartStore', 3, y, { align: 'center' }); y += 0.4;
       doc.setFontSize(6);
       doc.setFont('courier', 'normal');
       doc.text('EXCLUSIVE INVOICE', 3, y, { align: 'center' }); y += 0.4;
@@ -256,7 +256,7 @@ const Billing = () => {
       doc.text('Thank You!', 3, y, { align: 'center' }); y += 0.3;
       doc.setFontSize(6);
       doc.setFont('courier', 'normal');
-      doc.text('Visit Again • 3Dshop', 3, y, { align: 'center' });
+      doc.text('Visit Again • SmartStore', 3, y, { align: 'center' });
 
       doc.save(`receipt_${billId}.pdf`);
       toast({ title: "PDF Downloaded", description: `Receipt ${billId} saved` });
@@ -545,7 +545,7 @@ const Billing = () => {
                     >
                       {/* Shop name */}
                       <div style={{ textAlign: 'center', marginBottom: '8px' }}>
-                        <div style={{ fontSize: '16px', fontWeight: 900, letterSpacing: '2px' }}>3Dshop</div>
+                        <div style={{ fontSize: '16px', fontWeight: 900, letterSpacing: '2px' }}>SmartStore</div>
                         <div style={{ fontSize: '7px', color: '#888', letterSpacing: '1px' }}>EXCLUSIVE INVOICE</div>
                       </div>
                       <hr style={{ border: 'none', borderTop: '1px dashed #ccc', margin: '6px 0' }} />
@@ -609,7 +609,7 @@ const Billing = () => {
                       <hr style={{ border: 'none', borderTop: '1px dashed #ccc', margin: '6px 0' }} />
                       <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: '10px', fontWeight: 800 }}>Thank You!</div>
-                        <div style={{ fontSize: '7px', color: '#888' }}>Visit Again • 3Dshop</div>
+                        <div style={{ fontSize: '7px', color: '#888' }}>Visit Again • SmartStore</div>
                       </div>
                     </div>
                   </div>

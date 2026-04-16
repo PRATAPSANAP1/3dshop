@@ -23,8 +23,7 @@ const BrandingLoader = () => {
             transition={{ delay: 0.5, duration: 0.8 }}
             className="text-slate-900 font-black text-4xl italic tracking-tighter"
           >
-            3D
-          </motion.span>
+          {/* Removed 3D text */}
           <svg className="absolute inset-0 w-full h-full -rotate-90">
             <motion.circle
               cx="64" cy="64" r="60"
@@ -50,10 +49,11 @@ const BrandingLoader = () => {
         className="mt-12 text-center"
       >
         <h1 className="text-slate-900 font-black text-2xl tracking-[0.4em] uppercase">
-          3D<span className="text-orange-500">shop</span>
+          {/* 3Dshop removed */}
         </h1>
         <p className="text-slate-400 text-[10px] font-bold tracking-[0.6em] mt-3 uppercase">
-          Initializing Premium Suite
+          {/* Initializing Premium Suite removed */}
+          Loading...
         </p>
       </motion.div>
     </div>
