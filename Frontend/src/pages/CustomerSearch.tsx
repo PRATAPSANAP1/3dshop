@@ -179,7 +179,6 @@ const CustomerSearch: React.FC = () => {
   const [shopSuggestions, setShopSuggestions] = useState<string[]>([]);
   const [allShopNames, setAllShopNames] = useState<string[]>([]);
   const [showShopDropdown, setShowShopDropdown] = useState(false);
-  const [view2D, setView2D] = useState(false);
   const [webglLost, setWebglLost] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -448,16 +447,7 @@ const CustomerSearch: React.FC = () => {
             </AnimatePresence>
           </div>
 
-          <button
-            onClick={() => setView2D(!view2D)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 text-slate-500 border border-slate-200/60 hover:bg-slate-100 transition-all font-black text-[10px] uppercase tracking-widest"
-          >
-            {view2D ? (
-              <><Package size={14} /> 3D View</>
-            ) : (
-              <><MapPin size={14} /> 2D Map</>
-            )}
-          </button>
+          <div />
         </div>
 
         <div className="relative flex gap-2">
@@ -574,44 +564,6 @@ const CustomerSearch: React.FC = () => {
           </motion.div>
         )}
 
-        {view2D ? (
-          <div className="absolute inset-0 bg-white p-6 sm:p-10 overflow-auto">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="h-12 w-12 rounded-2xl bg-orange-500 flex items-center justify-center text-white shadow-sm">
-                  <Store size={22} />
-                </div>
-                <div>
-                  <h2 className="text-xl font-black italic text-slate-900 tracking-tight uppercase">{shopName} <span className="text-orange-500 not-italic">Map</span></h2>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em]">2D Floor Plan Overview</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                {racks.map((rack, idx) => (
-                  <motion.div
-                    key={rack._id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className={`p-5 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border-2 transition-all duration-300 hover:shadow-md cursor-pointer ${
-                      foundProduct?.rackId?._id === rack._id && showArrow 
-                      ? 'border-orange-500 bg-orange-50/60 scale-105 shadow-lg shadow-orange-200/30' 
-                      : 'border-slate-100 bg-slate-50 hover:border-orange-200 hover:bg-white'
-                    }`}
-                  >
-                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl mb-3 sm:mb-4 shadow-sm ring-4 ring-white" 
-                         style={{ backgroundColor: rack.color || ['#EA580C', '#10B981', '#8B5CF6', '#06B6D4', '#F43F5E', '#F59E0B'][idx % 6] }} />
-                    <p className="font-black italic text-slate-900 text-sm sm:text-base mb-1">{rack.rackName.toUpperCase()}</p>
-                    <div className="flex items-center gap-1.5">
-                      <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{rackProducts[rack._id]?.length || 0} Products</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : (
           <Canvas
             shadows={!isMobile}
             frameloop="demand"
@@ -699,7 +651,6 @@ const CustomerSearch: React.FC = () => {
             />
             <Environment preset="apartment" />
           </Canvas>
-        )}
 
         {/* WebGL Context Lost Recovery */}
         {webglLost && (
@@ -711,10 +662,10 @@ const CustomerSearch: React.FC = () => {
               <h3 className="text-lg font-black text-slate-900 mb-2">3D View Interrupted</h3>
               <p className="text-sm text-slate-500 mb-5">The 3D renderer lost context. This can happen with heavy GPU usage.</p>
               <button
-                onClick={() => { setWebglLost(false); setView2D(true); }}
+                onClick={() => setWebglLost(false)}
                 className="w-full h-12 rounded-xl bg-slate-900 text-white font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all active:scale-95 mb-2"
               >
-                Switch to 2D View
+                Dismiss
               </button>
               <button
                 onClick={() => window.location.reload()}
