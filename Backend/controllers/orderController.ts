@@ -178,7 +178,7 @@ export const verifyPayment = async (req: Request, res: Response) => {
 
     // Notify via Socket
     const io = req.app.get('io');
-    io.to('admin_orders').emit('order_status_updated', order);
+    if (io) io.to('admin_orders').emit('order_status_updated', order);
 
     await createAuditLog(req.user, 'PAYMENT_VERIFIED', 'Order', `Payment verified for order ${orderId}`, {
       entityId: orderId,
@@ -223,7 +223,7 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     const updatedOrder = await order.save();
 
     const io = req.app.get('io');
-    io.to(order._id.toString()).emit('order_status_updated', updatedOrder);
+    if (io) io.to(order._id.toString()).emit('order_status_updated', updatedOrder);
 
     await createAuditLog(req.user, 'ORDER_STATUS_UPDATE', 'Order', 'Order status updated to ' + status, {
       entityId: order._id.toString(),
@@ -316,7 +316,7 @@ export const handleReturnOrder = async (req: Request, res: Response) => {
     const updatedOrder = await order.save();
 
     const io = req.app.get('io');
-    io.to(order._id.toString()).emit('order_status_updated', updatedOrder);
+    if (io) io.to(order._id.toString()).emit('order_status_updated', updatedOrder);
 
     await createAuditLog(req.user, 'RETURN_HANDLE', 'Order', 'Return status updated to ' + status, {
       entityId: order._id.toString(),
@@ -457,7 +457,7 @@ export const updateDeliveryDetails = async (req: Request, res: Response) => {
     const updatedOrder = await order.save();
     const populatedOrder = await Order.findById(updatedOrder._id).populate('delivery.assignedTo', 'id name mobile email');
     const io = req.app.get('io');
-    io.to(order._id.toString()).emit('order_status_updated', populatedOrder);
+    if (io) io.to(order._id.toString()).emit('order_status_updated', populatedOrder);
     res.json(populatedOrder);
   } else {
     res.status(404).json({ message: 'Order not found' });
@@ -479,7 +479,7 @@ export const verifyDeliveryOtp = async (req: Request, res: Response) => {
       const updatedOrder = await order.save();
       const populatedOrder = await Order.findById(updatedOrder._id).populate('delivery.assignedTo', 'id name mobile email');
       const io = req.app.get('io');
-      io.to(order._id.toString()).emit('order_status_updated', populatedOrder);
+      if (io) io.to(order._id.toString()).emit('order_status_updated', populatedOrder);
       res.json(populatedOrder);
     } else {
       res.status(400).json({ message: 'Invalid OTP' });
@@ -511,7 +511,7 @@ export const updateDeliveryStatus = async (req: Request, res: Response) => {
     const updatedOrder = await order.save();
     const populatedOrder = await Order.findById(updatedOrder._id).populate('delivery.assignedTo', 'id name mobile email');
     const io = req.app.get('io');
-    io.to(order._id.toString()).emit('order_status_updated', populatedOrder);
+    if (io) io.to(order._id.toString()).emit('order_status_updated', populatedOrder);
     res.json(populatedOrder);
   } else {
     res.status(404).json({ message: 'Order not found' });
