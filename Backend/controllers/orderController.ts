@@ -21,7 +21,7 @@ if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
 }
 
 export const addOrderItems = async (req: Request, res: Response) => {
-  const { orderItems, shippingAddress, paymentMethod, itemsPrice, taxPrice, shippingPrice, totalPrice } = req.body;
+  const { orderItems, shippingAddress, paymentMethod, itemsPrice, taxPrice, shippingPrice, totalPrice, shopId } = req.body;
 
   if (orderItems && orderItems.length === 0) {
     res.status(400).json({ message: 'No order items' });
@@ -40,9 +40,20 @@ export const addOrderItems = async (req: Request, res: Response) => {
     return;
   }
 
+  // Ensure shopId is present
+  const finalShopId = shopId || orderItems[0]?.shopId;
+  if (!finalShopId) {
+    res.status(400).json({ message: 'Shop ID is required' });
+    return;
+  }
+
   const order = new Order({
     user: (req.user as any)._id,
-    orderItems,
+    shopId: finalShopId,
+    orderItems: orderItems.map((item: any) => ({
+      ...item,
+      shopId: item.shopId || finalShopId
+    })),
     shippingAddress,
     paymentMethod,
     taxPrice,

@@ -91,14 +91,16 @@ const Checkout = () => {
           qty: item.qty,
           image: item.product.images?.[0] || "",
           price: item.product.price,
-          product: item.product._id
+          product: item.product._id,
+          shopId: item.shopId || item.product.shopId
         })),
         shippingAddress: selectedAddress,
         paymentMethod,
         itemsPrice: totalPrice,
         taxPrice: 0,
         shippingPrice: 60,
-        totalPrice: finalPrice
+        totalPrice: finalPrice,
+        shopId: cart.items[0]?.shopId || cart.items[0]?.product?.shopId
       };
 
       // Ensure discount is recorded in order if backend supports it
@@ -181,14 +183,16 @@ const Checkout = () => {
           qty: item.qty,
           image: item.product.images?.[0] || "",
           price: item.product.price,
-          product: item.product._id
+          product: item.product._id,
+          shopId: item.shopId || item.product.shopId
         })),
         shippingAddress: selectedAddress,
         paymentMethod: 'COD',
         itemsPrice: totalPrice,
         taxPrice: 0,
         shippingPrice: 60,
-        totalPrice: finalPrice
+        totalPrice: finalPrice,
+        shopId: cart.items[0]?.shopId || cart.items[0]?.product?.shopId
       };
 
       if (discount > 0) {

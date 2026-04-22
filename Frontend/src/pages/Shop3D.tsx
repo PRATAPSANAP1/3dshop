@@ -95,7 +95,16 @@ export default function Shop3D() {
   return (
     <div className="min-h-screen bg-white">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-screen relative">
-        <Canvas shadows>
+        <Canvas 
+          shadows 
+          dpr={[1, 1.2]}
+          gl={{ 
+            powerPreference: 'high-performance',
+            antialias: false,
+            stencil: false,
+            failIfMajorPerformanceCaveat: false
+          }}
+        >
           <Suspense fallback={null}>
             <Scene activeCategory={activeCategory} />
           </Suspense>

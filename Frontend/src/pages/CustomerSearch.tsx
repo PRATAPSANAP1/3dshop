@@ -620,8 +620,8 @@ const CustomerSearch: React.FC = () => {
               fov: isMobile ? 55 : 45
             }}
             style={{ background: '#0f172a' }}
-            gl={{ antialias: !isMobile, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: false }}
-            dpr={[1, isMobile ? 1 : 1.5]}
+            gl={{ antialias: false, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: false, stencil: false }}
+            dpr={[1, 1.1]}
             onCreated={({ gl }) => {
               const canvas = gl.domElement;
               canvas.addEventListener('webglcontextlost', (e) => {

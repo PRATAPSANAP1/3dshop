@@ -213,7 +213,19 @@ const ShopBuilder = () => {
              </div>
           </div>
 
-          <Canvas camera={{ position: [20, 20, 20], fov: 40 }} shadows dpr={[1, 1.5]}>
+          <Canvas 
+            camera={{ position: [20, 20, 20], fov: 40 }} 
+            shadows 
+            dpr={[1, 1.2]} 
+            frameloop="demand"
+            gl={{ 
+              powerPreference: 'high-performance', 
+              antialias: false,
+              stencil: false,
+              depth: true,
+              failIfMajorPerformanceCaveat: false
+            }}
+          >
             <Suspense fallback={null}>
                <ambientLight intensity={0.8} />
                <pointLight position={[10, 15, 10]} intensity={1.5} castShadow />
