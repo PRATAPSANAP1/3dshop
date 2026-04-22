@@ -21,59 +21,78 @@ if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
 }
 
 export const addOrderItems = async (req: Request, res: Response) => {
-  const { orderItems, shippingAddress, paymentMethod, itemsPrice, taxPrice, shippingPrice, totalPrice, shopId } = req.body;
+  try {
+    const { orderItems, shippingAddress, paymentMethod, itemsPrice, taxPrice, shippingPrice, totalPrice, shopId } = req.body;
 
-  if (orderItems && orderItems.length === 0) {
-    res.status(400).json({ message: 'No order items' });
-    return;
+    if (orderItems && orderItems.length === 0) {
+      res.status(400).json({ message: 'No order items' });
+      return;
+    }
+
+    // Prevent duplicate orders within 5 seconds
+    const existingOrder = await Order.findOne({
+      user: (req.user as any)._id,
+      totalPrice: totalPrice,
+      createdAt: { $gte: new Date(Date.now() - 5000) }
+    });
+
+    if (existingOrder) {
+      res.status(200).json(existingOrder);
+      return;
+    }
+
+    // Ensure shopId is present
+    const finalShopId = shopId || orderItems[0]?.shopId;
+    if (!finalShopId) {
+      res.status(400).json({ message: 'Shop ID is required' });
+      return;
+    }
+
+    // Normalize shipping address (map legacy pinCode to postalCode)
+    const normalizedAddress = {
+      ...shippingAddress,
+      postalCode: shippingAddress.postalCode || shippingAddress.pinCode || shippingAddress.zipCode || shippingAddress.zip
+    };
+
+    if (!normalizedAddress.postalCode) {
+      res.status(400).json({ message: 'Postal code is required in shipping address' });
+      return;
+    }
+
+    const order = new Order({
+      user: (req.user as any)._id,
+      shopId: finalShopId,
+      orderItems: orderItems.map((item: any) => ({
+        ...item,
+        shopId: item.shopId || finalShopId
+      })),
+      shippingAddress: normalizedAddress,
+      paymentMethod,
+      taxPrice: taxPrice || 0,
+      shippingPrice: shippingPrice || 0,
+      totalPrice,
+      statusHistory: [{ status: 'Ordered' }]
+    });
+
+    const createdOrder = await order.save();
+
+    const io = req.app.get('io');
+    if (io) io.emit('new_order', createdOrder);
+
+    await createAuditLog(req.user, 'ORDER_CREATE', 'Order', 'Order created by ' + ((req.user as any)?.name || (req.user as any)?.email), {
+      entityId: createdOrder._id.toString(),
+      entityName: 'Order ' + createdOrder._id,
+      changes: { items: createdOrder.orderItems.length, total: createdOrder.totalPrice }
+    });
+
+    res.status(201).json(createdOrder);
+  } catch (error: any) {
+    console.error('Order Creation Error:', error);
+    res.status(500).json({ 
+      message: 'Failed to create order', 
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined 
+    });
   }
-
-  // Prevent duplicate orders within 5 seconds
-  const existingOrder = await Order.findOne({
-    user: (req.user as any)._id,
-    totalPrice: totalPrice,
-    createdAt: { $gte: new Date(Date.now() - 5000) }
-  });
-
-  if (existingOrder) {
-    res.status(200).json(existingOrder);
-    return;
-  }
-
-  // Ensure shopId is present
-  const finalShopId = shopId || orderItems[0]?.shopId;
-  if (!finalShopId) {
-    res.status(400).json({ message: 'Shop ID is required' });
-    return;
-  }
-
-  const order = new Order({
-    user: (req.user as any)._id,
-    shopId: finalShopId,
-    orderItems: orderItems.map((item: any) => ({
-      ...item,
-      shopId: item.shopId || finalShopId
-    })),
-    shippingAddress,
-    paymentMethod,
-    taxPrice,
-    shippingPrice,
-    totalPrice,
-    statusHistory: [{ status: 'Ordered' }]
-  });
-
-  const createdOrder = await order.save();
-
-  const io = req.app.get('io');
-  io.emit('new_order', createdOrder);
-
-  await createAuditLog(req.user, 'ORDER_CREATE', 'Order', 'Order created by ' + ((req.user as any)?.name || (req.user as any)?.email), {
-    entityId: createdOrder._id.toString(),
-    entityName: 'Order ' + createdOrder._id,
-    changes: { items: createdOrder.orderItems.length, total: createdOrder.totalPrice }
-  });
-
-  res.status(201).json(createdOrder);
 };
 
 export const createPaymentOrder = async (req: Request, res: Response) => {
