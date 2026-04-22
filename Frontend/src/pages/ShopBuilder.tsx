@@ -25,6 +25,88 @@ const AxisArrows = () => (
   </group>
 );
 
+const Loading3D = () => {
+  return (
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white">
+      <div className="relative w-48 h-48">
+        <Canvas camera={{ position: [0, 0, 5] }}>
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} />
+          <group>
+            {Array.from({ length: 12 }).map((_, i) => (
+              <mesh key={i} rotation={[0, 0, (i / 12) * Math.PI * 2]} position={[Math.cos((i/12)*Math.PI*2)*1.5, Math.sin((i/12)*Math.PI*2)*1.5, 0]}>
+                <Box args={[0.4, 0.4, 0.4]}>
+                  <meshStandardMaterial color={['#f97316','#8b5cf6','#06b6d4','#ec4899','#10b981','#f59e0b'][i % 6]} emissive={['#f97316','#8b5cf6','#06b6d4','#ec4899','#10b981','#f59e0b'][i % 6]} emissiveIntensity={0.5} />
+                </Box>
+              </mesh>
+            ))}
+          </group>
+          <RotateGroup />
+        </Canvas>
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <div className="h-10 w-10 border-4 border-violet border-t-transparent rounded-full animate-spin mb-4" />
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 animate-pulse text-center">Architecting<br/>Environment</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const RotateGroup = () => {
+  const ref = useRef<any>();
+  useFrame((state) => {
+    if (ref.current) ref.current.rotation.z = state.clock.getElapsedTime() * 1.5;
+  });
+  return <group ref={ref} />;
+};
+
+const RotationDial = ({ value, onChange, color = '#8b5cf6' }: any) => {
+  const [isDragging, setIsDragging] = useState(false);
+  
+  const handleUpdate = (e: any) => {
+    if (!isDragging && e.type !== 'click') return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+    
+    const x = clientX - (rect.left + rect.width / 2);
+    const y = clientY - (rect.top + rect.height / 2);
+    let deg = Math.atan2(y, x) * (180 / Math.PI) + 90;
+    if (deg < 0) deg += 360;
+    onChange(Math.round(deg));
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div 
+        className="relative w-28 h-28 rounded-full border-[6px] border-slate-50 flex items-center justify-center cursor-pointer select-none group transition-transform active:scale-95 shadow-inner"
+        onMouseMove={handleUpdate}
+        onMouseDown={() => setIsDragging(true)}
+        onMouseUp={() => setIsDragging(false)}
+        onMouseLeave={() => setIsDragging(false)}
+        onTouchMove={handleUpdate}
+        onTouchStart={() => setIsDragging(true)}
+        onTouchEnd={() => setIsDragging(false)}
+        onClick={handleUpdate}
+        style={{ background: `conic-gradient(from 0deg, ${color} 0deg, ${color} ${value}deg, transparent ${value}deg)` }}
+      >
+        <div className="absolute inset-2 bg-white rounded-full flex flex-col items-center justify-center shadow-md">
+          <span className="text-xl font-black italic text-slate-900 leading-none">{value}°</span>
+          <div className="h-0.5 w-4 bg-slate-100 rounded-full mt-2" />
+        </div>
+        <div 
+          className="absolute w-3 h-3 bg-slate-900 rounded-full border-2 border-white shadow-lg z-10"
+          style={{ 
+            transform: `rotate(${value - 90}deg) translateX(48px)`,
+            transition: isDragging ? 'none' : 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+        />
+      </div>
+      <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 italic">360° Orientation Control</p>
+    </div>
+  );
+};
+
 const Rack3D = ({ rack, products = [], isPreview = false }: any) => {
   const width = rack.width || 2;
   const height = rack.height || 3;
@@ -199,7 +281,7 @@ const ShopBuilder = () => {
     setShowForm(true);
   };
 
-  if (loading) return null;
+  if (loading) return <Loading3D />;
 
   return (
     <PageTransition>
@@ -422,23 +504,17 @@ const ShopBuilder = () => {
                                <Input type="number" step="0.5" value={formData.positionZ} onChange={e => setFormData({...formData, positionZ: parseFloat(e.target.value) || 0})} className="h-10" />
                             </div>
                          </div>
-                         {/* Desktop: number input for rotation */}
-                         <div className="hidden xl:block space-y-1">
-                            <label className="text-[8px] font-black uppercase">Rotation (°)</label>
-                            <Input type="number" min={0} max={360} value={formData.rotation} onChange={e => setFormData({...formData, rotation: parseInt(e.target.value) || 0})} className="h-10" />
+                         <div className="flex flex-col items-center py-4 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                            <RotationDial 
+                              value={formData.rotation || 0} 
+                              onChange={(val: number) => setFormData({...formData, rotation: val})} 
+                              color="#8b5cf6"
+                            />
                          </div>
-                         {/* Mobile: range sliders for position */}
-                         <div className="grid grid-cols-3 gap-2 xl:hidden">
-                            <div><label className="text-[7px] font-bold">X: {formData.positionX}</label><input type="range" min={-shopDimensions.width/2} max={shopDimensions.width/2} value={formData.positionX} onChange={e => setFormData({...formData, positionX: parseFloat(e.target.value)})} className="w-full accent-violet" /></div>
-                            <div><label className="text-[7px] font-bold">Y: {formData.positionY}</label><input type="range" min="0" max="10" step="0.1" value={formData.positionY} onChange={e => setFormData({...formData, positionY: parseFloat(e.target.value)})} className="w-full accent-violet" /></div>
-                            <div><label className="text-[7px] font-bold">Z: {formData.positionZ}</label><input type="range" min={-shopDimensions.depth/2} max={shopDimensions.depth/2} value={formData.positionZ} onChange={e => setFormData({...formData, positionZ: parseFloat(e.target.value)})} className="w-full accent-violet" /></div>
-                         </div>
-                         {/* Mobile: range slider for rotation */}
-                         <div className="space-y-1 xl:hidden">
-                            <label className="text-[8px] font-black uppercase">Angle: {formData.rotation}°</label>
-                            <input type="range" min="0" max="360" value={formData.rotation || 0} onChange={e => setFormData({...formData, rotation: parseInt(e.target.value)})} className="w-full accent-violet" />
-                         </div>
-                         <Button type="submit" className="w-full h-11 bg-slate-900 text-white font-black tracking-widest text-[10px] rounded-xl hover:bg-violet-600 transition-all">INITIALIZE UNIT</Button>
+                         
+                         <Button type="submit" className="w-full h-14 bg-slate-900 text-white font-black tracking-widest text-[11px] rounded-2xl hover:bg-violet shadow-lg shadow-violet/20 transition-all active:scale-95 uppercase">
+                            {editingRack ? 'SYNC ARCHITECTURAL UNIT' : 'INITIALIZE SPATIAL UNIT'}
+                         </Button>
                       </form>
                    )}
                    <div className="space-y-3">
