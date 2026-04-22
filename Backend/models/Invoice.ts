@@ -16,7 +16,7 @@ const invoiceSchema = new mongoose.Schema({
   paymentMethod: { type: String, enum: ['cash', 'card', 'upi', 'other'], default: 'cash' },
   customerName: { type: String, default: 'Walk-in Customer' },
   customerPhone: { type: String, default: '' },
-  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true }
 }, {
   timestamps: true,
   toJSON: { virtuals: true },

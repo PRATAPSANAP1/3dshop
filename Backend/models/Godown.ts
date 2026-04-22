@@ -23,7 +23,7 @@ const GodownSchema: Schema = new Schema({
   phone: { type: String },
   managerName: { type: String },
   capacity: { type: Number },
-  shopId: { type: Schema.Types.ObjectId, ref: 'User', required: true }
+  shopId: { type: Schema.Types.ObjectId, ref: 'Shop', required: true }
 }, { timestamps: true });
 
 export default mongoose.model<IGodown>('Godown', GodownSchema);

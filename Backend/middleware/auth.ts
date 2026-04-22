@@ -4,6 +4,8 @@ import User from '../models/User';
 
 interface JwtPayload {
   id: string;
+  shopId?: string;
+  role?: string;
 }
 
 export const protect = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -39,16 +41,28 @@ export const protect = async (req: Request, res: Response, next: NextFunction): 
     }
 
     req.user = user;
+    // Attach shopId from JWT (or user doc) for downstream tenant-scoped queries
+    (req as any).shopId = decoded.shopId || user.shopId?.toString() || null;
     next();
   } catch (error) {
     console.error('[AUTH_ERROR]:', error);
     res.status(401).json({ message: 'Invalid or expired session. Please re-authenticate.' });
   }
 };
+
 export const admin = (req: Request, res: Response, next: NextFunction): void => {
-  if (req.user && (req.user as any).role === 'admin') {
+  if (req.user && ((req.user as any).role === 'admin' || (req.user as any).role === 'superadmin')) {
     next();
   } else {
     res.status(403).json({ message: 'Restricted Access: Administrative privileges required.' });
   }
 };
+
+export const superadmin = (req: Request, res: Response, next: NextFunction): void => {
+  if (req.user && (req.user as any).role === 'superadmin') {
+    next();
+  } else {
+    res.status(403).json({ message: 'Restricted Access: Superadmin privileges required.' });
+  }
+};
+

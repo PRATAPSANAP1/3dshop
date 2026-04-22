@@ -24,7 +24,7 @@ const productSchema = new mongoose.Schema({
   numReviews: { type: Number, default: 0 },
   qrCode: { type: String, unique: true },
   totalRevenue: { type: Number, default: 0 },
-  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true }
 }, {
   timestamps: true
 });

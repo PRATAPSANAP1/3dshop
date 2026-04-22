@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 
 const auditLogSchema = new mongoose.Schema({
+  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   userName: { type: String, required: true },
-  userRole: { type: String, enum: ['admin', 'staff', 'customer'], required: true },
+  userRole: { type: String, enum: ['superadmin', 'admin', 'employee', 'shopper'], required: true },
 
   action: { 
     type: String, 

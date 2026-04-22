@@ -5,10 +5,12 @@ interface User {
   _id: string;
   name: string;
   email: string;
-  role: 'admin' | 'customer' | 'staff';
+  role: 'superadmin' | 'admin' | 'employee' | 'shopper';
+  shopId?: string;
   shopName?: string;
   mobile?: string;
   addresses?: any[];
+  employeePermissions?: string[];
 }
 
 interface AuthContextType {

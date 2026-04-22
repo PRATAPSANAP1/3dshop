@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+﻿import { Suspense, lazy } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -45,6 +45,11 @@ const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const Coupons = lazy(() => import("./pages/Coupons"));
 const HelpCenter = lazy(() => import("./pages/HelpCenter"));
 
+// New multi-tenant pages
+const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
+const Employees = lazy(() => import("./pages/Employees"));
+const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
+
 // Godown lazy imports
 const GodownLayout = lazy(() => import("./components/GodownLayout"));
 const GodownOverview = lazy(() => import("./pages/Godown/Overview"));
@@ -67,14 +72,41 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   if (loading) return null;
-  return user?.role === 'admin' ? <>{children}</> : <Navigate to="/login" replace />;
+  return (user?.role === 'admin' || user?.role === 'superadmin') ? <>{children}</> : <Navigate to="/login" replace />;
+};
+
+const EmployeeRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  return (user?.role === 'employee' || user?.role === 'admin' || user?.role === 'superadmin')
+    ? <>{children}</>
+    : <Navigate to="/login" replace />;
+};
+
+const SuperAdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  return user?.role === 'superadmin' ? <>{children}</> : <Navigate to="/login" replace />;
+};
+
+// Smart redirect based on role
+const SmartRedirect = () => {
+  const { user, loading } = useAuth();
+  if (loading) return <BrandingLoader />;
+  if (!user) return <Navigate to="/home" replace />;
+  switch (user.role) {
+    case 'superadmin': return <Navigate to="/superadmin/dashboard" replace />;
+    case 'admin': return <Navigate to="/dashboard" replace />;
+    case 'employee': return <Navigate to="/employee-dashboard" replace />;
+    default: return <CustomerSearch />;
+  }
 };
 
 // Guests see HomePage, logged-in users see the 3D store
 const GuestOrStoreRoute = () => {
   const { user, loading } = useAuth();
   if (loading) return <BrandingLoader />;
-  return user ? <CustomerSearch /> : <Navigate to="/home" replace />;
+  return user ? <SmartRedirect /> : <Navigate to="/home" replace />;
 };
 
 const AnimatedRoutes = () => {
@@ -83,12 +115,12 @@ const AnimatedRoutes = () => {
     <Suspense fallback={<BrandingLoader />}>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          {/* ── Public / Guest routes ── */}
+          {/* â”€â”€ Public / Guest routes â”€â”€ */}
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/landing" element={<Landing />} />
 
-          {/* ── App shell (sidebar + layout) ── */}
+          {/* â”€â”€ App shell (sidebar + layout) â”€â”€ */}
           <Route element={<AppLayout />}>
             {/* Admin-only */}
             <Route path="/dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} />
@@ -96,12 +128,19 @@ const AnimatedRoutes = () => {
             <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
             <Route path="/racks" element={<AdminRoute><Racks /></AdminRoute>} />
             <Route path="/shop-builder" element={<AdminRoute><ShopBuilder /></AdminRoute>} />
-            <Route path="/scanner" element={<AdminRoute><Scanner /></AdminRoute>} />
+            <Route path="/scanner" element={<EmployeeRoute><Scanner /></EmployeeRoute>} />
             <Route path="/smartstore" element={<AdminRoute><SmartStore /></AdminRoute>} />
             <Route path="/billing" element={<AdminRoute><Billing /></AdminRoute>} />
             <Route path="/audit-logs" element={<AdminRoute><AuditLogs /></AdminRoute>} />
             <Route path="/coupons" element={<AdminRoute><Coupons /></AdminRoute>} />
             <Route path="/logistics" element={<AdminRoute><Logistics /></AdminRoute>} />
+            <Route path="/employees" element={<AdminRoute><Employees /></AdminRoute>} />
+
+            {/* Employee dashboard */}
+            <Route path="/employee-dashboard" element={<EmployeeRoute><EmployeeDashboard /></EmployeeRoute>} />
+
+            {/* Superadmin routes */}
+            <Route path="/superadmin/dashboard" element={<SuperAdminRoute><SuperAdminDashboard /></SuperAdminRoute>} />
 
             {/* Godown Routes */}
             <Route path="/godown" element={<AdminRoute><GodownLayout /></AdminRoute>}>
@@ -116,7 +155,7 @@ const AnimatedRoutes = () => {
               <Route path="settings" element={<GodownSettings />} />
             </Route>
 
-            {/* Root → HomePage for guests, CustomerSearch for logged-in users */}
+            {/* Root â†’ Smart redirect */}
             <Route path="/" element={<GuestOrStoreRoute />} />
             <Route path="/shop-experience" element={<Shop3D />} />
             <Route path="/explore" element={<Navigate to="/" replace />} />
@@ -175,5 +214,5 @@ const App = () => (
 );
 
 
-export default App;
 
+export default App;

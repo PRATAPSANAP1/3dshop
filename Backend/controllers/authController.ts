@@ -7,8 +7,8 @@ import { createAuditLog } from '../middleware/audit';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-const generateAccessToken = (id: string, role: string) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET || 'dev_secret_key_12345', {
+const generateAccessToken = (id: string, role: string, shopId?: string) => {
+  return jwt.sign({ id, role, shopId: shopId || undefined }, process.env.JWT_SECRET || 'dev_secret_key_12345', {
     expiresIn: '15m',
   });
 };
@@ -42,9 +42,9 @@ export const register = async (req: Request, res: Response) => {
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: 'User already exists' });
 
-    const user = new User({ name, email, password, shopName, mobile, role: role || 'customer' });
+    const user = new User({ name, email, password, shopName, mobile, role: role || 'shopper' });
 
-    const accessToken = generateAccessToken(user._id.toString(), user.role);
+    const accessToken = generateAccessToken(user._id.toString(), user.role, user.shopId?.toString());
     const refreshToken = generateRefreshToken(user._id.toString());
 
     user.token = accessToken;
@@ -62,6 +62,7 @@ export const register = async (req: Request, res: Response) => {
       email, 
       shopName, 
       role: user.role,
+      shopId: user.shopId || null,
       accessToken,
       refreshToken
     });
@@ -80,7 +81,7 @@ export const login = async (req: Request, res: Response) => {
         return res.status(401).json({ message: `Access denied. Account is not a ${role}` });
       }
 
-      const accessToken = generateAccessToken(user._id.toString(), user.role);
+      const accessToken = generateAccessToken(user._id.toString(), user.role, user.shopId?.toString());
       const refreshToken = generateRefreshToken(user._id.toString());
 
       user.token = accessToken;
@@ -98,6 +99,7 @@ export const login = async (req: Request, res: Response) => {
         email: user.email, 
         shopName: user.shopName, 
         role: user.role,
+        shopId: user.shopId || null,
         accessToken,
         refreshToken
       });
@@ -125,7 +127,7 @@ export const refresh = async (req: Request, res: Response) => {
       return res.status(401).json({ message: 'Not authorized, invalid refresh token' });
     }
 
-    const accessToken = generateAccessToken(user._id.toString(), user.role);
+    const accessToken = generateAccessToken(user._id.toString(), user.role, user.shopId?.toString());
     user.token = accessToken;
     await user.save();
 
@@ -212,7 +214,7 @@ export const blockUser = async (req: Request, res: Response) => {
 
 export const updateUserRole = async (req: Request, res: Response) => {
   const { role } = req.body;
-  if (!['admin', 'customer', 'staff'].includes(role)) {
+  if (!['superadmin', 'admin', 'employee', 'shopper'].includes(role)) {
     return res.status(400).json({ message: 'Invalid role' });
   }
   try {
@@ -343,7 +345,7 @@ export const googleLogin = async (req: Request, res: Response) => {
       });
     }
 
-    const accessToken = generateAccessToken(user._id.toString(), user.role);
+    const accessToken = generateAccessToken(user._id.toString(), user.role, user.shopId?.toString());
     const refreshToken = generateRefreshToken(user._id.toString());
 
     user.token = accessToken;

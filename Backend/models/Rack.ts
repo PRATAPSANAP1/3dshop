@@ -12,7 +12,7 @@ const rackSchema = new mongoose.Schema({
   shelves: { type: Number, default: 4 },
   columns: { type: Number, default: 1 },
   color: { type: String, default: '#3b82f6' },
-  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true }
 }, {
   timestamps: true
 });

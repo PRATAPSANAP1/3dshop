@@ -9,7 +9,7 @@ const smartStoreDatasetSchema = new mongoose.Schema({
   zoneRadar: [{ zoneName: String, traffic: Number, dwell: Number, sales: Number }],
   movementMatrix: { type: Map, of: String }, // zone -> nextZone
   aiInsights: [String],
-  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true }
 }, {
   timestamps: true
 });

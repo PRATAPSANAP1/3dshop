@@ -5,7 +5,12 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['admin', 'customer', 'staff'], default: 'customer' },
+  role: { type: String, enum: ['superadmin', 'admin', 'employee', 'shopper'], default: 'shopper' },
+  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', default: null },
+  employeePermissions: [{ 
+    type: String, 
+    enum: ['VIEW_ORDERS', 'UPDATE_DELIVERY_STATUS', 'USE_SCANNER', 'VIEW_PRODUCTS', 'VIEW_DASHBOARD_STATS', 'MANAGE_INVENTORY_STOCK'] 
+  }],
   shopName: { type: String }, // Optional for regular customers
   mobile: { type: String },
   addresses: [{

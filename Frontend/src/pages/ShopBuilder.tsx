@@ -376,21 +376,53 @@ const ShopBuilder = () => {
                             <Input type="number" placeholder="Height" value={formData.height} onChange={e => setFormData({...formData, height: parseFloat(e.target.value)})} className="h-10" />
                          </div>
                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1">
+                            {/* Desktop: number inputs */}
+                            <div className="space-y-1 hidden xl:block">
+                               <label className="text-[8px] font-black uppercase">Shelves</label>
+                               <Input type="number" min={1} max={10} value={formData.shelves} onChange={e => setFormData({...formData, shelves: parseInt(e.target.value) || 1})} className="h-10" />
+                            </div>
+                            <div className="space-y-1 hidden xl:block">
+                               <label className="text-[8px] font-black uppercase">Columns</label>
+                               <Input type="number" min={1} max={8} value={formData.columns} onChange={e => setFormData({...formData, columns: parseInt(e.target.value) || 1})} className="h-10" />
+                            </div>
+                            {/* Mobile: range sliders */}
+                            <div className="space-y-1 xl:hidden">
                                <label className="text-[8px] font-black uppercase">Shelves: {formData.shelves}</label>
                                <input type="range" min="1" max="10" value={formData.shelves} onChange={e => setFormData({...formData, shelves: parseInt(e.target.value)})} className="w-full accent-violet" />
                             </div>
-                            <div className="space-y-1">
+                            <div className="space-y-1 xl:hidden">
                                <label className="text-[8px] font-black uppercase">Columns: {formData.columns}</label>
                                <input type="range" min="1" max="8" value={formData.columns} onChange={e => setFormData({...formData, columns: parseInt(e.target.value)})} className="w-full accent-violet" />
                             </div>
                          </div>
-                         <div className="grid grid-cols-3 gap-2">
+                         {/* Desktop: number inputs for position */}
+                         <div className="hidden xl:grid grid-cols-3 gap-2">
+                            <div className="space-y-1">
+                               <label className="text-[8px] font-black uppercase">Pos X</label>
+                               <Input type="number" step="0.5" value={formData.positionX} onChange={e => setFormData({...formData, positionX: parseFloat(e.target.value) || 0})} className="h-10" />
+                            </div>
+                            <div className="space-y-1">
+                               <label className="text-[8px] font-black uppercase">Pos Y</label>
+                               <Input type="number" step="0.1" value={formData.positionY} onChange={e => setFormData({...formData, positionY: parseFloat(e.target.value) || 0})} className="h-10" />
+                            </div>
+                            <div className="space-y-1">
+                               <label className="text-[8px] font-black uppercase">Pos Z</label>
+                               <Input type="number" step="0.5" value={formData.positionZ} onChange={e => setFormData({...formData, positionZ: parseFloat(e.target.value) || 0})} className="h-10" />
+                            </div>
+                         </div>
+                         {/* Desktop: number input for rotation */}
+                         <div className="hidden xl:block space-y-1">
+                            <label className="text-[8px] font-black uppercase">Rotation (°)</label>
+                            <Input type="number" min={0} max={360} value={formData.rotation} onChange={e => setFormData({...formData, rotation: parseInt(e.target.value) || 0})} className="h-10" />
+                         </div>
+                         {/* Mobile: range sliders for position */}
+                         <div className="grid grid-cols-3 gap-2 xl:hidden">
                             <div><label className="text-[7px] font-bold">X: {formData.positionX}</label><input type="range" min={-shopDimensions.width/2} max={shopDimensions.width/2} value={formData.positionX} onChange={e => setFormData({...formData, positionX: parseFloat(e.target.value)})} className="w-full accent-violet" /></div>
                             <div><label className="text-[7px] font-bold">Y: {formData.positionY}</label><input type="range" min="0" max="10" step="0.1" value={formData.positionY} onChange={e => setFormData({...formData, positionY: parseFloat(e.target.value)})} className="w-full accent-violet" /></div>
                             <div><label className="text-[7px] font-bold">Z: {formData.positionZ}</label><input type="range" min={-shopDimensions.depth/2} max={shopDimensions.depth/2} value={formData.positionZ} onChange={e => setFormData({...formData, positionZ: parseFloat(e.target.value)})} className="w-full accent-violet" /></div>
                          </div>
-                         <div className="space-y-1">
+                         {/* Mobile: range slider for rotation */}
+                         <div className="space-y-1 xl:hidden">
                             <label className="text-[8px] font-black uppercase">Angle: {formData.rotation}°</label>
                             <input type="range" min="0" max="360" value={formData.rotation || 0} onChange={e => setFormData({...formData, rotation: parseInt(e.target.value)})} className="w-full accent-violet" />
                          </div>

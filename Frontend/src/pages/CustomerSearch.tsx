@@ -159,7 +159,7 @@ const CustomerSearch: React.FC = () => {
   const [shopName, setShopName] = useState('');
   const [shopSelected, setShopSelected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState(0);
+
   const [shopConfig, setShopConfig] = useState<ShopConfig>({ width: 30, depth: 20 });
   const [doors, setDoors] = useState<Door[]>([]);
   const [racks, setRacks] = useState<Rack[]>([]);
@@ -240,15 +240,8 @@ const CustomerSearch: React.FC = () => {
     setRackProducts({});
     setAllProducts([]);
     setIsLoading(true);
-    setLoadingProgress(0);
 
     try {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 15;
-        if (progress >= 85) progress = 85;
-        setLoadingProgress((prev) => progress);
-      }, 150);
 
       const [configRes, doorsRes, racksRes] = await Promise.all([
         API.get(`/shop-config/public/${name}`),
@@ -291,12 +284,9 @@ const CustomerSearch: React.FC = () => {
       setAllProducts(allProductsList);
       setShopSelected(true);
       
-      clearInterval(interval);
-      setLoadingProgress(100);
-      setTimeout(() => setIsLoading(false), 400);
+      setIsLoading(false);
     } catch (error) {
       toast({ variant: 'destructive', title: 'Error', description: 'Could not load shop environment.' });
-      setLoadingProgress(0);
       setIsLoading(false);
     }
   };
@@ -374,27 +364,42 @@ const CustomerSearch: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col overflow-hidden bg-slate-50 h-full w-full">
+    <div className="relative flex flex-col overflow-hidden bg-slate-50 h-full w-full">
       <AnimatePresence>
         {isLoading && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm rounded-3xl"
+            className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white/80 backdrop-blur-md rounded-3xl"
             style={{ pointerEvents: 'none' }}
           >
-            <div className="flex flex-col items-center max-w-xs w-full gap-4 p-8 bg-white rounded-3xl shadow-xl shadow-slate-200/50">
-              <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden mb-2">
-                <motion.div 
-                  initial={{ width: 0 }} 
-                  animate={{ width: `${loadingProgress}%` }} 
-                  transition={{ duration: 0.2 }}
-                  className="h-full bg-orange-500 rounded-full"
-                />
+            {/* Skeleton store layout */}
+            <div className="w-full max-w-md px-8 space-y-5">
+              {/* Header skeleton */}
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-slate-200 animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-32 rounded-lg bg-slate-200 animate-pulse" />
+                  <div className="h-3 w-20 rounded-lg bg-slate-100 animate-pulse" />
+                </div>
               </div>
-              <div className="flex w-full justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
-                <span>{loadingProgress >= 100 ? 'Complete' : 'Loading Map...'}</span>
-                <span>{Math.floor(loadingProgress)}%</span>
+              {/* Rack skeletons */}
+              <div className="grid grid-cols-3 gap-3">
+                {[1,2,3,4,5,6].map(i => (
+                  <div key={i} className="space-y-2">
+                    <div className="h-20 rounded-2xl bg-slate-200 animate-pulse" style={{ animationDelay: `${i * 120}ms` }} />
+                    <div className="h-3 w-3/4 rounded-lg bg-slate-100 animate-pulse" style={{ animationDelay: `${i * 120}ms` }} />
+                  </div>
+                ))}
               </div>
+              {/* Bottom bar skeleton */}
+              <div className="flex gap-3">
+                <div className="h-10 flex-1 rounded-xl bg-slate-200 animate-pulse" />
+                <div className="h-10 w-24 rounded-xl bg-slate-100 animate-pulse" />
+              </div>
+              {/* Loading label */}
+              <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">
+                Loading store...
+              </p>
             </div>
           </motion.div>
         )}

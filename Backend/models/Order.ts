@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const orderItemSchema = new mongoose.Schema({
+  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true },
   name: { type: String, required: true },
   qty: { type: Number, required: true },
   price: { type: Number, required: true },
@@ -18,6 +19,7 @@ const statusHistorySchema = new mongoose.Schema({
 }, { _id: false });
 
 const orderSchema = new mongoose.Schema({
+  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true },
   user: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,

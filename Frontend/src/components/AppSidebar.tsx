@@ -21,6 +21,7 @@ import {
   ScrollText,
   Warehouse,
   Ticket,
+  UserPlus,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -40,15 +41,13 @@ const navItems = [
   { to: "/orders",      icon: ShoppingCart,   label: "Orders",       desc: "Manage fulfillment",   color: "text-orange-500", bg: "bg-orange-500/10" },
   { to: "/audit-logs",  icon: ScrollText,     label: "Audit Logs",   desc: "System activity",      color: "text-slate-600",  bg: "bg-slate-500/10" },
   { to: "/coupons",     icon: Ticket,         label: "Coupons",      desc: "Marketing engine",     color: "text-rose-500",   bg: "bg-rose-500/10" },
+  { to: "/employees",   icon: UserPlus,       label: "Employees",    desc: "Team management",      color: "text-violet-500", bg: "bg-violet-500/10" },
 ];
 export const AppSidebarContent = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
-  const isStaff = user?.role === 'staff';
   
-  const filteredItems = isStaff 
-    ? navItems.filter(item => ["/products", "/scanner", "/orders", "/delivery"].includes(item.to))
-    : navItems;
+  const filteredItems = navItems;
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
