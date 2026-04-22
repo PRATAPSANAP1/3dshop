@@ -376,7 +376,8 @@ const Orders = () => {
                         <p className="text-xl font-black italic text-slate-900 tracking-tighter">₹{order.totalPrice.toLocaleString()}</p>
                       </div>
                       <div className="flex gap-2">
-                        {order.orderStatus !== 'Cancelled' && 
+                        {user?.role !== 'admin' && 
+                         order.orderStatus !== 'Cancelled' && 
                          order.orderStatus !== 'Delivered' && 
                          !order.isReturnRequested &&
                          !order.delivery?.assignedTo && (

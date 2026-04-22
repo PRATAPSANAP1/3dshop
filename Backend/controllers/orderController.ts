@@ -8,10 +8,13 @@ import { createAuditLog } from '../middleware/audit';
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
 
-const razorpay = new Razorpay({
-  key_id: RAZORPAY_KEY_ID,
-  key_secret: RAZORPAY_KEY_SECRET,
-});
+let razorpay: any = null;
+if (RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET) {
+  razorpay = new Razorpay({
+    key_id: RAZORPAY_KEY_ID,
+    key_secret: RAZORPAY_KEY_SECRET,
+  });
+}
 
 if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
   console.warn('WARNING: Razorpay API keys are missing in environment variables.');
@@ -69,13 +72,13 @@ export const createPaymentOrder = async (req: Request, res: Response) => {
 
   const { amount, currency = 'INR', receipt } = req.body;
 
-  if (!amount || amount <= 0) {
-    return res.status(400).json({ message: 'Invalid payment amount' });
+  if (!amount || amount < 100) {
+    return res.status(400).json({ message: 'Invalid payment amount, must be at least 100 paise' });
   }
 
   try {
     const options = {
-      amount: Math.round(amount * 100),
+      amount: amount,
       currency,
       receipt,
       notes: {

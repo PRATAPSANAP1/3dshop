@@ -109,7 +109,7 @@ const Checkout = () => {
       const { data: dbOrder } = await api.post("/orders", orderData);
 
       const { data: rzpOrder } = await api.post("/orders/pay", {
-        amount: dbOrder.totalPrice,
+        amount: Math.round(dbOrder.totalPrice * 100),
         receipt: `receipt_${dbOrder._id.slice(-6)}`
       });
 
@@ -159,6 +159,12 @@ const Checkout = () => {
       };
 
       const paymentObject = new (window as any).Razorpay(options);
+      
+      paymentObject.on('payment.failed', function (response: any) {
+        toast({ variant: "destructive", title: "Payment Failed", description: response.error.description || "Checkout failed" });
+        setIsProcessing(false);
+      });
+
       paymentObject.open();
 
     } catch (err) {
@@ -321,10 +327,7 @@ const Checkout = () => {
               </AnimatePresence>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {(user?.addresses?.length ? user.addresses : [
-                  { label: 'Home', street: '123 Main Street', city: 'Mumbai', state: 'MH', zipCode: '400001', pinCode: '400001', isDefault: true },
-                  { label: 'Work', street: 'Office 45, Tech Park', city: 'Bengaluru', state: 'KA', zipCode: '560001', pinCode: '560001' }
-                ]).map((addr: any, idx: number) => (
+                {(user?.addresses || []).map((addr: any, idx: number) => (
                   <div
                     key={idx}
                     onClick={() => setSelectedAddress(addr)}

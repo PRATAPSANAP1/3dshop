@@ -126,7 +126,7 @@ const SupermarketRack = ({ rack, products, isHighlighted, highlightedProductId, 
         );
       })}
 
-      {products.slice(0, 3).map((product: Product, index: number) => {
+      {products.map((product: Product, index: number) => {
         const shelfIndex = (product.shelfNumber || 1) - 1;
         const columnIndex = (product.columnNumber || 1) - 1;
         if (shelfIndex >= shelves || shelfIndex < 0 || columnIndex >= columns || columnIndex < 0) return null;
@@ -205,7 +205,12 @@ const CustomerSearch: React.FC = () => {
     }
   };
 
+  const initRef = useRef(false);
+
   React.useEffect(() => {
+    if (initRef.current) return;
+    initRef.current = true;
+
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
 
@@ -215,7 +220,7 @@ const CustomerSearch: React.FC = () => {
         setAllShopNames(data);
         if (data && data.length > 0) {
           setShopName(data[0]);
-          autoLoadShop(data[0]);
+          loadShopData(data[0]);
         } else {
           setIsLoading(false);
           toast({ variant: 'destructive', title: 'No stores found', description: 'No active stores found in the system.' });
@@ -229,13 +234,20 @@ const CustomerSearch: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const autoLoadShop = async (name: string) => {
+  const loadShopData = async (name: string) => {
+    setDoors([]);
+    setRacks([]);
+    setRackProducts({});
+    setAllProducts([]);
+    setIsLoading(true);
+    setLoadingProgress(0);
+
     try {
+      let progress = 0;
       const interval = setInterval(() => {
-        setLoadingProgress((prev) => {
-          const next = prev + Math.random() * 15;
-          return next >= 85 ? 85 : next;
-        });
+        progress += Math.random() * 15;
+        if (progress >= 85) progress = 85;
+        setLoadingProgress((prev) => progress);
       }, 150);
 
       const [configRes, doorsRes, racksRes] = await Promise.all([
@@ -243,26 +255,38 @@ const CustomerSearch: React.FC = () => {
         API.get(`/doors/public/${name}`),
         API.get(`/public/racks/${name}`)
       ]);
+      
       if (configRes.data) {
         setShopConfig({
           width: configRes.data.width || 30,
           depth: configRes.data.depth || 20
         });
       }
-      setDoors(doorsRes.data);
-      setRacks(racksRes.data);
+      setDoors(doorsRes.data || []);
+      const racksList = racksRes.data || [];
+      setRacks(racksList);
 
       const productsMap: Record<string, Product[]> = {};
       const allProductsList: Product[] = [];
-      for (const rack of racksRes.data) {
-        try {
-          const { data } = await API.get(`/public/products/rack/${rack._id}`);
-          productsMap[rack._id] = data;
-          allProductsList.push(...data);
-        } catch (error) {
-          productsMap[rack._id] = [];
+      racksList.forEach((rack: Rack) => {
+        productsMap[rack._id] = [];
+      });
+
+      const rackPromises = racksList.map((rack: Rack) => 
+        API.get(`/public/products/rack/${rack._id}`)
+          .then(res => ({ rackId: rack._id, data: res.data }))
+      );
+
+      const rackResults = await Promise.allSettled(rackPromises);
+      rackResults.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          productsMap[result.value.rackId] = result.value.data;
+          allProductsList.push(...result.value.data);
+        } else {
+          console.error("Rack API Error:", result.reason);
         }
-      }
+      });
+
       setRackProducts(productsMap);
       setAllProducts(allProductsList);
       setShopSelected(true);
@@ -271,10 +295,14 @@ const CustomerSearch: React.FC = () => {
       setLoadingProgress(100);
       setTimeout(() => setIsLoading(false), 400);
     } catch (error) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not build 3D environment.' });
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not load shop environment.' });
       setLoadingProgress(0);
       setIsLoading(false);
     }
+  };
+
+  const autoLoadShop = async (name: string) => {
+    await loadShopData(name);
   };
 
   const handleShopNameInput = (value: string) => {
@@ -283,53 +311,7 @@ const CustomerSearch: React.FC = () => {
 
   const handleShopSelect = async () => {
     if (!shopName) return;
-    setIsLoading(true);
-    setLoadingProgress(0);
-    try {
-      const interval = setInterval(() => {
-        setLoadingProgress((prev) => {
-          const next = prev + Math.random() * 15;
-          return next >= 85 ? 85 : next;
-        });
-      }, 150);
-
-      const [configRes, doorsRes, racksRes] = await Promise.all([
-        API.get(`/shop-config/public/${shopName}`),
-        API.get(`/doors/public/${shopName}`),
-        API.get(`/public/racks/${shopName}`)
-      ]);
-      if (configRes.data) {
-        setShopConfig({
-          width: configRes.data.width || 30,
-          depth: configRes.data.depth || 20
-        });
-      }
-      setDoors(doorsRes.data);
-      setRacks(racksRes.data);
-
-      const productsMap: Record<string, Product[]> = {};
-      const allProductsList: Product[] = [];
-      for (const rack of racksRes.data) {
-        try {
-          const { data } = await API.get(`/public/products/rack/${rack._id}`);
-          productsMap[rack._id] = data;
-          allProductsList.push(...data);
-        } catch (error) {
-          productsMap[rack._id] = [];
-        }
-      }
-      setRackProducts(productsMap);
-      setAllProducts(allProductsList);
-      setShopSelected(true);
-      
-      clearInterval(interval);
-      setLoadingProgress(100);
-      setTimeout(() => setIsLoading(false), 400);
-    } catch (error) {
-      toast({ variant: 'destructive', title: 'Shop Not Found', description: 'Please check the name and try again.' });
-      setLoadingProgress(0);
-      setIsLoading(false);
-    }
+    await loadShopData(shopName);
   };
 
   const handleProductClick = (product: Product) => {
@@ -344,7 +326,6 @@ const CustomerSearch: React.FC = () => {
       setShowArrow(false);
       return;
     }
-    setIsLoading(true);
     try {
       const { data } = await API.get(`/public/search?query=${searchQuery}&shopName=${shopName}`);
       if (data.length > 0) {
@@ -361,8 +342,6 @@ const CustomerSearch: React.FC = () => {
     } catch (error) {
       setNotFound(true);
       setShowArrow(false);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -400,7 +379,8 @@ const CustomerSearch: React.FC = () => {
         {isLoading && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-white/60 backdrop-blur-sm"
+            className="absolute inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm rounded-3xl"
+            style={{ pointerEvents: 'none' }}
           >
             <div className="flex flex-col items-center max-w-xs w-full gap-4 p-8 bg-white rounded-3xl shadow-xl shadow-slate-200/50">
               <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden mb-2">
@@ -628,7 +608,7 @@ const CustomerSearch: React.FC = () => {
           </div>
         ) : (
           <Canvas
-            shadows
+            shadows={!isMobile}
             frameloop="demand"
             camera={{
               position: isMobile ? [0, 30, 25] : [0, 20, 20],
@@ -659,7 +639,7 @@ const CustomerSearch: React.FC = () => {
             </Plane>
 
             <gridHelper args={[Math.max(shopConfig?.width || 30, shopConfig?.depth || 20), 20, '#334155', '#1e293b']} position={[0, 0.01, 0]} />
-            <ContactShadows resolution={1024} scale={shopConfig?.width || 30} blur={2} opacity={0.15} far={10} color="#000000" />
+            <ContactShadows frames={1} resolution={isMobile ? 256 : 512} scale={shopConfig?.width || 30} blur={2} opacity={0.15} far={10} color="#000000" />
 
             <Box args={[shopConfig?.width || 30, 4, 0.3]} position={[0, 2, -(shopConfig?.depth || 20) / 2]}>
               <meshStandardMaterial color="#94a3b8" transparent opacity={0.08} depthWrite={false} />

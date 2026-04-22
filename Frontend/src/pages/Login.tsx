@@ -76,7 +76,7 @@ const Login = () => {
     try {
       const endpoint = isRegister ? '/auth/register' : '/auth/login';
       const payload = isRegister
-        ? { ...form, role, shopName: role === 'customer' ? (form.name ? `${form.name}'s Shop` : 'Personal Shop') : form.shopName }
+        ? { ...form, role, shopName: "SmartStore" }
         : { email: form.email, password: form.password, role };
 
       const { data } = await api.post(endpoint, payload);
@@ -357,20 +357,7 @@ const Login = () => {
                             <label className="text-sm font-bold text-slate-700 ml-1">Mobile Number</label>
                             <Input name="mobile" value={form.mobile} onChange={handleInputChange} placeholder="937047xxx" className="h-12 rounded-xl border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium" required />
                           </div>
-                          {role === 'admin' && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="space-y-1.5"
-                            >
-                              <label className="text-sm font-bold text-slate-700 ml-1">Shop/Organization Name</label>
-                              <Input name="shopName" value={form.shopName} onChange={handleInputChange} placeholder="Luxe Collection" className="h-12 rounded-xl border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium" required />
-                            </motion.div>
-                          )}
-                          {role === 'customer' && (
-                            <input type="hidden" name="shopName" value={form.name ? `${form.name}'s Shop` : "Personal Shop"} />
-                          )}
+
                         </motion.div>
                       )}
                     </AnimatePresence>

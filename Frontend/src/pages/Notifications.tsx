@@ -7,10 +7,13 @@ import SkeletonCard from "@/components/SkeletonCard";
 import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
+import { useNavigate } from "react-router-dom";
+
 const Notifications = () => {
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState<any[]>([]);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const fetchNotifications = async () => {
     try {
@@ -81,9 +84,10 @@ const Notifications = () => {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className={`flex items-start gap-4 rounded-xl border-l-4 border p-4 transition-all ${
+                onClick={() => navigate('/catalog')}
+                className={`cursor-pointer flex items-start gap-4 rounded-xl border-l-4 border p-4 transition-all ${
                   n.isRead
-                    ? "border-border border-l-border bg-card"
+                    ? "border-border border-l-border bg-card hover:bg-slate-50"
                     : n.type === "critical"
                     ? "border-rose/30 border-l-rose bg-rose/5"
                     : "border-warning/30 border-l-warning bg-warning/5"
@@ -105,7 +109,7 @@ const Notifications = () => {
                   </p>
                 </div>
                 {!n.isRead && (
-                  <button onClick={() => markRead(n._id)} className="text-muted-foreground hover:text-warning">
+                  <button onClick={(e) => { e.stopPropagation(); markRead(n._id); }} className="text-muted-foreground hover:text-warning">
                     <Check className="h-4 w-4" />
                   </button>
                 )}
