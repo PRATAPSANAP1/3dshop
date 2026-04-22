@@ -55,14 +55,24 @@ interface Product {
 
 const GlowBox = ({ args, color, glow, dimmed }: any) => {
   const ref = useRef<any>();
+  
+  // Only run the frame loop if glow is active to save resources
   useFrame(({ clock }) => {
     if (ref.current && glow) {
       ref.current.emissiveIntensity = 1.5 + Math.sin(clock.getElapsedTime() * 4) * 1.0;
     }
   });
+
   return (
     <Box args={args} castShadow>
-      <meshStandardMaterial ref={ref} color={glow ? '#22c55e' : dimmed ? '#1e293b' : color} emissive={glow ? '#22c55e' : color} emissiveIntensity={glow ? 1.5 : dimmed ? 0 : 0.2} transparent opacity={dimmed ? 0.15 : 1} />
+      <meshStandardMaterial 
+        ref={ref} 
+        color={glow ? '#22c55e' : dimmed ? '#1e293b' : color} 
+        emissive={glow ? '#22c55e' : color} 
+        emissiveIntensity={glow ? 1.5 : dimmed ? 0 : 0.2} 
+        transparent 
+        opacity={dimmed ? 0.15 : 1} 
+      />
     </Box>
   );
 };

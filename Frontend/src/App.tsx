@@ -1,4 +1,4 @@
-﻿import { Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -8,6 +8,26 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { AnimatePresence } from "framer-motion";
 import Navbar from "./components/Navbar";
 import BrandingLoader from "./components/BrandingLoader";
+import React from "react";
+
+// Error Boundary to catch lazy loading failures
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
+  constructor(props: {children: React.ReactNode}) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error: any) {
+    if (error.message?.includes('Failed to fetch dynamically imported module') || 
+        error.message?.includes('Importing a module script failed')) {
+      window.location.reload();
+    }
+  }
+  render() {
+    if (this.state.hasError) return <BrandingLoader />;
+    return this.props.children;
+  }
+}
 
 
 // Eager imports (critical path)
@@ -186,7 +206,9 @@ const AnimatedRoutes = () => {
 const AppContent = () => (
   <div className="flex min-h-screen flex-col bg-white">
     <Navbar />
-    <AnimatedRoutes />
+    <ErrorBoundary>
+      <AnimatedRoutes />
+    </ErrorBoundary>
   </div>
 );
 

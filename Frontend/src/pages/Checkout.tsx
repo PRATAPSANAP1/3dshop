@@ -25,7 +25,7 @@ const Checkout = () => {
   const [couponError, setCouponError] = useState("");
   const [addressForm, setAddressForm] = useState({
     label: 'Home', fullName: '', phone: '', street: '', landmark: '',
-    city: '', state: '', pinCode: '', isDefault: false,
+    city: '', state: '', postalCode: '', isDefault: false,
   });
   const { user, login } = useAuth();
   const { toast } = useToast();
@@ -51,8 +51,8 @@ const Checkout = () => {
   }, [user]);
 
   const handleAddAddress = async () => {
-    if (!addressForm.street || !addressForm.city || !addressForm.pinCode) {
-      toast({ variant: "destructive", title: "Missing Fields", description: "Street, city and pin code are required." });
+    if (!addressForm.street || !addressForm.city || !addressForm.postalCode) {
+      toast({ variant: "destructive", title: "Missing Fields", description: "Street, city and postal code are required." });
       return;
     }
     setSavingAddress(true);
@@ -67,7 +67,7 @@ const Checkout = () => {
       setSelectedAddress(addressForm);
       toast({ title: "Address Added", description: "New address saved and selected." });
       setShowAddressModal(false);
-      setAddressForm({ label: 'Home', fullName: '', phone: '', street: '', landmark: '', city: '', state: '', pinCode: '', isDefault: false });
+      setAddressForm({ label: 'Home', fullName: '', phone: '', street: '', landmark: '', city: '', state: '', postalCode: '', isDefault: false });
     } catch {
       toast({ variant: "destructive", title: "Error", description: "Failed to save address." });
     } finally {
@@ -307,7 +307,7 @@ const Checkout = () => {
                           <Input placeholder="City *" value={addressForm.city} onChange={e => setAddressForm({ ...addressForm, city: e.target.value })} className="h-11 rounded-xl" />
                           <Input placeholder="State" value={addressForm.state} onChange={e => setAddressForm({ ...addressForm, state: e.target.value })} className="h-11 rounded-xl" />
                         </div>
-                        <Input placeholder="Pin Code *" value={addressForm.pinCode} onChange={e => setAddressForm({ ...addressForm, pinCode: e.target.value })} className="h-11 rounded-xl" />
+                        <Input placeholder="Postal Code *" value={addressForm.postalCode} onChange={e => setAddressForm({ ...addressForm, postalCode: e.target.value })} className="h-11 rounded-xl" />
                         <label className="flex items-center gap-3 cursor-pointer">
                           <div
                             onClick={() => setAddressForm({ ...addressForm, isDefault: !addressForm.isDefault })}
