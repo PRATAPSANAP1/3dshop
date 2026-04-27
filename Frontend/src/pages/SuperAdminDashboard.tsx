@@ -9,7 +9,7 @@ import api from "@/lib/api";
 const SuperAdminDashboard = () => {
   const navigate = useNavigate();
   const [shops, setShops] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
     const fetchShops = async () => {
@@ -18,8 +18,6 @@ const SuperAdminDashboard = () => {
         setShops(data);
       } catch (err) {
         console.error(err);
-      } finally {
-        setLoading(false);
       }
     };
     fetchShops();
@@ -110,8 +108,8 @@ const SuperAdminDashboard = () => {
                   </div>
                 </div>
               </motion.div>
-            ))
-          )}
+            )
+          }
         </div>
       </div>
     </PageTransition>
