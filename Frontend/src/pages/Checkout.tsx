@@ -215,8 +215,14 @@ const Checkout = () => {
       await api.delete("/cart");
       setStep(3);
       toast({ title: "Order Placed!", description: "Pay when you receive the items." });
-    } catch (err) {
-      toast({ variant: "destructive", title: "Error", description: "Order failed" });
+    } catch (error: any) {
+      console.error("Order error", error);
+      const serverMsg = error.response?.data?.message || "Could not place order. Please check your details.";
+      toast({ 
+        variant: "destructive", 
+        title: "Order Failed", 
+        description: serverMsg 
+      });
     } finally {
       setIsProcessing(false);
     }
