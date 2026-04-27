@@ -82,34 +82,33 @@ const SuperAdminDashboard = () => {
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">All Shops ({shops.length})</p>
           </div>
           {shops.map((shop, i) => (
-              <motion.div
-                key={shop._id}
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="bg-white rounded-2xl border border-slate-100 p-5 flex items-center gap-4 hover:shadow-md hover:border-slate-200 transition-all cursor-pointer group"
-                onClick={() => navigate(`/dashboard`)}
-              >
-                <div className="h-12 w-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500 font-black text-lg shrink-0">
-                  {shop.displayName?.[0]?.toUpperCase()}
+            <motion.div
+              key={shop._id}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="bg-white rounded-2xl border border-slate-100 p-5 flex items-center gap-4 hover:shadow-md hover:border-slate-200 transition-all cursor-pointer group"
+              onClick={() => navigate(`/dashboard`)}
+            >
+              <div className="h-12 w-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500 font-black text-lg shrink-0">
+                {shop.displayName?.[0]?.toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-black text-sm text-slate-900 uppercase tracking-tight">{shop.displayName}</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/{shop.name} · {shop.plan}</p>
+              </div>
+              <div className="flex items-center gap-3 shrink-0">
+                <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${
+                  shop.isActive ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500"
+                }`}>
+                  {shop.isActive ? "Active" : "Inactive"}
+                </span>
+                <div className="h-8 w-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-orange-500 group-hover:text-white transition-all">
+                  <ArrowRight size={14} />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-black text-sm text-slate-900 uppercase tracking-tight">{shop.displayName}</p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/{shop.name} · {shop.plan}</p>
-                </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest ${
-                    shop.isActive ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500"
-                  }`}>
-                    {shop.isActive ? "Active" : "Inactive"}
-                  </span>
-                  <div className="h-8 w-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-orange-500 group-hover:text-white transition-all">
-                    <ArrowRight size={14} />
-                  </div>
-                </div>
-              </motion.div>
-            )
-          }
+              </div>
+            </motion.div>
+          ))}
         </div>
       </div>
     </PageTransition>
