@@ -30,7 +30,16 @@ const FloatingOrb = () => {
 const Hero3DScene = () => {
   return (
     <div className="w-full h-full min-h-[400px]">
-      <Canvas>
+      <Canvas
+        frameloop="demand"
+        dpr={[1, 1.2]}
+        gl={{ 
+          antialias: false, 
+          powerPreference: 'high-performance', 
+          stencil: false,
+          failIfMajorPerformanceCaveat: false 
+        }}
+      >
         <PerspectiveCamera makeDefault position={[0, 0, 5]} />
         <ambientLight intensity={0.5} />
         <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />

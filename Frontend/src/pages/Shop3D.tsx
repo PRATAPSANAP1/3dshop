@@ -94,6 +94,7 @@ export default function Shop3D() {
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-screen relative">
         <Canvas 
           shadows 
+          frameloop="demand"
           dpr={[1, 1.2]}
           gl={{ 
             powerPreference: 'high-performance',
