@@ -244,21 +244,18 @@ The platform implements a multi-tenant security architecture where access is str
 
 ### 🛡️ Role Hierarchy & Permissions
 
-| Role | Access Level | Primary Responsibilities |
-| :--- | :--- | :--- |
-| **Super Admin** | **Global Platform** | Manage all registered shops, monitor platform-wide analytics, and control global user directory. |
-| **Admin** | **Shop Owner** | Full control over their specific shop: inventory, 3D layout, billing, and team management. |
+| **Admin** | **Highest Access** | Full control over the shop: inventory, 3D layout, billing, team management, and shop configurations. |
 | **Employee** | **Staff / Operational** | Handles day-to-day tasks like scanning (POS), order packing, and delivery fulfillment. |
 | **Shopper** | **End Customer** | Browsing the 3D store, managing cart/wishlist, and tracking personal orders. |
 
 ### 🔑 Detailed Permission Map
 
-#### 1. Super Admin (Platform Level)
-*   **Shop Management**: Create, deactivate, and monitor all shops on the platform.
-*   **Global Directory**: View and manage users across all multi-tenant instances.
-*   **System Integrity**: Access global audit logs to monitor high-level platform activity.
+#### 1. Admin (Administrator Level)
+*   **Shop Management**: Full control over shop identity, branding, and active configurations.
+*   **Global Access**: Manage users, products, and analytics within the assigned shop scope.
+*   **System Integrity**: Access audit logs to monitor all activity within the shop instance.
 
-#### 2. Admin (Shop Level)
+#### 2. Employee (Operational Level)
 *   **Inventory & Logistics**: Full CRUD on products, racks, and logistics fleet.
 *   **3D Architectural Control**: Design the shop layout using the 3D Shop Builder.
 *   **Team Governance**: Invite employees and manage granular **Employee Permissions** (e.g., View Orders, Manage Stock).
