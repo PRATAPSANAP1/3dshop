@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import Order from '../models/Order';
 import Product from '../models/Product';
 import Razorpay from 'razorpay';
@@ -58,6 +59,11 @@ export const addOrderItems = async (req: Request, res: Response) => {
       return;
     }
 
+    if (!mongoose.Types.ObjectId.isValid(finalShopId)) {
+      res.status(400).json({ message: 'Invalid Shop ID format' });
+      return;
+    }
+
     // Normalize shipping address (map legacy pinCode to postalCode)
     const normalizedAddress = {
       ...shippingAddress,
@@ -105,7 +111,7 @@ export const addOrderItems = async (req: Request, res: Response) => {
     console.error('Order Creation Error:', error);
     res.status(500).json({ 
       message: 'Failed to create order', 
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined 
+      error: error.message // Return message for easier debugging
     });
   }
 };
