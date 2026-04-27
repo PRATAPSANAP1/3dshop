@@ -20,13 +20,13 @@ export const PERMISSION_LABELS: Record<EmployeePermission, string> = {
 export const usePermission = (perm: EmployeePermission): boolean => {
   const { user } = useAuth();
   if (!user) return false;
-  if ((user as any).role === 'admin' || (user as any).role === 'superadmin') return true;
+  if ((user as any).role === 'admin') return true;
   return (user as any).employeePermissions?.includes(perm) ?? false;
 };
 
 export const useHasAnyPermission = (): boolean => {
   const { user } = useAuth();
   if (!user) return false;
-  if ((user as any).role === 'admin' || (user as any).role === 'superadmin') return true;
+  if ((user as any).role === 'admin') return true;
   return ((user as any).employeePermissions?.length ?? 0) > 0;
 };

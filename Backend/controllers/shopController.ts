@@ -61,8 +61,8 @@ export const updateShop = async (req: Request, res: Response) => {
     if (!shop) return res.status(404).json({ message: 'Shop not found' });
 
     const user = req.user as any;
-    if (user.role !== 'superadmin' && shop.ownerUserId.toString() !== user._id.toString()) {
-      return res.status(403).json({ message: 'Only the shop owner can update settings' });
+    if (user.role !== 'admin' && shop.ownerUserId.toString() !== user._id.toString()) {
+      return res.status(403).json({ message: 'Only the shop owner or an administrator can update settings' });
     }
 
     const { displayName, settings, logoUrl } = req.body;

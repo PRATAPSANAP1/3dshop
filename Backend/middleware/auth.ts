@@ -51,24 +51,16 @@ export const protect = async (req: Request, res: Response, next: NextFunction): 
 };
 
 export const admin = (req: Request, res: Response, next: NextFunction): void => {
-  if (req.user && ((req.user as any).role === 'admin' || (req.user as any).role === 'superadmin')) {
+  if (req.user && (req.user as any).role === 'admin') {
     next();
   } else {
     res.status(403).json({ message: 'Restricted Access: Administrative privileges required.' });
   }
 };
 
-export const superadmin = (req: Request, res: Response, next: NextFunction): void => {
-  if (req.user && (req.user as any).role === 'superadmin') {
-    next();
-  } else {
-    res.status(403).json({ message: 'Restricted Access: Superadmin privileges required.' });
-  }
-};
 export const staff = (req: Request, res: Response, next: NextFunction): void => {
   if (req.user && (
     (req.user as any).role === 'admin' || 
-    (req.user as any).role === 'superadmin' || 
     (req.user as any).role === 'employee'
   )) {
     next();

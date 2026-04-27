@@ -1,5 +1,5 @@
 import express from 'express';
-import { protect, admin, superadmin } from '../middleware/auth';
+import { protect, admin } from '../middleware/auth';
 import { requireShopAccess } from '../middleware/requireShopAccess';
 import {
   createShop, listShops, getShop, updateShop, deactivateShop,
@@ -16,11 +16,11 @@ router.get('/public', publicListShops);
 router.get('/public/:slug', publicGetShop);
 
 // ── Protected shop CRUD ──
-router.post('/', protect, superadmin, createShop);
-router.get('/', protect, superadmin, listShops);
+router.post('/', protect, admin, createShop);
+router.get('/', protect, admin, listShops);
 router.get('/:shopId', protect, requireShopAccess, getShop);
 router.patch('/:shopId', protect, requireShopAccess, updateShop);
-router.delete('/:shopId', protect, superadmin, deactivateShop);
+router.delete('/:shopId', protect, admin, deactivateShop);
 
 // ── Employee management (admin only) ──
 router.get('/:shopId/employees', protect, admin, requireShopAccess, listEmployees);

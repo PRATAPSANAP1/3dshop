@@ -391,14 +391,14 @@ export const handleReturnOrder = async (req: Request, res: Response) => {
 };
 
 export const getAllOrders = async (req: Request, res: Response) => {
-  const query = (req.user as any).role === 'superadmin' ? {} : { shopId: (req as any).shopId };
+  const query = (req.user as any).role === 'admin' ? { shopId: (req as any).shopId } : { user: (req.user as any)._id };
   const orders = await Order.find(query).populate('user', 'id name email').populate('delivery.assignedTo', 'id name mobile email').sort({ createdAt: -1 });
   res.json(orders);
 };
 
 export const getPaymentStats = async (req: Request, res: Response) => {
   try {
-    const query = (req.user as any).role === 'superadmin' ? {} : { shopId: (req as any).shopId };
+    const query = { shopId: (req as any).shopId };
     const orders = await Order.find(query);
 
     const totalOrders = orders.length;

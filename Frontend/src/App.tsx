@@ -68,7 +68,6 @@ const HelpCenter = lazy(() => import("./pages/HelpCenter"));
 // New multi-tenant pages
 const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
 const Employees = lazy(() => import("./pages/Employees"));
-const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 
 // Godown lazy imports
 const GodownLayout = lazy(() => import("./components/GodownLayout"));
@@ -92,22 +91,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   if (loading && !user) return null;
-  return (user?.role === 'admin' || user?.role === 'superadmin') ? <>{children}</> : <Navigate to="/login" replace />;
+  return user?.role === 'admin' ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 const EmployeeRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   if (loading && !user) return null;
-  return (user?.role === 'employee' || user?.role === 'admin' || user?.role === 'superadmin')
+  return (user?.role === 'employee' || user?.role === 'admin')
     ? <>{children}</>
     : <Navigate to="/login" replace />;
 };
 
-const SuperAdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
-  if (loading && !user) return null;
-  return user?.role === 'superadmin' ? <>{children}</> : <Navigate to="/login" replace />;
-};
 
 // Smart redirect based on role
 const SmartRedirect = () => {
@@ -115,7 +109,6 @@ const SmartRedirect = () => {
   if (loading && !user) return null;
   if (!user) return <Navigate to="/home" replace />;
   switch (user.role) {
-    case 'superadmin': return <Navigate to="/superadmin/dashboard" replace />;
     case 'admin': return <Navigate to="/dashboard" replace />;
     case 'employee': return <Navigate to="/employee-dashboard" replace />;
     default: return <CustomerSearch />;
@@ -159,8 +152,6 @@ const AnimatedRoutes = () => {
             {/* Employee dashboard */}
             <Route path="/employee-dashboard" element={<EmployeeRoute><EmployeeDashboard /></EmployeeRoute>} />
 
-            {/* Superadmin routes */}
-            <Route path="/superadmin/dashboard" element={<SuperAdminRoute><SuperAdminDashboard /></SuperAdminRoute>} />
 
             {/* Godown Routes */}
             <Route path="/godown" element={<AdminRoute><GodownLayout /></AdminRoute>}>

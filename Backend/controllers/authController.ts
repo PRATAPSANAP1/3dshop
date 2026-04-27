@@ -223,7 +223,7 @@ export const blockUser = async (req: Request, res: Response) => {
 
 export const updateUserRole = async (req: Request, res: Response) => {
   const { role } = req.body;
-  if (!['superadmin', 'admin', 'employee', 'shopper'].includes(role)) {
+  if (!['admin', 'employee', 'shopper'].includes(role)) {
     return res.status(400).json({ message: 'Invalid role' });
   }
   try {
