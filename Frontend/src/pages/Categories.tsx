@@ -7,18 +7,12 @@ import { useNavigate } from "react-router-dom";
 
 const CARD_GRADIENTS = [
   "from-violet-500 to-indigo-600",
-  "from-rose-500 to-pink-600",
-  "from-amber-500 to-orange-600",
-  "from-teal-500 to-emerald-600",
   "from-sky-500 to-blue-600",
   "from-fuchsia-500 to-purple-600",
 ];
 
 const CARD_ACCENTS = [
   "bg-violet-400/20",
-  "bg-rose-400/20",
-  "bg-amber-400/20",
-  "bg-teal-400/20",
   "bg-sky-400/20",
   "bg-fuchsia-400/20",
 ];
