@@ -4,7 +4,7 @@ import { Box, Plus, Package, Trash2, X, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/PageTransition";
-import SkeletonCard from "@/components/SkeletonCard";
+
 import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 

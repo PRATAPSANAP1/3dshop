@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import PageTransition from "@/components/PageTransition";
-import SkeletonCard from "@/components/SkeletonCard";
+
 
 const COLORS = [
   "hsl(220, 70%, 50%)",

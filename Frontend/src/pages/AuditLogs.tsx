@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PageTransition from "@/components/PageTransition";
-import SkeletonCard from "@/components/SkeletonCard";
+
 import StatCard from "@/components/StatCard";
 import api from "@/lib/api";
 import { 

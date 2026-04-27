@@ -6,7 +6,7 @@ import {
 } from "recharts";
 import PageTransition from "@/components/PageTransition";
 import StatCard from "@/components/StatCard";
-import SkeletonCard from "@/components/SkeletonCard";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 

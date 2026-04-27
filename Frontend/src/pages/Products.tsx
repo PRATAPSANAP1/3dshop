@@ -5,7 +5,7 @@ import { Plus, Search, Package, AlertTriangle, X, IndianRupee, Layers, Tag, Tren
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/PageTransition";
-import SkeletonCard from "@/components/SkeletonCard";
+
 import QRLabelModal from "@/components/QRLabelModal";
 import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
