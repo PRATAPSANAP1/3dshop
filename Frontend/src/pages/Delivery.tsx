@@ -45,7 +45,7 @@ const Delivery = () => {
   const { socket, onEvent } = useSocket("admin_orders");
 
   const isAdmin = user?.role === "admin";
-  const isStaff = user?.role === "staff";
+  const isStaff = user?.role === "employee";
 
   const fetchOrders = async () => {
     try {
@@ -71,7 +71,7 @@ const Delivery = () => {
   const fetchAdmins = async () => {
     try {
       const { data } = await api.get("/auth/users");
-      setAdmins(data.filter((u: any) => u.role === "admin" || u.role === "staff"));
+      setAdmins(data.filter((u: any) => u.role === "admin" || u.role === "employee"));
     } catch (err) { /* ignore */ }
   };
 

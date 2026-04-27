@@ -64,7 +64,7 @@ const Orders = () => {
   const fetchAdmins = async () => {
     try {
       const { data } = await api.get('/auth/users');
-      setAdmins(data.filter((u: any) => u.role === 'admin' || u.role === 'staff'));
+      setAdmins(data.filter((u: any) => u.role === 'admin' || u.role === 'employee'));
     } catch(err) { /* ignore */ }
   };
 

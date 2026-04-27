@@ -94,7 +94,7 @@ const Users = () => {
 
                 <div className="flex items-center gap-5 mb-6 relative z-10">
                   <div className={`h-16 w-16 rounded-2xl flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 ${
-                    user.isBlocked ? 'bg-rose-100 text-rose-400' : user.role === 'admin' ? 'bg-slate-900 text-amber-400' : user.role === 'staff' ? 'bg-blue-50 text-blue-500' : 'bg-orange-50 text-orange-500'
+                    user.isBlocked ? 'bg-rose-100 text-rose-400' : user.role === 'admin' ? 'bg-slate-900 text-amber-400' : user.role === 'employee' ? 'bg-blue-50 text-blue-500' : 'bg-orange-50 text-orange-500'
                   }`}>
                     <UsersIcon size={28} />
                   </div>
@@ -103,7 +103,7 @@ const Users = () => {
                     <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="outline" className={`px-3 py-0.5 rounded-full border-none font-black uppercase tracking-[0.15em] text-[8px] italic ${
                         user.role === 'admin' ? 'bg-amber-400/20 text-amber-600' :
-                        user.role === 'staff' ? 'bg-blue-100 text-blue-600' :
+                        user.role === 'employee' ? 'bg-blue-100 text-blue-600' :
                         'bg-slate-100 text-slate-500'
                       }`}>
                         {user.role}
@@ -139,9 +139,10 @@ const Users = () => {
                       onChange={e => handleRoleChange(user._id, e.target.value)}
                       className="w-full h-10 pl-3 pr-8 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-700 appearance-none outline-none focus:border-orange-400 transition-colors"
                     >
-                      <option value="customer">Customer</option>
-                      <option value="staff">Staff</option>
+                      <option value="shopper">Shopper</option>
+                      <option value="employee">Employee</option>
                       <option value="admin">Admin</option>
+                      <option value="superadmin">Super Admin</option>
                     </select>
                     <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   </div>
@@ -167,7 +168,7 @@ const Users = () => {
                   <div className={`h-full ${
                     user.isBlocked ? 'bg-rose-400 w-full' :
                     user.role === 'admin' ? 'bg-amber-400 w-full' :
-                    user.role === 'staff' ? 'bg-blue-400 w-3/4' :
+                    user.role === 'employee' ? 'bg-blue-400 w-3/4' :
                     'bg-emerald-400 w-1/4'
                   }`}></div>
                 </div>

@@ -8,7 +8,7 @@ const Index = () => {
 
   useEffect(() => {
     if (loading) return;
-    if (user?.role === "admin" || user?.role === "staff") {
+    if (user?.role === "admin" || user?.role === "employee" || user?.role === "superadmin") {
       navigate("/dashboard", { replace: true });
     } else {
       navigate("/home", { replace: true });

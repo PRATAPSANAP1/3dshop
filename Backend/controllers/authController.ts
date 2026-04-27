@@ -341,7 +341,7 @@ export const googleLogin = async (req: Request, res: Response) => {
         name,
         email,
         password: randomPassword,
-        role: 'customer'
+        role: 'shopper'
       });
     }
 

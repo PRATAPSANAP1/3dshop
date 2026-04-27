@@ -22,7 +22,7 @@ const Login = () => {
   const [isRegister, setIsRegister] = useState(searchParams.get('mode') === 'register');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState<'admin' | 'customer'>('customer');
+  const [role, setRole] = useState<'admin' | 'shopper'>('shopper');
   const [form, setForm] = useState({ name: '', email: '', password: '', shopName: '', mobile: '' });
   const [showForgot, setShowForgot] = useState(false);
   const [forgotStep, setForgotStep] = useState(1); // 1: Email, 2: OTP & New Pass
@@ -76,8 +76,8 @@ const Login = () => {
     try {
       const endpoint = isRegister ? '/auth/register' : '/auth/login';
       const payload = isRegister
-        ? { ...form, role, shopName: "SmartStore" }
-        : { email: form.email, password: form.password, role };
+        ? { ...form, role: role === 'admin' ? 'admin' : 'shopper', shopName: "SmartStore" }
+        : { email: form.email, password: form.password };
 
       const { data } = await api.post(endpoint, payload);
 
@@ -85,10 +85,10 @@ const Login = () => {
       try {
         const meRes = await api.get('/auth/me');
         if (meRes.data) {
-          fullUser = { ...data, ...meRes.data, role: role };
+          fullUser = { ...data, ...meRes.data };
         }
       } catch (err) {
-        fullUser = { ...data, name: form.name || 'User', role: role };
+        fullUser = { ...data, name: form.name || 'User' };
       }
 
       login(fullUser);
@@ -313,14 +313,14 @@ const Login = () => {
                       layout
                       style={{
                         width: "calc(50% - 6px)",
-                        left: role === 'customer' ? '6px' : 'calc(50%)',
+                        left: role === 'shopper' ? '6px' : 'calc(50%)',
                       }}
                       transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     />
                     <button
                       type="button"
-                      onClick={() => setRole('customer')}
-                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-colors duration-300 font-bold text-sm relative z-10 ${role === 'customer' ? 'text-primary' : 'text-slate-400 hover:text-slate-600'
+                      onClick={() => setRole('shopper')}
+                      className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-colors duration-300 font-bold text-sm relative z-10 ${role === 'shopper' ? 'text-primary' : 'text-slate-400 hover:text-slate-600'
                         }`}
                     >
                       <UserIcon size={16} /> SHOPPER
