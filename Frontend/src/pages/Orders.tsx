@@ -186,6 +186,18 @@ const Orders = () => {
     }
   };
 
+  const handleDeleteOrder = async (id: string) => {
+    if (!window.confirm("Permanently remove this cancelled order from your history?")) return;
+    try {
+      await api.delete(`/orders/${id}`);
+      setOrders(prev => prev.filter(o => o._id !== id));
+      setSelectedOrder(null);
+      toast({ title: "Order Removed", description: "The order history has been cleaned." });
+    } catch (err) {
+      toast({ variant: "destructive", title: "Error", description: "Failed to remove order." });
+    }
+  };
+
   const downloadInvoice = (order: any) => {
     const printWindow = window.open('', '_blank', 'width=800,height=900');
     if (!printWindow) return;
@@ -400,6 +412,18 @@ const Orders = () => {
                              <RotateCcw size={14} /> CANCEL
                            </button>
                          )}
+                        {order.orderStatus === 'Cancelled' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteOrder(order._id);
+                            }}
+                            className="h-9 px-3 rounded-xl bg-slate-900 text-white hover:bg-rose-600 transition-all flex items-center justify-center text-[8px] font-black uppercase tracking-widest gap-2"
+                            title="Remove History"
+                          >
+                            <Trash2 size={14} /> REMOVE
+                          </button>
+                        )}
                         <button className="h-9 w-9 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center">
                           <Eye size={16} />
                         </button>
@@ -573,6 +597,14 @@ const Orders = () => {
                             className="w-full h-14 mt-4 rounded-2xl bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white font-black uppercase tracking-widest text-[10px] transition-all"
                           >
                             CANCEL THIS ORDER
+                          </Button>
+                        )}
+                        {selectedOrder.orderStatus === 'Cancelled' && (
+                          <Button 
+                            onClick={() => handleDeleteOrder(selectedOrder._id)}
+                            className="w-full h-14 mt-4 rounded-2xl bg-slate-900 text-white hover:bg-rose-600 font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-3"
+                          >
+                            <Trash2 size={18} /> REMOVE FROM HISTORY
                           </Button>
                         )}
                         <Button 

@@ -235,7 +235,7 @@ const Profile = () => {
                   <label className="flex items-center gap-2 text-sm font-bold text-slate-700 ml-1">
                     <Lock className="h-4 w-4 text-violet" /> Update Password
                   </label>
-                  <Input name="password" type="password" value={formData.password} onChange={handleInputChange} placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢ (leave blank to keep current)" className="h-12 rounded-xl border-slate-200" />
+                  <Input name="password" type="password" value={formData.password} onChange={handleInputChange} placeholder="•••••••• (leave blank to keep current)" className="h-12 rounded-xl border-slate-200" />
                 </div>
               </div>
 
@@ -359,7 +359,7 @@ const Profile = () => {
                             </p>
                           </div>
                           <div className="text-right shrink-0">
-                            <p className="text-sm font-black text-slate-900">â‚¹{order.totalPrice?.toLocaleString('en-IN')}</p>
+                            <p className="text-sm font-black text-slate-900">{order.totalPrice?.toLocaleString('en-IN')}</p>
                             {order.isPaid && <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Paid</p>}
                           </div>
                         </div>
@@ -370,7 +370,7 @@ const Profile = () => {
                         onClick={() => navigate('/orders')}
                         className="w-full py-3 text-[10px] font-black uppercase tracking-widest text-orange-500 hover:text-orange-600 transition-colors text-center"
                       >
-                        +{orders.length - 5} more orders â†’
+                        +{orders.length - 5} more orders →
                       </button>
                     )}
                   </div>
