@@ -11,6 +11,13 @@ import { useAuth } from "@/context/AuthContext";
 
 const PALETTES = [
   { grad: "from-orange-500 to-amber-500", soft: "bg-orange-50/50", txt: "text-orange-600", border: "border-orange-100", dot: "#f97316", btn: "bg-orange-50 text-orange-500 hover:bg-orange-500 hover:text-white" },
+  { grad: "from-violet-500 to-purple-500", soft: "bg-violet-50/50", txt: "text-violet-600", border: "border-violet-100", dot: "#8b5cf6", btn: "bg-violet-50 text-violet-500 hover:bg-violet-500 hover:text-white" },
+  { grad: "from-cyan-500 to-blue-500", soft: "bg-cyan-50/50", txt: "text-cyan-600", border: "border-cyan-100", dot: "#06b6d4", btn: "bg-cyan-50 text-cyan-500 hover:bg-cyan-500 hover:text-white" },
+  { grad: "from-emerald-500 to-green-500", soft: "bg-emerald-50/50", txt: "text-emerald-600", border: "border-emerald-100", dot: "#10b981", btn: "bg-emerald-50 text-emerald-500 hover:bg-emerald-500 hover:text-white" },
+  { grad: "from-rose-500 to-pink-500", soft: "bg-rose-50/50", txt: "text-rose-600", border: "border-rose-100", dot: "#f43f5e", btn: "bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white" },
+  { grad: "from-sky-500 to-indigo-500", soft: "bg-sky-50/50", txt: "text-sky-600", border: "border-sky-100", dot: "#0ea5e9", btn: "bg-sky-50 text-sky-500 hover:bg-sky-500 hover:text-white" },
+  { grad: "from-teal-500 to-emerald-500", soft: "bg-teal-50/50", txt: "text-teal-600", border: "border-teal-100", dot: "#14b8a6", btn: "bg-teal-50 text-teal-500 hover:bg-teal-500 hover:text-white" },
+  { grad: "from-fuchsia-500 to-purple-500", soft: "bg-fuchsia-50/50", txt: "text-fuchsia-600", border: "border-fuchsia-100", dot: "#d946ef", btn: "bg-fuchsia-50 text-fuchsia-500 hover:bg-fuchsia-500 hover:text-white" },
 ];
 
 const getColorIndex = (str: string) => {
