@@ -306,6 +306,33 @@ export const cancelOrder = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteOrder = async (req: Request, res: Response) => {
+  const order = await Order.findById(req.params.id);
+
+  if (order) {
+    // Permission check: only owner can delete
+    if (order.user.toString() !== (req.user as any)._id.toString()) {
+      return res.status(403).json({ message: 'Not authorized to delete this order' });
+    }
+
+    // Constraint check: only cancelled orders can be deleted
+    if (order.orderStatus !== 'Cancelled') {
+      return res.status(400).json({ message: 'Only cancelled orders can be removed from history' });
+    }
+
+    await Order.findByIdAndDelete(req.params.id);
+
+    await createAuditLog(req.user, 'ORDER_DELETE', 'Order', 'Order removed from history by user', {
+      entityId: order._id.toString(),
+      entityName: 'Order ' + order._id
+    });
+
+    res.json({ message: 'Order removed successfully' });
+  } else {
+    res.status(404).json({ message: 'Order not found' });
+  }
+};
+
 export const requestReturnOrder = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { reason } = req.body;

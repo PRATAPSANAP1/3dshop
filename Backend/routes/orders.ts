@@ -14,7 +14,8 @@ import {
   updateDeliveryStatus,
   getPaymentStats,
   fetchPaymentDetails,
-  cancelOrder
+  cancelOrder,
+  deleteOrder
 } from '../controllers/orderController';
 import { protect, admin, staff } from '../middleware/auth';
 import { paymentLimiter } from '../middleware/security';
@@ -33,7 +34,10 @@ router.route('/verify').post(protect, paymentLimiter, verifyPayment);
 router.route('/payments/stats').get(protect, admin, getPaymentStats);
 router.route('/payments/:paymentId').get(protect, admin, fetchPaymentDetails);
 
-router.route('/:id').get(protect, getOrderById);
+router.route('/:id')
+  .get(protect, getOrderById)
+  .delete(protect, deleteOrder);
+
 router.put('/:id/status', protect, admin, updateOrderStatus);
 router.put('/:id/cancel', protect, cancelOrder);
 router.put('/:id/delivery', protect, admin, updateDeliveryDetails);
