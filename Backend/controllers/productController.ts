@@ -6,7 +6,7 @@ import { createAuditLog } from '../middleware/audit';
 
 export const getProductsByRack = async (req: Request, res: Response) => {
   try {
-    const products = await Product.find({ rackId: req.params.rackId, shopId: req.user._id });
+    const products = await Product.find({ rackId: req.params.rackId, shopId: (req as any).shopId });
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -15,7 +15,7 @@ export const getProductsByRack = async (req: Request, res: Response) => {
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const products = await Product.find({ shopId: req.user._id }).populate('rackId');
+    const products = await Product.find({ shopId: (req as any).shopId }).populate('rackId');
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -31,7 +31,7 @@ export const createProduct = async (req: Request, res: Response) => {
     const qrCode = crypto.randomBytes(16).toString('hex');
     const product = new Product({
       productName, category, price, quantity, minStockLevel, expiryDate, rackId, shelfNumber, columnNumber, brand, size, qrCode,
-      shopId: req.user._id
+      shopId: (req as any).shopId
     });
 
     await product.save();
@@ -41,7 +41,7 @@ export const createProduct = async (req: Request, res: Response) => {
         type: 'lowStock',
         message: `${productName} is low on stock (${quantity} left)`,
         productId: product._id,
-        shopId: (req as any).user._id
+        shopId: (req as any).shopId
       });
     }
 
@@ -60,7 +60,7 @@ export const createProduct = async (req: Request, res: Response) => {
 export const updateProduct = async (req: Request, res: Response) => {
   try {
     const product = await Product.findOneAndUpdate(
-      { _id: req.params.id, shopId: req.user._id },
+      { _id: req.params.id, shopId: (req as any).shopId },
       req.body,
       { new: true }
     );
@@ -89,7 +89,7 @@ export const updateProduct = async (req: Request, res: Response) => {
 
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
-    const product = await Product.findOneAndDelete({ _id: req.params.id, shopId: (req as any).user._id });
+    const product = await Product.findOneAndDelete({ _id: req.params.id, shopId: (req as any).shopId });
     if(product) {
        await createAuditLog((req as any).user, 'PRODUCT_DELETE', 'Product', `Deleted product ${product.productName}`, {
          entityId: product._id.toString(),

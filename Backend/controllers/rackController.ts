@@ -4,10 +4,10 @@ import Product from '../models/Product';
 
 export const getRacks = async (req: Request, res: Response) => {
   try {
-    const racks = await Rack.find({ shopId: req.user._id }).lean();
+    const racks = await Rack.find({ shopId: (req as any).shopId }).lean();
     
     const racksWithStatus = await Promise.all(racks.map(async (rack) => {
-      const products = await Product.find({ rackId: rack._id, shopId: req.user._id });
+      const products = await Product.find({ rackId: rack._id, shopId: (req as any).shopId });
       
       let status = 'normal';
       const now = new Date();
@@ -30,7 +30,7 @@ export const getRacks = async (req: Request, res: Response) => {
 
 export const createRack = async (req: Request, res: Response) => {
   try {
-    const rack = new Rack({ ...req.body, shopId: req.user._id });
+    const rack = new Rack({ ...req.body, shopId: (req as any).shopId });
     await rack.save();
     res.status(201).json(rack);
   } catch (error) {
@@ -41,7 +41,7 @@ export const createRack = async (req: Request, res: Response) => {
 export const updateRack = async (req: Request, res: Response) => {
   try {
     const rack = await Rack.findOneAndUpdate(
-      { _id: req.params.id, shopId: req.user._id },
+      { _id: req.params.id, shopId: (req as any).shopId },
       req.body,
       { new: true }
     );
@@ -53,7 +53,7 @@ export const updateRack = async (req: Request, res: Response) => {
 
 export const deleteRack = async (req: Request, res: Response) => {
   try {
-    await Rack.findOneAndDelete({ _id: req.params.id, shopId: req.user._id });
+    await Rack.findOneAndDelete({ _id: req.params.id, shopId: (req as any).shopId });
     res.json({ message: 'Rack deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

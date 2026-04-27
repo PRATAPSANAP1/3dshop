@@ -94,7 +94,7 @@ const Users = () => {
 
                 <div className="flex items-center gap-5 mb-6 relative z-10">
                   <div className={`h-16 w-16 rounded-2xl flex items-center justify-center shadow-sm transition-transform group-hover:scale-110 ${
-                    user.isBlocked ? 'bg-rose-100 text-rose-400' : user.role === 'admin' ? 'bg-slate-900 text-amber-400' : user.role === 'employee' ? 'bg-blue-50 text-blue-500' : 'bg-orange-50 text-orange-500'
+                    user.isBlocked ? 'bg-rose-100 text-rose-400' : (user.role === 'admin' || user.role === 'superadmin') ? 'bg-slate-900 text-amber-400' : user.role === 'employee' ? 'bg-blue-50 text-blue-500' : 'bg-orange-50 text-orange-500'
                   }`}>
                     <UsersIcon size={28} />
                   </div>
@@ -102,7 +102,7 @@ const Users = () => {
                     <h3 className="text-xl font-black italic text-slate-900 leading-tight mb-1 truncate">{user.name}</h3>
                     <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="outline" className={`px-3 py-0.5 rounded-full border-none font-black uppercase tracking-[0.15em] text-[8px] italic ${
-                        user.role === 'admin' ? 'bg-amber-400/20 text-amber-600' :
+                        (user.role === 'admin' || user.role === 'superadmin') ? 'bg-amber-400/20 text-amber-600' :
                         user.role === 'employee' ? 'bg-blue-100 text-blue-600' :
                         'bg-slate-100 text-slate-500'
                       }`}>
@@ -128,6 +128,12 @@ const Users = () => {
                     <Calendar size={16} className="text-slate-300 shrink-0" />
                     <span className="text-sm font-bold">Joined {new Date(user.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}</span>
                   </div>
+                  {user.shopName && (
+                    <div className="flex items-center gap-3 text-slate-500">
+                      <Shield size={16} className="text-slate-300 shrink-0" />
+                      <span className="text-sm font-bold truncate">Shop: {user.shopName}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Role Selector */}
@@ -167,7 +173,7 @@ const Users = () => {
                 <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-100">
                   <div className={`h-full ${
                     user.isBlocked ? 'bg-rose-400 w-full' :
-                    user.role === 'admin' ? 'bg-amber-400 w-full' :
+                    (user.role === 'admin' || user.role === 'superadmin') ? 'bg-amber-400 w-full' :
                     user.role === 'employee' ? 'bg-blue-400 w-3/4' :
                     'bg-emerald-400 w-1/4'
                   }`}></div>

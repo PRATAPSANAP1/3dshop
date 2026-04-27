@@ -4,7 +4,7 @@ import User from '../models/User';
 
 export const getDoors = async (req: Request, res: Response) => {
   try {
-    const doors = await Door.find({ shopId: req.user._id });
+    const doors = await Door.find({ shopId: (req as any).shopId });
     res.json(doors);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -13,7 +13,7 @@ export const getDoors = async (req: Request, res: Response) => {
 
 export const createDoor = async (req: Request, res: Response) => {
   try {
-    const door = new Door({ ...req.body, shopId: req.user._id });
+    const door = new Door({ ...req.body, shopId: (req as any).shopId });
     await door.save();
     res.status(201).json(door);
   } catch (error) {
@@ -23,7 +23,7 @@ export const createDoor = async (req: Request, res: Response) => {
 
 export const deleteDoor = async (req: Request, res: Response) => {
   try {
-    await Door.findOneAndDelete({ _id: req.params.id, shopId: req.user._id });
+    await Door.findOneAndDelete({ _id: req.params.id, shopId: (req as any).shopId });
     res.json({ message: 'Door deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

@@ -4,8 +4,9 @@ import Order from '../models/Order';
 
 export const getStats = async (req: Request, res: Response) => {
   try {
-    const products = await Product.find({});
-    const orders = await Order.find({}).sort({ createdAt: -1 });
+    const query = (req.user as any).role === 'superadmin' ? {} : { shopId: (req as any).shopId };
+    const products = await Product.find(query);
+    const orders = await Order.find(query).sort({ createdAt: -1 });
 
     let lowStockCount = 0;
     let expiringSoonCount = 0;

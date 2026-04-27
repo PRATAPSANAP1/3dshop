@@ -331,13 +331,15 @@ export const handleReturnOrder = async (req: Request, res: Response) => {
 };
 
 export const getAllOrders = async (req: Request, res: Response) => {
-  const orders = await Order.find({}).populate('user', 'id name email').populate('delivery.assignedTo', 'id name mobile email').sort({ createdAt: -1 });
+  const query = (req.user as any).role === 'superadmin' ? {} : { shopId: (req as any).shopId };
+  const orders = await Order.find(query).populate('user', 'id name email').populate('delivery.assignedTo', 'id name mobile email').sort({ createdAt: -1 });
   res.json(orders);
 };
 
 export const getPaymentStats = async (req: Request, res: Response) => {
   try {
-    const orders = await Order.find({});
+    const query = (req.user as any).role === 'superadmin' ? {} : { shopId: (req as any).shopId };
+    const orders = await Order.find(query);
 
     const totalOrders = orders.length;
     const paidOnline = orders.filter(o => o.isPaid && o.paymentMethod !== 'COD');

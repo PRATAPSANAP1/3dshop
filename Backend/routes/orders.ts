@@ -16,7 +16,7 @@ import {
   fetchPaymentDetails,
   cancelOrder
 } from '../controllers/orderController';
-import { protect, admin } from '../middleware/auth';
+import { protect, admin, staff } from '../middleware/auth';
 import { paymentLimiter } from '../middleware/security';
 
 const router = express.Router();
@@ -37,8 +37,8 @@ router.route('/:id').get(protect, getOrderById);
 router.put('/:id/status', protect, admin, updateOrderStatus);
 router.put('/:id/cancel', protect, cancelOrder);
 router.put('/:id/delivery', protect, admin, updateDeliveryDetails);
-router.route('/:id/delivery/verify-otp').post(protect, admin, verifyDeliveryOtp);
-router.route('/:id/delivery/status').put(protect, admin, updateDeliveryStatus);
+router.route('/:id/delivery/verify-otp').post(protect, staff, verifyDeliveryOtp);
+router.route('/:id/delivery/status').put(protect, staff, updateDeliveryStatus);
 router.route('/:id/return').post(protect, requestReturnOrder);
 router.route('/:id/return-handle').put(protect, admin, handleReturnOrder);
 

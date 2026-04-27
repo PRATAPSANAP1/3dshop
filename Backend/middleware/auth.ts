@@ -65,4 +65,15 @@ export const superadmin = (req: Request, res: Response, next: NextFunction): voi
     res.status(403).json({ message: 'Restricted Access: Superadmin privileges required.' });
   }
 };
+export const staff = (req: Request, res: Response, next: NextFunction): void => {
+  if (req.user && (
+    (req.user as any).role === 'admin' || 
+    (req.user as any).role === 'superadmin' || 
+    (req.user as any).role === 'employee'
+  )) {
+    next();
+  } else {
+    res.status(403).json({ message: 'Restricted Access: Staff privileges required.' });
+  }
+};
 
