@@ -169,7 +169,7 @@ export const getMe = async (req: Request, res: Response) => {
 };
 
 export const updateProfile = async (req: Request, res: Response) => {
-  const { name, email, mobile, shopName, password } = req.body;
+  const { name, email, mobile, shopName, password, addresses } = req.body;
   const user = await User.findById((req.user as any)._id);
 
   if (user) {
@@ -177,10 +177,19 @@ export const updateProfile = async (req: Request, res: Response) => {
     user.email = email || user.email;
     user.mobile = mobile || user.mobile;
     user.shopName = shopName || user.shopName;
+    if (addresses) user.addresses = addresses;
     if (password) user.password = password;
 
     const updatedUser = await user.save();
-    res.json({ _id: updatedUser._id, name: updatedUser.name, email: updatedUser.email, shopName: updatedUser.shopName, role: updatedUser.role });
+    res.json({ 
+      _id: updatedUser._id, 
+      name: updatedUser.name, 
+      email: updatedUser.email, 
+      shopName: updatedUser.shopName, 
+      role: updatedUser.role,
+      mobile: updatedUser.mobile,
+      addresses: updatedUser.addresses
+    });
   } else {
     res.status(404).json({ message: 'User not found' });
   }

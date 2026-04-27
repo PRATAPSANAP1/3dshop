@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Store, Mail, Phone, Lock, ShoppingBag, Plus, MapPin, X, Home, Briefcase, Check, Package, ChevronRight, Clock } from "lucide-react";
+import { User, Store, Mail, Phone, Lock, ShoppingBag, Plus, MapPin, X, Home, Briefcase, Check, Package, ChevronRight, Clock, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/PageTransition";
@@ -37,6 +37,7 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [savingAddress, setSavingAddress] = useState(false);
+  const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [addressForm, setAddressForm] = useState({
     label: 'Home',
     fullName: '',
@@ -80,18 +81,43 @@ const Profile = () => {
     }
     setSavingAddress(true);
     try {
-      const currentAddresses = user?.addresses || [];
-      const updatedAddresses = [...currentAddresses, addressForm];
-      const { data } = await api.put('/auth/profile', { addresses: updatedAddresses });
-      login({ ...user, addresses: updatedAddresses, ...data });
-      toast({ title: "Address Added", description: "New address saved to your profile." });
+      const currentAddresses = [...(user?.addresses || [])];
+      if (editingIdx !== null) {
+        currentAddresses[editingIdx] = addressForm;
+      } else {
+        currentAddresses.push(addressForm);
+      }
+      
+      const { data } = await api.put('/auth/profile', { addresses: currentAddresses });
+      login({ ...user, ...data });
+      toast({ title: editingIdx !== null ? "Address Updated" : "Address Added", description: "Your changes have been saved." });
       setShowAddressModal(false);
+      setEditingIdx(null);
       setAddressForm({ label: 'Home', fullName: '', phone: '', street: '', landmark: '', city: '', state: '', postalCode: '', isDefault: false });
     } catch {
       toast({ variant: "destructive", title: "Error", description: "Failed to save address." });
     } finally {
       setSavingAddress(false);
     }
+  };
+
+  const handleRemoveAddress = async (idx: number) => {
+    if (!confirm("Are you sure you want to remove this address?")) return;
+    try {
+      const currentAddresses = [...(user?.addresses || [])];
+      currentAddresses.splice(idx, 1);
+      const { data } = await api.put('/auth/profile', { addresses: currentAddresses });
+      login({ ...user, ...data });
+      toast({ title: "Address Removed" });
+    } catch {
+      toast({ variant: "destructive", title: "Error", description: "Failed to remove address." });
+    }
+  };
+
+  const startEditAddress = (addr: any, idx: number) => {
+    setAddressForm(addr);
+    setEditingIdx(idx);
+    setShowAddressModal(true);
   };
 
   const handleSave = async () => {
@@ -132,8 +158,8 @@ const Profile = () => {
                 className="bg-white rounded-3xl p-8 w-full max-w-md shadow-xl"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-black italic text-slate-900 uppercase">Add <span className="text-primary not-italic">Address</span></h3>
-                  <button onClick={() => setShowAddressModal(false)} className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-rose-500">
+                  <h3 className="text-xl font-black italic text-slate-900 uppercase">{editingIdx !== null ? 'Edit' : 'Add'} <span className="text-primary not-italic">Address</span></h3>
+                  <button onClick={() => { setShowAddressModal(false); setEditingIdx(null); }} className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-rose-500">
                     <X size={18} />
                   </button>
                 </div>
@@ -270,7 +296,7 @@ const Profile = () => {
                 {user?.addresses && user.addresses.length > 0 ? (
                   <div className="space-y-3">
                     {user.addresses.map((addr: any, idx: number) => (
-                      <div key={idx} className={`p-4 rounded-2xl border-2 flex items-start gap-3 ${
+                      <div key={idx} className={`p-4 rounded-2xl border-2 flex items-start gap-3 group transition-all ${
                         addr.isDefault ? 'border-primary/30 bg-primary/5' : 'border-slate-100 bg-slate-50'
                       }`}>
                         <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${
@@ -284,7 +310,14 @@ const Profile = () => {
                             {addr.isDefault && <span className="text-[9px] font-black uppercase tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded-full">Default</span>}
                           </div>
                           <p className="text-xs text-slate-500 font-medium mt-0.5 truncate">{addr.street}, {addr.city} {addr.postalCode}</p>
-                          {addr.phone && <p className="text-xs text-slate-400 font-medium mt-0.5">{addr.phone}</p>}
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => startEditAddress(addr, idx)} className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-primary hover:border-primary transition-all">
+                            <Edit size={14} />
+                          </button>
+                          <button onClick={() => handleRemoveAddress(idx)} className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-200 transition-all">
+                            <Trash2 size={14} />
+                          </button>
                         </div>
                       </div>
                     ))}
