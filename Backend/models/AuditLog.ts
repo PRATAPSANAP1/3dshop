@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const auditLogSchema = new mongoose.Schema({
-  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true },
+  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', default: null },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   userName: { type: String, required: true },
   userRole: { type: String, enum: ['superadmin', 'admin', 'employee', 'shopper'], required: true },
@@ -14,7 +14,7 @@ const auditLogSchema = new mongoose.Schema({
       'ORDER_CREATE', 'ORDER_STATUS_UPDATE', 'ORDER_DELIVER', 'ORDER_CANCEL',
       'RETURN_REQUEST', 'RETURN_HANDLE',
       'USER_CREATE', 'USER_UPDATE', 'USER_DELETE',
-      'AUTH_LOGIN', 'AUTH_LOGOUT', 'AUTH_REGISTER',
+      'AUTH_LOGIN', 'AUTH_LOGOUT', 'AUTH_REGISTER', 'GOOGLE_AUTH_LOGIN',
       'SHOP_CONFIG_UPDATE', 'RACK_CREATE', 'RACK_UPDATE', 'RACK_DELETE',
       'DOOR_CREATE', 'DOOR_UPDATE', 'DOOR_DELETE',
       'INVOICE_CREATE',
