@@ -51,6 +51,7 @@ const Wishlist = () => {
   };
 
 
+  if (loading) return null;
 
   return (
     <PageTransition>
