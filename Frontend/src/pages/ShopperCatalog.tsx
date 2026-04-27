@@ -70,9 +70,12 @@ const ShopperCatalog = () => {
     'from-cyan-500 to-blue-500',
     'from-emerald-500 to-green-500',
     'from-rose-500 to-pink-500',
+    'from-sky-500 to-indigo-500',
+    'from-teal-500 to-emerald-500',
+    'from-fuchsia-500 to-purple-500',
+    'from-amber-500 to-orange-500',
+    'from-indigo-500 to-blue-500',
   ];
-
-
 
   const SOFT_COLORS = [
     'bg-orange-50/50',
@@ -80,6 +83,11 @@ const ShopperCatalog = () => {
     'bg-cyan-50/50',
     'bg-emerald-50/50',
     'bg-rose-50/50',
+    'bg-sky-50/50',
+    'bg-teal-50/50',
+    'bg-fuchsia-50/50',
+    'bg-amber-50/50',
+    'bg-indigo-50/50',
   ];
 
   return (
