@@ -1,9 +1,27 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Tag, ArrowRight } from "lucide-react";
+import { Layers, ArrowUpRight } from "lucide-react";
 import PageTransition from "@/components/PageTransition";
 import api from "@/lib/api";
 import { useNavigate } from "react-router-dom";
+
+const CARD_GRADIENTS = [
+  "from-violet-500 to-indigo-600",
+  "from-rose-500 to-pink-600",
+  "from-amber-500 to-orange-600",
+  "from-teal-500 to-emerald-600",
+  "from-sky-500 to-blue-600",
+  "from-fuchsia-500 to-purple-600",
+];
+
+const CARD_ACCENTS = [
+  "bg-violet-400/20",
+  "bg-rose-400/20",
+  "bg-amber-400/20",
+  "bg-teal-400/20",
+  "bg-sky-400/20",
+  "bg-fuchsia-400/20",
+];
 
 const Categories = () => {
   const [loading, setLoading] = useState(true);
@@ -33,66 +51,80 @@ const Categories = () => {
     return Object.entries(catsMap).map(([name, count]) => ({ name, count }));
   }, [products]);
 
-  if (loading) {
-    return (
-      <PageTransition>
-        <div className="pb-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="h-72 rounded-[2.5rem] bg-slate-50 border border-slate-100 p-8 flex flex-col justify-between overflow-hidden animate-pulse">
-                <div className="absolute top-8 right-8 h-12 w-12 rounded-2xl bg-slate-200" />
-                <div className="h-8 bg-slate-200 rounded-full w-1/2 mt-auto mb-6" />
-                <div className="flex items-center justify-between border-t border-slate-200 pt-6">
-                  <div className="h-10 bg-slate-200 rounded-full w-24" />
-                  <div className="h-12 w-12 rounded-full bg-slate-200" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </PageTransition>
-    );
-  }
+  if (loading) return null;
 
   return (
     <PageTransition>
       <div className="pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence mode="popLayout">
-            {categories.map((cat, i) => (
-              <motion.div
-                key={cat.name}
-                initial={{ opacity: 0, scale: 0.95, y: 30 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ delay: i * 0.1, type: 'spring', damping: 20 }}
-                className="group relative h-72 rounded-[2.5rem] bg-white border border-slate-100  p-8 flex flex-col justify-between overflow-hidden cursor-pointer hover:-translate-y-3 transition-all duration-500"
-                onClick={() => navigate(`/catalog?category=${cat.name}`)}
-              >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-[4rem] group-hover:scale-150 transition-transform duration-700" />
-                <div className="absolute top-8 right-8 h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-orange-500 group-hover:rotate-12 transition-all">
-                  <Tag size={24} />
-                </div>
+            {categories.map((cat, i) => {
+              const gradient = CARD_GRADIENTS[i % CARD_GRADIENTS.length];
+              const accent = CARD_ACCENTS[i % CARD_ACCENTS.length];
 
-                <div className="relative z-10 mt-auto">
-                  <h3 className="text-3xl font-black italic text-slate-900 leading-none uppercase">{cat.name}</h3>
-                </div>
+              return (
+                <motion.div
+                  key={cat.name}
+                  initial={{ opacity: 0, y: 40, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{
+                    delay: i * 0.07,
+                    type: "spring",
+                    stiffness: 260,
+                    damping: 22,
+                  }}
+                  whileHover={{ y: -6, scale: 1.02 }}
+                  className={`group relative h-64 rounded-3xl bg-gradient-to-br ${gradient} p-7 flex flex-col justify-between overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-300`}
+                  onClick={() => navigate(`/catalog?category=${cat.name}`)}
+                >
+                  {/* Background blob */}
+                  <div
+                    className={`absolute -top-8 -right-8 w-40 h-40 rounded-full ${accent} blur-2xl group-hover:scale-125 transition-transform duration-700`}
+                  />
+                  <div
+                    className={`absolute -bottom-10 -left-6 w-32 h-32 rounded-full ${accent} blur-2xl opacity-60 group-hover:scale-110 transition-transform duration-700`}
+                  />
 
-                <div className="relative z-10 flex items-center justify-between border-t border-slate-50 pt-6 mt-6">
-                  <div className="flex gap-4">
-                    <div className="flex flex-col">
-                      <span className="text-xl font-black text-slate-900 italic leading-none">{cat.count}</span>
-                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">Products</span>
+                  {/* Top row */}
+                  <div className="relative z-10 flex items-start justify-between">
+                    <div className="h-11 w-11 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
+                      <Layers size={20} strokeWidth={1.8} />
+                    </div>
+
+                    <motion.div
+                      className="h-10 w-10 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center text-white border border-white/20"
+                      whileHover={{ rotate: 45 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    >
+                      <ArrowUpRight size={18} />
+                    </motion.div>
+                  </div>
+
+                  {/* Bottom content */}
+                  <div className="relative z-10 space-y-3">
+                    <h3 className="text-2xl font-extrabold text-white leading-tight tracking-tight uppercase drop-shadow-sm">
+                      {cat.name}
+                    </h3>
+
+                    <div className="flex items-center gap-2">
+                      <div className="h-px flex-1 bg-white/20" />
+                      <span className="text-xs font-bold uppercase tracking-widest text-white/70">
+                        {cat.count} {cat.count === 1 ? "product" : "products"}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="h-12 w-12 rounded-full border border-slate-100 flex items-center justify-center text-slate-300 group-hover:border-orange-500 group-hover:text-orange-500 group-hover:bg-orange-50 transition-all">
-                    <ArrowRight size={20} />
-                  </div>
-                </div>
-
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              </motion.div>
-            ))}
+                  {/* Shimmer on hover */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                    initial={{ x: "-100%" }}
+                    whileHover={{ x: "100%" }}
+                    transition={{ duration: 0.6, ease: "easeInOut" }}
+                  />
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </div>
       </div>
