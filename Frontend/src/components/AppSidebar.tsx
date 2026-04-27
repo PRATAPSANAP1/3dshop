@@ -22,11 +22,12 @@ import {
   Warehouse,
   Ticket,
   UserPlus,
+  Building2,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 const navItems = [
-  { to: "/",            icon: Sparkles,       label: "Shop Vision",  desc: "Interactive 3D Map",   color: "text-amber-600",  bg: "bg-amber-500/10" },
+  { to: "/shop-experience", icon: Sparkles,       label: "Shop Vision",  desc: "Interactive 3D Map",   color: "text-amber-600",  bg: "bg-amber-500/10" },
   { to: "/dashboard",   icon: LayoutDashboard,label: "Analytics",    desc: "Performance metrics",  color: "text-orange-500", bg: "bg-orange-500/10" },
   { to: "/products",    icon: Package,        label: "Products",     desc: "Manage SKUs",          color: "text-orange-500", bg: "bg-orange-500/10" },
   { to: "/racks",       icon: Box,            label: "Racks",        desc: "Spatial mapping",      color: "text-amber-600",  bg: "bg-amber-500/10" },
@@ -42,6 +43,7 @@ const navItems = [
   { to: "/audit-logs",  icon: ScrollText,     label: "Audit Logs",   desc: "System activity",      color: "text-slate-600",  bg: "bg-slate-500/10" },
   { to: "/coupons",     icon: Ticket,         label: "Coupons",      desc: "Marketing engine",     color: "text-rose-500",   bg: "bg-rose-500/10" },
   { to: "/employees",   icon: UserPlus,       label: "Employees",    desc: "Team management",      color: "text-violet-500", bg: "bg-violet-500/10" },
+  { to: "/shops",       icon: Building2,      label: "Shops",        desc: "Manage instances",     color: "text-emerald-600",bg: "bg-emerald-500/10" },
 ];
 export const AppSidebarContent = () => {
   const location = useLocation();
