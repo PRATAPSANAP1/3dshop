@@ -71,7 +71,7 @@ const Wishlist = () => {
           </div>
         </div>
 
-        {wishlist?.products?.length === 0 ? (
+        {!wishlist || wishlist.products.length === 0 ? (
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -98,7 +98,7 @@ const Wishlist = () => {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-10">
             <AnimatePresence mode="popLayout">
-              {wishlist.products.map((p: any) => (
+              {wishlist?.products?.map((p: any) => (
                 <motion.div
                   key={p._id}
                   layout
