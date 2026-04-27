@@ -24,8 +24,13 @@ export const addOrderItems = async (req: Request, res: Response) => {
   try {
     const { orderItems, shippingAddress, paymentMethod, itemsPrice, taxPrice, shippingPrice, totalPrice, shopId } = req.body;
 
-    if (orderItems && orderItems.length === 0) {
+    if (!orderItems || !Array.isArray(orderItems) || orderItems.length === 0) {
       res.status(400).json({ message: 'No order items' });
+      return;
+    }
+
+    if (!shippingAddress) {
+      res.status(400).json({ message: 'Shipping address is required' });
       return;
     }
 
@@ -38,6 +43,11 @@ export const addOrderItems = async (req: Request, res: Response) => {
 
     if (existingOrder) {
       res.status(200).json(existingOrder);
+      return;
+    }
+
+    if (totalPrice === undefined || totalPrice === null || isNaN(totalPrice)) {
+      res.status(400).json({ message: 'Total price is invalid or missing' });
       return;
     }
 
@@ -56,6 +66,11 @@ export const addOrderItems = async (req: Request, res: Response) => {
 
     if (!normalizedAddress.postalCode) {
       res.status(400).json({ message: 'Postal code is required in shipping address' });
+      return;
+    }
+
+    if (!normalizedAddress.street || !normalizedAddress.city) {
+      res.status(400).json({ message: 'Street and City are required in shipping address' });
       return;
     }
 
