@@ -74,6 +74,14 @@ const ShopperCatalog = () => {
 
 
 
+  const SOFT_COLORS = [
+    'bg-orange-50/50',
+    'bg-violet-50/50',
+    'bg-cyan-50/50',
+    'bg-emerald-50/50',
+    'bg-rose-50/50',
+  ];
+
   return (
     <PageTransition>
       <div className="space-y-5">
@@ -122,7 +130,7 @@ const ShopperCatalog = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: i * 0.03 }}
-                  className="group relative flex flex-col bg-white rounded-2xl sm:rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm hover:border-orange-200 hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+                  className={`group relative flex flex-col ${SOFT_COLORS[i % SOFT_COLORS.length]} rounded-2xl sm:rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm hover:border-orange-200 hover:-translate-y-1 transition-all duration-300 cursor-pointer`}
                   onClick={() => navigate(`/product/${p._id}`)}
                 >
                   {/* Color banner */}
