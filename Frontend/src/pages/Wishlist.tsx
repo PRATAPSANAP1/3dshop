@@ -105,7 +105,7 @@ const Wishlist = () => {
                   initial={{ opacity: 0, scale: 0.9, y: 30 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.8, x: 20 }}
-                  className="group relative bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] hover:border-slate-200 hover:-translate-y-3 transition-all duration-500"
+                  className="group relative bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] hover:border-orange-100 hover:bg-orange-50/10 hover:-translate-y-3 transition-all duration-500"
                 >
                   <div className="relative aspect-[4/5] bg-slate-50 flex items-center justify-center">
                      <ShoppingBag size={64} className="text-slate-100 group-hover:scale-125 group-hover:rotate-6 transition-transform duration-700" />

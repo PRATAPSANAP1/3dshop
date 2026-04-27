@@ -46,16 +46,16 @@ const Categories = () => {
                 initial={{ opacity: 0, scale: 0.95, y: 30 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ delay: i * 0.1, type: 'spring', damping: 20 }}
-                className="group relative h-72 rounded-[2.5rem] bg-white border border-slate-100  p-8 flex flex-col justify-between overflow-hidden cursor-pointer hover:-translate-y-3 transition-all duration-500"
+                className="group relative h-72 rounded-[2.5rem] bg-white border border-slate-100 p-8 flex flex-col justify-between overflow-hidden cursor-pointer hover:-translate-y-3 hover:bg-orange-50/10 hover:border-orange-100 transition-all duration-500"
                 onClick={() => navigate(`/catalog?category=${cat.name}`)}
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-[4rem] group-hover:scale-150 transition-transform duration-700" />
-                <div className="absolute top-8 right-8 h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-orange-500 group-hover:rotate-12 transition-all">
+                <div className="absolute top-8 right-8 h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-orange-500 group-hover:rotate-12 group-hover:bg-orange-500 group-hover:text-white transition-all">
                   <Tag size={24} />
                 </div>
 
                 <div className="relative z-10 mt-auto">
-                  <h3 className="text-3xl font-black italic text-slate-900 leading-none uppercase">{cat.name}</h3>
+                  <h3 className="text-3xl font-black italic text-slate-900 leading-none uppercase group-hover:text-orange-600 transition-colors">{cat.name}</h3>
                 </div>
 
                 <div className="relative z-10 flex items-center justify-between border-t border-slate-50 pt-6 mt-6">
