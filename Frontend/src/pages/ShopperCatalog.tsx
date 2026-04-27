@@ -10,7 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 const PALETTES = [
-  { grad: "from-sky-500 to-indigo-500", soft: "bg-sky-50/50", txt: "text-sky-600", border: "border-orange-100", dot: "#e95e0eff", btn: "bg-sky-50 text-sky-500 hover:bg-sky-500 hover:text-white" },
+  { grad: "from-orange-500 to-amber-500", soft: "bg-orange-50/50", txt: "text-orange-600", border: "border-orange-100", dot: "#f97316", btn: "bg-orange-50 text-orange-500 hover:bg-orange-500 hover:text-white" },
 ];
 
 const getColorIndex = (str: string) => {
