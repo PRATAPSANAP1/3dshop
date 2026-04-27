@@ -97,6 +97,7 @@ export const getStats = async (req: Request, res: Response) => {
       dailyData,
       topProducts,
       totalOrders: orders.length,
+      recentOrders: orders.slice(0, 5),
       dynamicStats: {
         revGrowth: `+${revGrowth}% Growth`,
         ordGrowth: `+${ordGrowth}% Lift`,

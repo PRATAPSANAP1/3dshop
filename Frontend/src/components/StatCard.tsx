@@ -34,6 +34,7 @@ const StatCard = ({
     'text-rose-500': '#F43F5E',
     'text-amber': '#F59E0B',
     'text-slate-600': '#475569',
+    'text-blue-500': '#3B82F6',
   };
   const borderHex = borderColorMap[accentColor] || '#EA580C';
 
@@ -41,9 +42,11 @@ const StatCard = ({
   <motion.div
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
+    whileHover={onClick ? { scale: 1.02, y: -2 } : {}}
+    whileTap={onClick ? { scale: 0.98 } : {}}
     transition={{ delay, duration: 0.4, ease: "easeOut" }}
     onClick={onClick}
-    className={`stat-card group border-l-4 ${onClick ? 'cursor-pointer hover:shadow-sm' : ''}`}
+    className={`stat-card group border-l-4 ${onClick ? 'cursor-pointer hover:shadow-md hover:border-l-primary transition-all duration-300' : ''}`}
     style={{ borderLeftColor: borderHex }}
   >
     <div className="flex items-start justify-between">

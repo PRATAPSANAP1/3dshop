@@ -148,53 +148,108 @@ const Dashboard = () => {
         {/* Compact bottom padding anchor */}
         <div className="h-2" />
 
-        {/* Top Products */}
-        {stats?.topProducts?.length > 0 && (
+        {/* Recent Activity Feed */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Top Products */}
+          {stats?.topProducts?.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-white rounded-[2.5rem] border border-slate-100/80 p-6 hover:border-slate-200 transition-all"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="font-heading text-base font-black text-slate-900 tracking-tight uppercase italic leading-none">Top Products</h2>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">By Revenue Generated</p>
+                </div>
+                <div className="px-3 py-1 rounded-lg bg-orange-50 text-orange-600 text-[8px] font-black uppercase tracking-widest">Top 5</div>
+              </div>
+              <div className="space-y-3">
+                {stats.topProducts.map((product: any, i: number) => {
+                  const maxRevenue = stats.topProducts[0]?.revenue || 1;
+                  const pct = Math.round((product.revenue / maxRevenue) * 100);
+                  return (
+                    <div key={i} className="flex items-center gap-4 group">
+                      <div className="h-8 w-8 rounded-xl bg-slate-50 flex items-center justify-center text-[10px] font-black text-slate-400 shrink-0">
+                        {i + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="text-sm font-black text-slate-800 truncate">{product.name}</p>
+                          <span className="text-sm font-black text-orange-500 ml-2 shrink-0">₹{product.revenue.toLocaleString()}</span>
+                        </div>
+                        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${pct}%` }}
+                            transition={{ delay: 0.5 + i * 0.08, duration: 0.6 }}
+                            className="h-full rounded-full bg-gradient-to-r from-orange-500 to-amber-400"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Recent Orders */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.5 }}
             className="bg-white rounded-[2.5rem] border border-slate-100/80 p-6 hover:border-slate-200 transition-all"
           >
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="font-heading text-base font-black text-slate-900 tracking-tight uppercase italic leading-none">Top Products</h2>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">By Revenue Generated</p>
+                <h2 className="font-heading text-base font-black text-slate-900 tracking-tight uppercase italic leading-none">Live Orders</h2>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Latest Store Activity</p>
               </div>
-              <div className="px-3 py-1 rounded-lg bg-orange-50 text-orange-600 text-[8px] font-black uppercase tracking-widest">Top 5</div>
+              <Button onClick={() => navigate("/orders")} variant="ghost" className="h-8 rounded-xl text-[8px] font-black uppercase tracking-widest gap-2 bg-slate-50 hover:bg-orange-500 hover:text-white transition-all">
+                View All <ArrowUpRight size={12} />
+              </Button>
             </div>
+            
             <div className="space-y-3">
-              {stats.topProducts.map((product: any, i: number) => {
-                const maxRevenue = stats.topProducts[0]?.revenue || 1;
-                const pct = Math.round((product.revenue / maxRevenue) * 100);
-                return (
-                  <div key={i} className="flex items-center gap-4 group">
-                    <div className="h-8 w-8 rounded-xl bg-slate-50 flex items-center justify-center text-[10px] font-black text-slate-400 shrink-0">
-                      {i + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-black text-slate-800 truncate">{product.name}</p>
-                        <span className="text-sm font-black text-orange-500 ml-2 shrink-0">₹{product.revenue.toLocaleString()}</span>
+              {stats?.recentOrders?.length > 0 ? (
+                stats.recentOrders.map((order: any, idx: number) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => navigate("/orders")}
+                    className="flex items-center justify-between p-3 rounded-2xl border border-slate-50 bg-slate-50/30 hover:bg-white hover:border-slate-200 hover:shadow-sm transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-orange-500 transition-colors">
+                        <ShoppingBag size={16} />
                       </div>
-                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${pct}%` }}
-                          transition={{ delay: 0.5 + i * 0.08, duration: 0.6 }}
-                          className="h-full rounded-full bg-gradient-to-r from-orange-500 to-amber-400"
-                        />
+                      <div>
+                        <p className="text-xs font-black text-slate-900 uppercase">#{order._id.slice(-6).toUpperCase()}</p>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{new Date(order.createdAt).toLocaleDateString()}</p>
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{product.stock} units</p>
+                    <div className="text-right">
+                      <p className="text-xs font-black text-slate-900 italic">₹{order.totalPrice.toLocaleString()}</p>
+                      <span className={`text-[8px] font-black uppercase tracking-tighter px-2 py-0.5 rounded-full ${
+                        order.orderStatus === 'Delivered' ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-500'
+                      }`}>
+                        {order.orderStatus}
+                      </span>
                     </div>
                   </div>
-                );
-              })}
+                ))
+              ) : (
+                <div className="text-center py-12">
+                   <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center mx-auto mb-3">
+                      <ShoppingBag size={20} className="text-slate-200" />
+                   </div>
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No recent orders</p>
+                </div>
+              )}
             </div>
           </motion.div>
-        )}
+        </div>
       </div>
     </PageTransition>
   );
