@@ -1,32 +1,29 @@
 import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Search, Package, AlertTriangle, X, IndianRupee, Layers, Tag, TrendingUp, ShoppingBag, Edit2, Trash2, QrCode } from "lucide-react";
+import { Plus, Search, Package, AlertTriangle, X, IndianRupee, Layers, Tag, ShoppingBag, Edit2, Trash2, QrCode, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/PageTransition";
-
 import QRLabelModal from "@/components/QRLabelModal";
 import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
-const CARD_COLORS = [
-  { bg: "from-orange-500 to-amber-500", light: "bg-orange-50", text: "text-orange-600", ring: "ring-orange-200" },
-  { bg: "from-violet-500 to-purple-500", light: "bg-violet-50", text: "text-violet-600", ring: "ring-violet-200" },
-  { bg: "from-cyan-500 to-blue-500", light: "bg-cyan-50", text: "text-cyan-600", ring: "ring-cyan-200" },
-  { bg: "from-emerald-500 to-green-500", light: "bg-emerald-50", text: "text-emerald-600", ring: "ring-emerald-200" },
-  { bg: "from-rose-500 to-pink-500", light: "bg-rose-50", text: "text-rose-600", ring: "ring-rose-200" },
-  { bg: "from-amber-500 to-yellow-500", light: "bg-amber-50", text: "text-amber-600", ring: "ring-amber-200" },
-  { bg: "from-indigo-500 to-blue-600", light: "bg-indigo-50", text: "text-indigo-600", ring: "ring-indigo-200" },
-  { bg: "from-teal-500 to-emerald-500", light: "bg-teal-50", text: "text-teal-600", ring: "ring-teal-200" },
+const CARD_PALETTES = [
+  { grad: "from-fuchsia-500 via-pink-500 to-rose-500", soft: "bg-fuchsia-50", txt: "text-fuchsia-600", border: "border-fuchsia-100", dot: "#e879f9" },
+  { grad: "from-violet-500 via-indigo-500 to-blue-500", soft: "bg-violet-50", txt: "text-violet-600", border: "border-violet-100", dot: "#8b5cf6" },
+  { grad: "from-cyan-400 via-teal-500 to-emerald-500", soft: "bg-cyan-50", txt: "text-cyan-600", border: "border-cyan-100", dot: "#22d3ee" },
+  { grad: "from-amber-400 via-orange-500 to-red-500", soft: "bg-amber-50", txt: "text-amber-600", border: "border-amber-100", dot: "#f59e0b" },
+  { grad: "from-lime-400 via-green-500 to-teal-500", soft: "bg-lime-50", txt: "text-lime-600", border: "border-lime-100", dot: "#a3e635" },
+  { grad: "from-sky-400 via-blue-500 to-indigo-600", soft: "bg-sky-50", txt: "text-sky-600", border: "border-sky-100", dot: "#38bdf8" },
+  { grad: "from-rose-400 via-pink-500 to-fuchsia-600", soft: "bg-rose-50", txt: "text-rose-600", border: "border-rose-100", dot: "#fb7185" },
+  { grad: "from-orange-400 via-amber-500 to-yellow-400", soft: "bg-orange-50", txt: "text-orange-600", border: "border-orange-100", dot: "#fb923c" },
 ];
 
 const getColorIndex = (str: string) => {
   let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return Math.abs(hash) % CARD_COLORS.length;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return Math.abs(hash) % CARD_PALETTES.length;
 };
 
 const Products = () => {
@@ -37,15 +34,9 @@ const Products = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [racks, setRacks] = useState<any[]>([]);
-  const [form, setForm] = useState({ 
-    productName: '', 
-    category: '', 
-    price: '', 
-    quantity: '', 
-    minStockLevel: '',
-    rackId: '',
-    shelfNumber: '',
-    columnNumber: ''
+  const [form, setForm] = useState({
+    productName: '', category: '', price: '', quantity: '',
+    minStockLevel: '', rackId: '', shelfNumber: '', columnNumber: ''
   });
   const [qrProduct, setQrProduct] = useState<any>(null);
   const { toast } = useToast();
@@ -57,10 +48,7 @@ const Products = () => {
 
   const fetchData = async () => {
     try {
-      const [pRes, rRes] = await Promise.all([
-        api.get('/products'),
-        api.get('/racks')
-      ]);
+      const [pRes, rRes] = await Promise.all([api.get('/products'), api.get('/racks')]);
       setProducts(pRes.data);
       setRacks(rRes.data);
     } catch (err) {
@@ -127,8 +115,6 @@ const Products = () => {
   const totalValue = products.reduce((s, p) => s + ((p.price || 0) * (p.quantity || 0)), 0);
   const lowStockCount = products.filter(p => p.quantity < p.minStockLevel).length;
 
-
-
   return (
     <PageTransition>
       <div className="space-y-6">
@@ -140,95 +126,120 @@ const Products = () => {
             </h1>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{products.length} SKUs Registered</p>
           </div>
-          <Button onClick={() => { setEditingProduct(null); setForm({ productName: '', category: '', price: '', quantity: '', minStockLevel: '', rackId: '', shelfNumber: '', columnNumber: '' }); setShowAddModal(true); }} className="gap-2 h-12 px-6 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-sm shadow-orange-500/20 border-none text-white" style={{ background: 'linear-gradient(135deg, #EA580C 0%, #D97706 100%)' }}>
+          <Button
+            onClick={() => { setEditingProduct(null); setForm({ productName: '', category: '', price: '', quantity: '', minStockLevel: '', rackId: '', shelfNumber: '', columnNumber: '' }); setShowAddModal(true); }}
+            className="gap-2 h-12 px-6 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-sm shadow-orange-500/20 border-none text-white"
+            style={{ background: 'linear-gradient(135deg, #EA580C 0%, #D97706 100%)' }}
+          >
             <Plus className="h-4 w-4" strokeWidth={3} />
             Add Product
           </Button>
         </div>
 
-        {/* Stats Row */}
+        {/* ── STATS CARDS ── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-            className="bg-white rounded-[2rem] border border-slate-100 p-6 flex items-center gap-4 group hover:border-orange-200 hover:-translate-y-1 transition-all duration-300"
+          {/* Total Stock */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+            className="relative rounded-3xl overflow-hidden p-6 flex items-center gap-5 cursor-default"
+            style={{ background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)" }}
           >
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white shadow-sm shadow-orange-200 group-hover:scale-110 transition-transform">
-              <Layers size={22} />
+            <div className="absolute inset-0 opacity-20"
+              style={{ backgroundImage: "radial-gradient(circle at 80% 20%, #fff 0%, transparent 50%)" }} />
+            <div className="absolute -bottom-4 -right-4 opacity-10"><Layers size={90} className="text-white" /></div>
+            <div className="h-14 w-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-900/20">
+              <Layers size={26} />
             </div>
-            <div>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Stock</p>
-              <p className="text-2xl font-black text-slate-900 italic leading-none mt-1">{totalStock.toLocaleString()}</p>
+            <div className="relative z-10">
+              <p className="text-[9px] font-black text-white/70 uppercase tracking-widest">Total Stock</p>
+              <p className="text-3xl font-black text-white italic leading-none mt-1">{totalStock.toLocaleString()}</p>
+              <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest mt-1">units across all SKUs</p>
             </div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-            className="bg-white rounded-[2rem] border border-slate-100 p-6 flex items-center gap-4 group hover:border-emerald-200 hover:-translate-y-1 transition-all duration-300"
+          {/* Inventory Value */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+            className="relative rounded-3xl overflow-hidden p-6 flex items-center gap-5 cursor-default"
+            style={{ background: "linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)" }}
           >
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center text-white shadow-sm shadow-emerald-200 group-hover:scale-110 transition-transform">
-              <IndianRupee size={22} />
+            <div className="absolute inset-0 opacity-20"
+              style={{ backgroundImage: "radial-gradient(circle at 80% 20%, #fff 0%, transparent 50%)" }} />
+            <div className="absolute -bottom-4 -right-4 opacity-10"><IndianRupee size={90} className="text-white" /></div>
+            <div className="h-14 w-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white shrink-0 shadow-lg shadow-emerald-900/20">
+              <IndianRupee size={26} />
             </div>
-            <div>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Inventory Value</p>
-              <p className="text-2xl font-black text-slate-900 italic leading-none mt-1">₹{totalValue.toLocaleString()}</p>
+            <div className="relative z-10">
+              <p className="text-[9px] font-black text-white/70 uppercase tracking-widest">Inventory Value</p>
+              <p className="text-3xl font-black text-white italic leading-none mt-1">₹{totalValue.toLocaleString()}</p>
+              <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest mt-1">total catalog worth</p>
             </div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-            className="bg-white rounded-[2rem] border border-slate-100 p-6 flex items-center gap-4 group hover:border-rose-200 hover:-translate-y-1 transition-all duration-300"
+          {/* Low Stock */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+            className="relative rounded-3xl overflow-hidden p-6 flex items-center gap-5 cursor-default"
+            style={{ background: "linear-gradient(135deg, #f43f5e 0%, #e11d48 50%, #be123c 100%)" }}
           >
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-white shadow-sm shadow-rose-200 group-hover:scale-110 transition-transform">
-              <AlertTriangle size={22} />
+            <div className="absolute inset-0 opacity-20"
+              style={{ backgroundImage: "radial-gradient(circle at 80% 20%, #fff 0%, transparent 50%)" }} />
+            <div className="absolute -bottom-4 -right-4 opacity-10"><AlertTriangle size={90} className="text-white" /></div>
+            <div className="h-14 w-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white shrink-0 shadow-lg shadow-rose-900/20">
+              <AlertTriangle size={26} />
             </div>
-            <div>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Low Stock Alerts</p>
-              <p className="text-2xl font-black text-slate-900 italic leading-none mt-1">{lowStockCount} <span className="text-sm font-normal text-slate-300">items</span></p>
+            <div className="relative z-10">
+              <p className="text-[9px] font-black text-white/70 uppercase tracking-widest">Low Stock Alerts</p>
+              <p className="text-3xl font-black text-white italic leading-none mt-1">{lowStockCount}</p>
+              <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest mt-1">items need restocking</p>
             </div>
           </motion.div>
         </div>
 
-        {/* Search & Filters */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center bg-white p-3 rounded-[2rem] border border-slate-100">
+        {/* ── SEARCH & FILTER BAR ── */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center bg-white p-3 rounded-3xl border-2 border-slate-100 shadow-sm">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
+              <Search size={13} className="text-white" />
+            </div>
             <Input
               placeholder="Search products..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-12 h-12 rounded-xl border-slate-200 focus:ring-orange-500/10 focus:border-orange-400 transition-all font-bold text-slate-700"
+              className="pl-12 h-11 rounded-xl border-slate-200 focus:ring-orange-500/10 focus:border-orange-400 font-bold text-slate-700"
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar flex-wrap">
             {categories.map((cat) => {
-              const ci = cat === "All" ? -1 : getColorIndex(cat);
+              const isActive = activeCategory === cat;
+              const ci = cat === "All" ? 3 : getColorIndex(cat);
+              const p = CARD_PALETTES[ci];
               return (
-                <button
+                <motion.button
                   key={cat}
+                  whileTap={{ scale: 0.94 }}
                   onClick={() => setActiveCategory(cat)}
-                  className={`whitespace-nowrap rounded-xl px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.15em] transition-all ${
-                    activeCategory === cat
-                      ? "text-white shadow-sm"
-                      : "bg-slate-50 text-slate-400 hover:bg-slate-100 border border-slate-100"
+                  className={`whitespace-nowrap rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] transition-all border-2 ${
+                    isActive
+                      ? "text-white border-transparent shadow-md"
+                      : `bg-white ${p.txt} ${p.border} hover:scale-105`
                   }`}
-                  style={activeCategory === cat ? {
-                    background: cat === "All"
-                      ? "linear-gradient(135deg, #0f172a 0%, #334155 100%)"
-                      : `linear-gradient(135deg, var(--tw-gradient-from), var(--tw-gradient-to))`,
-                    ...(cat !== "All" && { background: `linear-gradient(135deg, ${['#EA580C','#8B5CF6','#06B6D4','#10B981','#F43F5E','#F59E0B','#6366F1','#14B8A6'][ci]} 0%, ${['#D97706','#A855F7','#3B82F6','#22C55E','#EC4899','#EAB308','#818CF8','#10B981'][ci]} 100%)` })
-                  } : {}}
+                  style={isActive ? { background: `linear-gradient(135deg, ${p.dot}, ${p.dot}cc)` } : {}}
                 >
                   {cat}
-                </button>
+                </motion.button>
               );
             })}
           </div>
         </div>
 
-        {/* Product Cards */}
+        {/* ── PRODUCT CARDS ── */}
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <AnimatePresence mode="popLayout">
             {filtered.map((product, i) => {
               const isLow = product.quantity < product.minStockLevel;
               const ci = getColorIndex(product.category || 'Uncategorized');
-              const palette = CARD_COLORS[ci];
+              const pal = CARD_PALETTES[ci];
               return (
                 <motion.div
                   key={product._id}
@@ -236,79 +247,84 @@ const Products = () => {
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                  transition={{ delay: i * 0.03, type: "spring", damping: 20 }}
-                  className="group relative bg-white rounded-[2rem] border border-slate-200 overflow-hidden hover:border-slate-300 hover:-translate-y-2 transition-all duration-500 cursor-pointer flex flex-col h-full"
+                  whileHover={{ y: -5, scale: 1.02 }}
+                  transition={{ delay: i * 0.03, type: "spring", damping: 18, stiffness: 260 }}
+                  className="group relative bg-white rounded-3xl border-2 border-slate-100 overflow-hidden hover:border-transparent hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full"
                 >
-                  {/* Edit / Delete / QR overlay */}
-                  <div className="absolute top-3 right-3 z-20 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {/* Action buttons */}
+                  <div className="absolute top-3 right-3 z-20 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
                     {product.qrCode && (
-                      <button
+                      <motion.button whileTap={{ scale: 0.9 }}
                         onClick={e => { e.stopPropagation(); setQrProduct(product); }}
-                        className="h-10 w-10 rounded-xl bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-slate-500 hover:text-violet-500 hover:border-violet-300 transition-colors shadow-sm"
-                        title="QR Label (Print / PDF)"
+                        className="h-9 w-9 rounded-xl bg-white shadow-md flex items-center justify-center text-violet-500 hover:bg-violet-500 hover:text-white transition-colors border border-violet-100"
                       >
-                        <QrCode size={18} />
-                      </button>
+                        <QrCode size={15} />
+                      </motion.button>
                     )}
-                    <button
+                    <motion.button whileTap={{ scale: 0.9 }}
                       onClick={e => { e.stopPropagation(); openEdit(product); }}
-                      className="h-10 w-10 rounded-xl bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-slate-500 hover:text-orange-500 hover:border-orange-300 transition-colors shadow-sm"
+                      className="h-9 w-9 rounded-xl bg-white shadow-md flex items-center justify-center text-orange-500 hover:bg-orange-500 hover:text-white transition-colors border border-orange-100"
                     >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
+                      <Edit2 size={14} />
+                    </motion.button>
+                    <motion.button whileTap={{ scale: 0.9 }}
                       onClick={e => { e.stopPropagation(); handleDeleteProduct(product._id, product.productName); }}
-                      className="h-10 w-10 rounded-xl bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-slate-500 hover:text-rose-500 hover:border-rose-300 transition-colors shadow-sm"
+                      className="h-9 w-9 rounded-xl bg-white shadow-md flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-colors border border-rose-100"
                     >
-                      <Trash2 size={16} />
-                    </button>
+                      <Trash2 size={14} />
+                    </motion.button>
                   </div>
-                  {/* Gradient Header */}
-                  <div className={`relative h-10 bg-gradient-to-br ${palette.bg} p-5 flex flex-col justify-between overflow-hidden`}>
-                    <div className="flex items-start justify-between relative z-10">
-                      <div className={`px-3 py-1 rounded-lg bg-white/20 backdrop-blur-md border border-white/10`}>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-white/90">{product.category || "General"}</p>
-                      </div>
+
+                  {/* Gradient Header Band */}
+                  <div className={`relative h-24 bg-gradient-to-br ${pal.grad} overflow-hidden`}>
+                    <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/10" />
+                    <div className="absolute top-4 -right-2 w-12 h-12 rounded-full bg-white/10" />
+                    <div className="absolute -bottom-8 -left-4 w-20 h-20 rounded-full bg-black/10" />
+
+                    <div className="absolute bottom-3 left-4 flex items-center gap-1.5">
+                      <span className="px-3 py-1 rounded-lg bg-white/25 backdrop-blur-sm border border-white/20 text-[9px] font-black uppercase tracking-widest text-white">
+                        {product.category || "General"}
+                      </span>
                       {isLow && (
-                        <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 2 }}
-                          className="flex items-center gap-1 rounded-lg bg-white/20 backdrop-blur-md px-2.5 py-1 border border-white/10"
+                        <motion.span
+                          animate={{ scale: [1, 1.08, 1] }}
+                          transition={{ repeat: Infinity, duration: 1.8 }}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/90 text-[8px] font-black uppercase tracking-wider text-rose-600"
                         >
-                          <AlertTriangle size={10} className="text-white" />
-                          <span className="text-[8px] font-black text-white uppercase tracking-wider">Low</span>
-                        </motion.div>
+                          <Zap size={9} fill="currentColor" /> Low
+                        </motion.span>
                       )}
                     </div>
-                    <div className="absolute -bottom-4 -right-4 opacity-10">
-                      <ShoppingBag size={80} className="text-white" />
+
+                    <div className="absolute -bottom-3 -right-2 opacity-15">
+                      <ShoppingBag size={70} className="text-white" />
                     </div>
                   </div>
 
+                  {/* Card Body */}
                   <div className="p-5 flex flex-col flex-1">
-                    <h3 className="text-base font-black text-slate-900 leading-tight tracking-tight group-hover:text-orange-600 transition-colors line-clamp-2">
+                    <h3 className="text-[15px] font-black text-slate-900 leading-snug tracking-tight group-hover:text-slate-700 transition-colors line-clamp-2">
                       {product.productName || product.name || 'Unnamed'}
                     </h3>
-                    <div className="flex items-center gap-2 mt-1.5 mb-5">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                        {product.rackId?.rackName || "Unassigned"} • Shelf {product.shelfNumber || "—"}
-                      </p>
-                    </div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-4">
+                      {product.rackId?.rackName || "Unassigned"} · Shelf {product.shelfNumber || "—"}
+                    </p>
 
-                    <div className="mt-auto grid grid-cols-2 gap-3">
-                      <div className={`${palette.light} rounded-xl p-3 border border-slate-50`}>
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Price</p>
-                        <p className="text-lg font-black text-slate-900 italic leading-none truncate">₹{product.price}</p>
+                    <div className="mt-auto grid grid-cols-2 gap-2.5">
+                      <div className={`${pal.soft} rounded-2xl p-3.5 border ${pal.border}`}>
+                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Price</p>
+                        <p className={`text-xl font-black italic leading-none ${pal.txt}`}>₹{product.price}</p>
                       </div>
-                      <div className={`${isLow ? 'bg-rose-50' : palette.light} rounded-xl p-3 border ${isLow ? 'border-rose-100' : 'border-slate-50'}`}>
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Stock</p>
-                        <p className={`text-lg font-black italic leading-none truncate ${isLow ? 'text-rose-500' : 'text-slate-900'}`}>
-                          {product.quantity} <span className="text-[10px] font-normal text-slate-300">units</span>
+                      <div className={`${isLow ? 'bg-rose-50 border-rose-100' : `${pal.soft} ${pal.border}`} rounded-2xl p-3.5 border`}>
+                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Stock</p>
+                        <p className={`text-xl font-black italic leading-none ${isLow ? 'text-rose-500' : pal.txt}`}>
+                          {product.quantity}<span className="text-[10px] font-normal text-slate-300 ml-0.5">u</span>
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Hover Shine */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+                  <div className={`h-1 w-full bg-gradient-to-r ${pal.grad} opacity-60 group-hover:opacity-100 transition-opacity`} />
                 </motion.div>
               );
             })}
@@ -317,15 +333,15 @@ const Products = () => {
 
         {filtered.length === 0 && !loading && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="h-20 w-20 rounded-[2rem] bg-slate-50 flex items-center justify-center mb-6">
-              <Package size={36} className="text-slate-200" />
+            <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center mb-6 border border-slate-100">
+              <Package size={36} className="text-slate-300" />
             </div>
             <p className="text-lg font-black text-slate-900 italic">No products found</p>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Try adjusting your search or category filter</p>
           </div>
         )}
 
-        {/* Add Modal */}
+        {/* ── ADD / EDIT MODAL ── */}
         {createPortal(
           <AnimatePresence>
             {showAddModal && (
@@ -333,87 +349,117 @@ const Products = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/30 backdrop-blur-sm p-4"
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+                style={{ backgroundColor: "rgba(15,23,42,0.55)", backdropFilter: "blur(8px)" }}
                 onClick={() => setShowAddModal(false)}
               >
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                  initial={{ opacity: 0, scale: 0.88, y: 40 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9, y: 30 }}
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-full max-w-lg max-h-[95vh] overflow-y-auto bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 sm:p-10 relative overflow-visible"
+                  exit={{ opacity: 0, scale: 0.88, y: 40 }}
+                  transition={{ type: "spring", stiffness: 280, damping: 24 }}
+                  onClick={e => e.stopPropagation()}
+                  className="w-full max-w-lg max-h-[95vh] overflow-y-auto bg-white rounded-[2.5rem] shadow-2xl relative"
                 >
-                  <button onClick={() => setShowAddModal(false)} className="absolute top-5 right-5 h-8 w-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 hover:border-rose-200 hover:rotate-90 transition-all">
-                    <X size={14} />
-                  </button>
+                  <div className="h-2 w-full rounded-t-[2.5rem] bg-gradient-to-r from-fuchsia-500 via-orange-400 to-amber-400" />
 
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="h-14 w-14 rounded-2xl flex items-center justify-center text-white shadow-sm" style={{ background: 'linear-gradient(135deg, #EA580C 0%, #D97706 100%)' }}>
-                      {editingProduct ? <Edit2 size={24} /> : <Plus size={28} strokeWidth={3} />}
+                  <div className="p-8 sm:p-10">
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setShowAddModal(false)}
+                      className="absolute top-6 right-6 h-9 w-9 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all hover:rotate-90"
+                    >
+                      <X size={15} />
+                    </motion.button>
+
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="h-14 w-14 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                        style={{ background: "linear-gradient(135deg, #f43f5e 0%, #f97316 50%, #eab308 100%)" }}>
+                        {editingProduct ? <Edit2 size={22} /> : <Sparkles size={24} />}
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase italic leading-none">
+                          {editingProduct ? 'Edit' : 'New'}{" "}
+                          <span className="bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent not-italic">
+                            Product
+                          </span>
+                        </h2>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                          {editingProduct ? 'Update SKU details' : 'Register a new SKU'}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="font-heading text-xl font-black text-slate-900 tracking-tight uppercase italic leading-none">
-                        {editingProduct ? 'Edit' : 'Add'} <span className="text-orange-500 not-italic">Product</span>
-                      </h2>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{editingProduct ? 'Update SKU details' : 'Register new SKU'}</p>
-                    </div>
+
+                    <form onSubmit={handleAddProduct} className="space-y-5">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Product Name</label>
+                          <Input value={form.productName} onChange={e => setForm({ ...form, productName: e.target.value })}
+                            placeholder="Full Product Name" className="h-12 rounded-xl border-2 border-slate-100 focus:border-fuchsia-400 font-semibold" required />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Category</label>
+                          <Input value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
+                            placeholder="e.g. Electronics" className="h-12 rounded-xl border-2 border-slate-100 focus:border-violet-400 font-semibold" required />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Assigned Rack</label>
+                          <select
+                            value={form.rackId}
+                            onChange={e => setForm({ ...form, rackId: e.target.value })}
+                            className="w-full h-12 px-4 rounded-xl border-2 border-slate-100 bg-white text-sm font-bold focus:outline-none focus:border-cyan-400 transition-colors"
+                          >
+                            <option value="">Unassigned</option>
+                            {racks.map(r => <option key={r._id} value={r._id}>{r.rackName}</option>)}
+                          </select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Shelf #</label>
+                            <Input type="number" value={form.shelfNumber} onChange={e => setForm({ ...form, shelfNumber: e.target.value })}
+                              placeholder="1" className="h-12 rounded-xl border-2 border-slate-100 focus:border-teal-400" />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Col #</label>
+                            <Input type="number" value={form.columnNumber} onChange={e => setForm({ ...form, columnNumber: e.target.value })}
+                              placeholder="1" className="h-12 rounded-xl border-2 border-slate-100 focus:border-teal-400" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-3">
+                        {[
+                          { label: "Price (₹)", key: "price", color: "focus:border-emerald-400" },
+                          { label: "Qty", key: "quantity", color: "focus:border-blue-400" },
+                          { label: "Min Alert", key: "minStockLevel", color: "focus:border-rose-400" },
+                        ].map(({ label, key, color }) => (
+                          <div className="space-y-2" key={key}>
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">{label}</label>
+                            <Input
+                              type="number"
+                              value={(form as any)[key]}
+                              onChange={e => setForm({ ...form, [key]: e.target.value })}
+                              placeholder="0"
+                              className={`h-12 rounded-xl border-2 border-slate-100 ${color} font-semibold`}
+                              required
+                            />
+                          </div>
+                        ))}
+                      </div>
+
+                      <motion.button
+                        type="submit"
+                        whileTap={{ scale: 0.97 }}
+                        className="w-full h-14 rounded-2xl text-white font-black uppercase tracking-[0.2em] text-[11px] border-none shadow-lg transition-all"
+                        style={{ background: "linear-gradient(135deg, #f43f5e 0%, #f97316 50%, #eab308 100%)" }}
+                      >
+                        {editingProduct ? '✦ Save Changes' : '✦ Add to Catalog'}
+                      </motion.button>
+                    </form>
                   </div>
-                  
-                  <form onSubmit={handleAddProduct} className="space-y-5">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <div className="space-y-2">
-                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Product Name</label>
-                         <Input value={form.productName} onChange={(e) => setForm({...form, productName: e.target.value})} placeholder="Full Product Name" className="h-12 rounded-xl" required />
-                      </div>
-                      <div className="space-y-2">
-                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Category</label>
-                         <Input value={form.category} onChange={(e) => setForm({...form, category: e.target.value})} placeholder="e.g. Electronics" className="h-12 rounded-xl" required />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assigned Rack</label>
-                        <select 
-                          value={form.rackId} 
-                          onChange={(e) => setForm({...form, rackId: e.target.value})}
-                          className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-sm font-bold focus:outline-none focus:border-orange-400"
-                        >
-                          <option value="">Unassigned</option>
-                          {racks.map(r => <option key={r._id} value={r._id}>{r.rackName}</option>)}
-                        </select>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Shelf #</label>
-                          <Input type="number" value={form.shelfNumber} onChange={(e) => setForm({...form, shelfNumber: e.target.value})} placeholder="1" className="h-12 rounded-xl" />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Col #</label>
-                          <Input type="number" value={form.columnNumber} onChange={(e) => setForm({...form, columnNumber: e.target.value})} placeholder="1" className="h-12 rounded-xl" />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Price (₹)</label>
-                        <Input type="number" value={form.price} onChange={(e) => setForm({...form, price: e.target.value})} placeholder="0" className="h-12 rounded-xl" required />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Qty</label>
-                        <Input type="number" value={form.quantity} onChange={(e) => setForm({...form, quantity: e.target.value})} placeholder="0" className="h-12 rounded-xl" required />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Min Alert</label>
-                        <Input type="number" value={form.minStockLevel} onChange={(e) => setForm({...form, minStockLevel: e.target.value})} placeholder="5" className="h-12 rounded-xl" required />
-                      </div>
-                    </div>
-
-                    <Button type="submit" className="w-full h-14 rounded-2xl text-white font-black uppercase tracking-[0.2em] shadow-sm transition-all active:scale-95 text-[10px] border-none" style={{ background: 'linear-gradient(135deg, #EA580C 0%, #D97706 100%)' }}>
-                      {editingProduct ? 'Save Changes' : 'Add to Catalog'}
-                    </Button>
-                  </form>
                 </motion.div>
               </motion.div>
             )}
@@ -421,12 +467,7 @@ const Products = () => {
           document.body
         )}
 
-        {/* QR Label Modal (Print / PDF at 2×2cm) */}
-        <QRLabelModal
-          open={!!qrProduct}
-          onClose={() => setQrProduct(null)}
-          product={qrProduct}
-        />
+        <QRLabelModal open={!!qrProduct} onClose={() => setQrProduct(null)} product={qrProduct} />
       </div>
     </PageTransition>
   );
