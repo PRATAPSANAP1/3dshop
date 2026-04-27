@@ -154,12 +154,11 @@ const ProductDetail = () => {
             </div>
 
             <h1 className="text-5xl lg:text-7xl font-black italic tracking-tighter text-slate-900 leading-[0.9] mb-6">
-               {product?.productName} <br />
-               <span className="text-orange-500 not-italic">EDITION.</span>
+               {product?.productName}
             </h1>
 
             <p className="text-slate-500 text-lg font-medium leading-relaxed mb-10 max-w-xl italic uppercase tracking-wider shadow-slate-100">
-               {product?.description || "Experience the pinnacle of engineering with our latest collection. Specifically crafted for those who demand excellence in every detail."}
+               {product?.description}
             </p>
 
             <div className="mb-12">
@@ -204,8 +203,6 @@ const ProductDetail = () => {
 
                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-8">
                   {[
-                    { icon: ShieldCheck, label: "2 Year Guarantee", color: "text-emerald-500" },
-                    { icon: Truck, label: "Express Delivery", color: "text-blue-500" },
                     { icon: RefreshCw, label: "Refund Policy", color: "text-orange-500" },
                     { icon: Zap, label: "Instant Access", color: "text-amber-500" },
                   ].map((item, idx) => (
