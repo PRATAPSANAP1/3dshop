@@ -62,21 +62,7 @@ export default function AuditLogs() {
     }
   };
 
-  if (loading) {
-    return (
-      <PageTransition>
-        <div className="space-y-6 max-w-7xl mx-auto px-4">
-          <div className="skeleton-loader h-10 w-48 rounded-lg" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <SkeletonCard className="h-32" />
-            <SkeletonCard className="h-32" />
-            <SkeletonCard className="h-32" />
-          </div>
-          <SkeletonCard className="h-[500px]" />
-        </div>
-      </PageTransition>
-    );
-  }
+  if (loading) return null;
 
   const getActionColor = (action: string) => {
     if (action.includes('CREATE')) return 'text-emerald-500 bg-emerald-500/10 border-emerald-200';

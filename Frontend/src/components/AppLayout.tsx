@@ -1,4 +1,5 @@
 import { Outlet, useLocation } from "react-router-dom";
+import { Suspense } from "react";
 import AppSidebar, { AppSidebarContent } from "./AppSidebar";
 import { useAuth } from "@/context/AuthContext";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -191,7 +192,9 @@ const AppLayout = () => {
           : 'px-3 sm:px-5 py-4 md:py-10 lg:py-12 pb-24 md:pb-12'
       }`}>
         <div className={`animate-in fade-in slide-in-from-bottom-4 duration-700 ${is3DPage ? 'h-full' : ''}`}>
-           <Outlet />
+           <Suspense fallback={null}>
+             <Outlet />
+           </Suspense>
         </div>
       </main>
       {!isAdminLike && <MobileBottomNav />}

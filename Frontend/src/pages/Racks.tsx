@@ -108,18 +108,7 @@ const Racks = () => {
     return products.filter(p => (p.rackId?._id === rackId || p.rackId === rackId) && p.quantity < (p.minStockLevel || 10)).length;
   };
 
-  if (loading) {
-    return (
-      <PageTransition>
-        <div className="space-y-6">
-          <div className="skeleton-loader h-10 w-32 rounded-lg" />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} className="h-40" />)}
-          </div>
-        </div>
-      </PageTransition>
-    );
-  }
+  if (loading) return null;
 
   return (
     <PageTransition>

@@ -267,19 +267,7 @@ const Billing = () => {
 
   const paymentIcon: Record<string, string> = { cash: '💵', card: '💳', upi: '📱', other: '🔗' };
 
-  if (loading) {
-    return (
-      <PageTransition>
-        <div className="space-y-4">
-          <div className="skeleton-loader h-10 w-40 rounded-xl" />
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} className="h-24" />)}
-          </div>
-          {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} className="h-20" />)}
-        </div>
-      </PageTransition>
-    );
-  }
+  if (loading) return null;
 
   return (
     <PageTransition>

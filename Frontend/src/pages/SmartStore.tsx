@@ -35,18 +35,7 @@ const SmartStore = () => {
 
   useEffect(() => { fetchData(); }, []);
 
-  if (loading && !data) {
-    return (
-      <PageTransition>
-        <div className="space-y-6">
-          <div className="skeleton-loader h-10 w-64 rounded-xl" />
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} className="h-[300px]" />)}
-          </div>
-        </div>
-      </PageTransition>
-    );
-  }
+  if (loading && !data) return null;
 
   const chartCard = (title: string, subtitle: string, children: React.ReactNode, delay: number, index: number) => (
     <motion.div

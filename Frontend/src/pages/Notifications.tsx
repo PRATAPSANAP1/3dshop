@@ -48,9 +48,7 @@ const Notifications = () => {
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
-  if (loading) {
-    return <PageTransition><div className="space-y-4">{Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} className="h-20" />)}</div></PageTransition>;
-  }
+  if (loading) return null;
 
   return (
     <PageTransition>

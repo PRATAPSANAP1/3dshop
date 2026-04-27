@@ -127,23 +127,7 @@ const Products = () => {
   const totalValue = products.reduce((s, p) => s + ((p.price || 0) * (p.quantity || 0)), 0);
   const lowStockCount = products.filter(p => p.quantity < p.minStockLevel).length;
 
-  if (loading) {
-    return (
-      <PageTransition>
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[1, 2, 3].map(i => <div key={i} className="h-28 rounded-[2rem] bg-slate-100 animate-pulse" />)}
-          </div>
-          <div className="h-16 bg-slate-100 rounded-[2rem] animate-pulse" />
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-64 rounded-[2rem] bg-slate-100 animate-pulse" />
-            ))}
-          </div>
-        </div>
-      </PageTransition>
-    );
-  }
+  if (loading) return null;
 
   return (
     <PageTransition>

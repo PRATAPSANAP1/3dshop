@@ -72,33 +72,7 @@ const ShopperCatalog = () => {
     'from-rose-500 to-pink-500',
   ];
 
-  if (loading) {
-    return (
-      <PageTransition>
-        <div className="space-y-6">
-          <div className="h-12 bg-slate-100 rounded-2xl animate-pulse w-full" />
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {[1,2,3,4].map(i => <div key={i} className="h-9 w-20 bg-slate-100 rounded-xl animate-pulse shrink-0" />)}
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-            {[1,2,3,4,5,6].map(i => (
-              <div key={i} className="bg-white rounded-2xl border border-slate-100 overflow-hidden animate-pulse">
-                <div className="h-24 sm:h-32 bg-slate-100" />
-                <div className="p-3 sm:p-5 space-y-2">
-                  <div className="h-4 bg-slate-200 rounded-full w-3/4" />
-                  <div className="h-3 bg-slate-100 rounded-full w-1/2" />
-                  <div className="flex justify-between items-center pt-2">
-                    <div className="h-5 bg-slate-200 rounded-full w-14" />
-                    <div className="h-9 w-9 bg-slate-100 rounded-xl" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </PageTransition>
-    );
-  }
+  if (loading) return null;
 
   return (
     <PageTransition>

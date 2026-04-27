@@ -112,7 +112,7 @@ const SuperAdminRoute = ({ children }: { children: React.ReactNode }) => {
 // Smart redirect based on role
 const SmartRedirect = () => {
   const { user, loading } = useAuth();
-  if (loading) return <BrandingLoader />;
+  if (loading) return null;
   if (!user) return <Navigate to="/home" replace />;
   switch (user.role) {
     case 'superadmin': return <Navigate to="/superadmin/dashboard" replace />;
@@ -125,14 +125,14 @@ const SmartRedirect = () => {
 // Guests see HomePage, logged-in users see the 3D store
 const GuestOrStoreRoute = () => {
   const { user, loading } = useAuth();
-  if (loading) return <BrandingLoader />;
+  if (loading) return null;
   return user ? <SmartRedirect /> : <Navigate to="/home" replace />;
 };
 
 const AnimatedRoutes = () => {
   const location = useLocation();
   return (
-    <Suspense fallback={<BrandingLoader />}>
+    <Suspense fallback={null}>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           {/* â”€â”€ Public / Guest routes â”€â”€ */}
