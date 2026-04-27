@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Wishlist from '../models/Wishlist';
+import Product from '../models/Product';
 
 export const getWishlist = async (req: Request, res: Response) => {
   try {
@@ -16,9 +17,18 @@ export const getWishlist = async (req: Request, res: Response) => {
 export const addToWishlist = async (req: Request, res: Response) => {
   const { productId } = req.body;
   try {
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
     let list = await Wishlist.findOne({ user: (req.user as any)._id });
     if (!list) {
-      list = new Wishlist({ user: (req.user as any)._id, products: [] });
+      list = new Wishlist({ 
+        user: (req.user as any)._id, 
+        shopId: (product as any).shopId,
+        products: [] 
+      });
     }
 
     if (list.products.includes(productId)) {
