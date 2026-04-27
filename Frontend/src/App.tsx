@@ -64,6 +64,7 @@ const Users = lazy(() => import("./pages/Users"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const Coupons = lazy(() => import("./pages/Coupons"));
 const HelpCenter = lazy(() => import("./pages/HelpCenter"));
+const Shops = lazy(() => import("./pages/Shops"));
 
 // New multi-tenant pages
 const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
@@ -148,6 +149,7 @@ const AnimatedRoutes = () => {
             <Route path="/coupons" element={<AdminRoute><Coupons /></AdminRoute>} />
             <Route path="/logistics" element={<AdminRoute><Logistics /></AdminRoute>} />
             <Route path="/employees" element={<AdminRoute><Employees /></AdminRoute>} />
+            <Route path="/shops" element={<AdminRoute><Shops /></AdminRoute>} />
 
             {/* Employee dashboard */}
             <Route path="/employee-dashboard" element={<EmployeeRoute><EmployeeDashboard /></EmployeeRoute>} />

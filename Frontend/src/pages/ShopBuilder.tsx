@@ -281,7 +281,7 @@ const ShopBuilder = () => {
     setShowForm(true);
   };
 
-  if (loading) return <Loading3D />;
+  // Remove full-screen loading as per user request
 
   return (
     <PageTransition>

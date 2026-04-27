@@ -1,5 +1,8 @@
 import { Request, Response } from 'express';
 import crypto from 'crypto';
+import fs from 'fs';
+import csv from 'csv-parser';
+
 import Product from '../models/Product';
 import Notification from '../models/Notification';
 import { createAuditLog } from '../middleware/audit';
@@ -218,4 +221,68 @@ export const createReview = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
+};
+
+export const importProducts = async (req: Request, res: Response) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'Please upload a CSV file' });
+  }
+
+  const shopId = (req as any).shopId;
+  const results: any[] = [];
+  const errors: string[] = [];
+
+  fs.createReadStream(req.file.path)
+    .pipe(csv())
+    .on('data', (data) => results.push(data))
+    .on('end', async () => {
+      try {
+        const createdProducts = [];
+        for (const item of results) {
+          try {
+            // Basic validation
+            if (!item.productName || !item.price || !item.quantity) {
+              errors.push(`Missing required fields for: ${item.productName || 'Unknown Product'}`);
+              continue;
+            }
+
+            const qrCode = crypto.randomBytes(16).toString('hex');
+            const product = new Product({
+              productName: item.productName,
+              category: item.category || 'General',
+              price: Number(item.price),
+              quantity: Number(item.quantity),
+              minStockLevel: Number(item.minStockLevel || 5),
+              brand: item.brand || '',
+              size: item.size || '',
+              qrCode,
+              shopId
+            });
+
+            await product.save();
+            createdProducts.push(product);
+
+            // Audit log for each
+            await createAuditLog((req as any).user, 'PRODUCT_CREATE', 'Product', `Imported product ${item.productName}`, {
+              entityId: product._id.toString(),
+              entityName: item.productName,
+              changes: { isImported: true }
+            });
+          } catch (err: any) {
+            errors.push(`Failed to import ${item.productName}: ${err.message}`);
+          }
+        }
+
+        // Clean up file
+        fs.unlinkSync(req.file!.path);
+
+        res.json({
+          message: `Successfully imported ${createdProducts.length} products`,
+          count: createdProducts.length,
+          errors: errors.length > 0 ? errors : null
+        });
+      } catch (error) {
+        res.status(500).json({ message: 'Error processing CSV data' });
+      }
+    });
 };

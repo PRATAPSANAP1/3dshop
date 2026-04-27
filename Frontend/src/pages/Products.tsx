@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Search, Package, AlertTriangle, X, IndianRupee, Layers, Tag, ShoppingBag, Edit2, Trash2, QrCode, Sparkles, Zap } from "lucide-react";
+import { Plus, Search, Package, AlertTriangle, X, IndianRupee, Layers, Tag, ShoppingBag, Edit2, Trash2, QrCode, Sparkles, Zap, Upload, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/PageTransition";
@@ -39,6 +39,8 @@ const Products = () => {
     minStockLevel: '', rackId: '', shelfNumber: '', columnNumber: ''
   });
   const [qrProduct, setQrProduct] = useState<any>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importing, setImporting] = useState(false);
   const { toast } = useToast();
 
   const categories = useMemo(() => {
@@ -126,13 +128,23 @@ const Products = () => {
             </h1>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{products.length} SKUs Registered</p>
           </div>
-          <Button
-            onClick={() => { setEditingProduct(null); setForm({ productName: '', category: '', price: '', quantity: '', minStockLevel: '', rackId: '', shelfNumber: '', columnNumber: '' }); setShowAddModal(true); }}
-            className="gap-2 h-12 px-6 rounded-2xl bg-primary hover:bg-primary-hover font-black uppercase tracking-widest text-[10px] shadow-sm shadow-primary/20 border-none text-white"
-          >
-            <Plus className="h-4 w-4" strokeWidth={3} />
-            Add Product
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setShowImportModal(true)}
+              variant="outline"
+              className="gap-2 h-12 px-6 rounded-2xl border-2 border-slate-100 text-slate-400 hover:border-primary hover:text-primary font-black uppercase tracking-widest text-[10px] transition-all"
+            >
+              <Upload className="h-4 w-4" />
+              Import CSV
+            </Button>
+            <Button
+              onClick={() => { setEditingProduct(null); setForm({ productName: '', category: '', price: '', quantity: '', minStockLevel: '', rackId: '', shelfNumber: '', columnNumber: '' }); setShowAddModal(true); }}
+              className="gap-2 h-12 px-6 rounded-2xl bg-primary hover:bg-primary-hover font-black uppercase tracking-widest text-[10px] shadow-sm shadow-primary/20 border-none text-white"
+            >
+              <Plus className="h-4 w-4" strokeWidth={3} />
+              Add Product
+            </Button>
+          </div>
         </div>
 
         {/* ── STATS CARDS ── */}
@@ -466,6 +478,110 @@ const Products = () => {
         )}
 
         <QRLabelModal open={!!qrProduct} onClose={() => setQrProduct(null)} product={qrProduct} />
+
+        {/* ── IMPORT MODAL ── */}
+        {createPortal(
+          <AnimatePresence>
+            {showImportModal && (
+              <motion.div
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md"
+                onClick={() => setShowImportModal(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
+                  onClick={e => e.stopPropagation()}
+                  className="bg-white rounded-[2.5rem] p-8 sm:p-10 w-full max-w-md shadow-2xl"
+                >
+                  <div className="flex items-center justify-between mb-8">
+                    <div>
+                      <h2 className="text-2xl font-black italic tracking-tighter text-slate-900 uppercase leading-none">BULK <span className="text-primary">IMPORT.</span></h2>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Initialize catalog via CSV</p>
+                    </div>
+                    <button onClick={() => setShowImportModal(false)} className="h-10 w-10 rounded-xl bg-slate-50 text-slate-400 hover:text-rose-500 transition-colors">
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="p-6 rounded-3xl bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center text-center">
+                      <Upload className="h-10 w-10 text-slate-300 mb-4" />
+                      <p className="text-xs font-bold text-slate-600 mb-1">Upload your inventory CSV</p>
+                      <p className="text-[9px] text-slate-400 font-medium uppercase tracking-widest">Max file size: 5MB</p>
+                      
+                      <input 
+                        type="file" 
+                        id="csv-upload" 
+                        className="hidden" 
+                        accept=".csv"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          
+                          setImporting(true);
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          
+                          try {
+                            const { data } = await api.post('/products/import', formData, {
+                              headers: { 'Content-Type': 'multipart/form-data' }
+                            });
+                            toast({ title: "Import Successful", description: data.message });
+                            setShowImportModal(false);
+                            fetchData();
+                          } catch (err: any) {
+                            toast({ 
+                              variant: "destructive", 
+                              title: "Import Failed", 
+                              description: err.response?.data?.message || "Check your CSV format" 
+                            });
+                          } finally {
+                            setImporting(false);
+                          }
+                        }}
+                      />
+                      <Button 
+                        asChild
+                        disabled={importing}
+                        className="mt-6 bg-slate-900 text-white hover:bg-primary h-12 px-8 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all shadow-md"
+                      >
+                        <label htmlFor="csv-upload">
+                          {importing ? "Processing..." : "Select CSV File"}
+                        </label>
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-primary/5 rounded-2xl border border-primary/10">
+                      <div className="flex items-center gap-3">
+                        <FileDown className="h-5 w-5 text-primary" />
+                        <div>
+                          <p className="text-[10px] font-black text-slate-900 uppercase leading-none mb-1">Template</p>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Required Structure</p>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        className="text-[9px] font-black text-primary hover:bg-primary/10"
+                        onClick={() => {
+                          const csvContent = "productName,category,price,quantity,minStockLevel,brand,size\nSample Product,Electronics,999,50,10,Sony,Medium";
+                          const blob = new Blob([csvContent], { type: 'text/csv' });
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = 'inventory_template.csv';
+                          a.click();
+                        }}
+                      >
+                        Download
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
       </div>
     </PageTransition>
   );

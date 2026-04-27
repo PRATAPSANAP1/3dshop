@@ -1,6 +1,10 @@
 import express from 'express';
-import { getProducts, createProduct, updateProduct, deleteProduct, scanQR, getProductsByRack, getProductById, updateStockByQR, getReviews, createReview } from '../controllers/productController';
+import { getProducts, createProduct, updateProduct, deleteProduct, scanQR, getProductsByRack, getProductById, updateStockByQR, getReviews, createReview, importProducts } from '../controllers/productController';
 import { protect, admin, staff } from '../middleware/auth';
+import multer from 'multer';
+import os from 'os';
+
+const upload = multer({ dest: os.tmpdir() });
 
 
 const router = express.Router();
@@ -15,6 +19,7 @@ router.delete('/:id', protect, admin, deleteProduct);
 router.post('/scan', protect, scanQR);
 router.get('/:id/reviews', getReviews);
 router.post('/:id/reviews', protect, createReview);
+router.post('/import', protect, admin, upload.single('file'), importProducts);
 
 
 export default router;
