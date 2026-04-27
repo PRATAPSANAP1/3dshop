@@ -577,18 +577,26 @@ const CustomerSearch: React.FC = () => {
           <Canvas
             shadows={!isMobile}
             frameloop="demand"
+            performance={{ min: 0.5 }}
             camera={{
               position: isMobile ? [0, 30, 25] : [0, 20, 20],
               fov: isMobile ? 55 : 45
             }}
             style={{ background: '#0f172a' }}
-            gl={{ antialias: false, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: false, stencil: false }}
-            dpr={[1, 1.1]}
+            gl={{ 
+              antialias: false, 
+              powerPreference: 'high-performance', 
+              failIfMajorPerformanceCaveat: true, 
+              stencil: false,
+              alpha: false,
+              depth: true
+            }}
+            dpr={isMobile ? 1 : [1, 1.1]}
             onCreated={({ gl }) => {
               const canvas = gl.domElement;
               canvas.addEventListener('webglcontextlost', (e) => {
                 e.preventDefault();
-                console.warn('WebGL context lost — will show recovery UI');
+                console.warn('WebGL context lost — showing recovery UI');
                 setWebglLost(true);
               });
               canvas.addEventListener('webglcontextrestored', () => {

@@ -53,30 +53,42 @@ export const addOrderItems = async (req: Request, res: Response) => {
     }
 
     // Ensure shopId is present
-    const finalShopId = shopId || orderItems[0]?.shopId;
+    let finalShopId = shopId || orderItems[0]?.shopId;
+
+    // Fallback: If shopId is missing, try to find it from the first product
+    if (!finalShopId && orderItems[0]?.product) {
+      const prod = await Product.findById(orderItems[0].product);
+      if (prod) finalShopId = prod.shopId;
+    }
+
     if (!finalShopId) {
-      res.status(400).json({ message: 'Shop ID is required' });
+      res.status(400).json({ message: 'Missing Shop Identity. Your cart may be from an older version. Please clear cart and try again.' });
       return;
     }
 
     if (!mongoose.Types.ObjectId.isValid(finalShopId)) {
-      res.status(400).json({ message: 'Invalid Shop ID format' });
+      res.status(400).json({ message: 'Invalid Shop ID format: ' + finalShopId });
       return;
     }
 
     // Normalize shipping address (map legacy pinCode to postalCode)
     const normalizedAddress = {
       ...shippingAddress,
-      postalCode: shippingAddress.postalCode || shippingAddress.pinCode || shippingAddress.zipCode || shippingAddress.zip
+      postalCode: shippingAddress?.postalCode || shippingAddress?.pinCode || shippingAddress?.zipCode || shippingAddress?.zip
     };
 
     if (!normalizedAddress.postalCode) {
-      res.status(400).json({ message: 'Postal code is required in shipping address' });
+      res.status(400).json({ message: 'Postal Code (PIN Code) is required in your shipping address.' });
       return;
     }
 
-    if (!normalizedAddress.street || !normalizedAddress.city) {
-      res.status(400).json({ message: 'Street and City are required in shipping address' });
+    if (!normalizedAddress.street) {
+      res.status(400).json({ message: 'Street address is required.' });
+      return;
+    }
+
+    if (!normalizedAddress.city) {
+      res.status(400).json({ message: 'City is required in your shipping address.' });
       return;
     }
 
