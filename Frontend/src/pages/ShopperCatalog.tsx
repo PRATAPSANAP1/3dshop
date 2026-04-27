@@ -18,6 +18,8 @@ const PALETTES = [
   { grad: "from-rose-400 to-pink-600", soft: "bg-rose-50/50", txt: "text-rose-600", border: "border-rose-100", dot: "#f43f5e", btn: "bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white" },
   { grad: "from-sky-400 to-indigo-500", soft: "bg-sky-50/50", txt: "text-sky-600", border: "border-sky-100", dot: "#0ea5e9", btn: "bg-sky-50 text-sky-500 hover:bg-sky-500 hover:text-white" },
   { grad: "from-fuchsia-500 to-purple-600", soft: "bg-fuchsia-50/50", txt: "text-fuchsia-600", border: "border-fuchsia-100", dot: "#d946ef", btn: "bg-fuchsia-50 text-fuchsia-500 hover:bg-fuchsia-500 hover:text-white" },
+  { grad: "from-indigo-600 to-blue-700", soft: "bg-indigo-50/50", txt: "text-indigo-600", border: "border-indigo-100", dot: "#4f46e5", btn: "bg-indigo-50 text-indigo-500 hover:bg-indigo-500 hover:text-white" },
+  { grad: "from-teal-400 to-emerald-500", soft: "bg-teal-50/50", txt: "text-teal-600", border: "border-teal-100", dot: "#14b8a6", btn: "bg-teal-50 text-teal-500 hover:bg-teal-500 hover:text-white" },
 ];
 
 const getColorIndex = (str: string) => {

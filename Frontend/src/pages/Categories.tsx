@@ -13,6 +13,9 @@ const PALETTES = [
   { soft: "bg-rose-50/80", hoverSoft: "hover:bg-rose-50/40", border: "border-rose-200", hoverBorder: "hover:border-rose-300", accent: "text-rose-500", blob: "bg-rose-100", iconBg: "bg-rose-50", iconHover: "group-hover:bg-rose-500" },
   { soft: "bg-sky-50/80", hoverSoft: "hover:bg-sky-50/40", border: "border-sky-200", hoverBorder: "hover:border-sky-300", accent: "text-sky-500", blob: "bg-sky-100", iconBg: "bg-sky-50", iconHover: "group-hover:bg-sky-500" },
   { soft: "bg-fuchsia-50/80", hoverSoft: "hover:bg-fuchsia-50/40", border: "border-fuchsia-200", hoverBorder: "hover:border-fuchsia-300", accent: "text-fuchsia-500", blob: "bg-fuchsia-100", iconBg: "bg-fuchsia-50", iconHover: "group-hover:bg-fuchsia-500" },
+  { soft: "bg-indigo-50/80", hoverSoft: "hover:bg-indigo-50/40", border: "border-indigo-200", hoverBorder: "hover:border-indigo-300", accent: "text-indigo-500", blob: "bg-indigo-100", iconBg: "bg-indigo-50", iconHover: "group-hover:bg-indigo-500" },
+  { soft: "bg-teal-50/80", hoverSoft: "hover:bg-teal-50/40", border: "border-teal-200", hoverBorder: "hover:border-teal-300", accent: "text-teal-500", blob: "bg-teal-100", iconBg: "bg-teal-50", iconHover: "group-hover:bg-teal-500" },
+  { soft: "bg-slate-100/80", hoverSoft: "hover:bg-slate-100/40", border: "border-slate-200", hoverBorder: "hover:border-slate-300", accent: "text-slate-600", blob: "bg-slate-200", iconBg: "bg-slate-100", iconHover: "group-hover:bg-slate-600" },
 ];
 
 const getColorIndex = (str: string) => {
