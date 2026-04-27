@@ -16,6 +16,11 @@ export const getWishlist = async (req: Request, res: Response) => {
 
 export const addToWishlist = async (req: Request, res: Response) => {
   const { productId } = req.body;
+  
+  if (!productId || !mongoose.Types.ObjectId.isValid(productId)) {
+    return res.status(400).json({ message: 'Invalid Product ID' });
+  }
+
   try {
     const product = await Product.findById(productId);
     if (!product) {
@@ -23,19 +28,20 @@ export const addToWishlist = async (req: Request, res: Response) => {
     }
 
     // Atomic update: creates if missing, adds product if not already present
+    // No shopId needed as products are self-contained
     const updatedWishlist = await Wishlist.findOneAndUpdate(
       { user: (req.user as any)._id },
-      { 
-        $addToSet: { products: productId as any },
-        $setOnInsert: { shopId: (product as any).shopId }
-      },
+      { $addToSet: { products: productId as any } },
       { upsert: true, new: true }
     ).populate('products');
 
     res.status(201).json(updatedWishlist);
   } catch (err: any) {
     console.error('[WISHLIST_ADD_ERROR]:', err);
-    res.status(500).json({ message: 'Failed to add to wishlist: ' + err.message });
+    res.status(500).json({ 
+      message: 'Internal server error while adding to wishlist',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined 
+    });
   }
 };
 
