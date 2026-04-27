@@ -123,7 +123,7 @@ const Checkout = () => {
       }
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_yourkey",
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_live_SiQac1IRhggraC",
         amount: rzpOrder.amount,
         currency: rzpOrder.currency,
         name: "SmartStore Professional",
