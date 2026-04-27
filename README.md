@@ -18,6 +18,17 @@
 - **Animated Stats** — 50k+ customers, 30min dispatch, 99.9% uptime
 - **Premium Footer** — 4-column layout with department and support links
 
+### 🚀 Final Polish & Security Hardening (Latest Updates)
+- **Zero-Loading UI**: Removed all "circle-type" loading animations project-wide for an instant, responsive feel.
+- **Multi-Tenant Isolation**: Hardened DB queries in `product`, `order`, `rack`, and `billing` controllers to ensure 100% data isolation between shops using `shopId` scoping.
+- **RBAC Standardization**: Refined role hierarchy (`superadmin`, `admin`, `employee`, `shopper`) with granular `employeePermissions` support.
+- **Team Management Portal**: New `/employees` interface for shop owners to invite staff and manage access rights.
+- **POS & Search Optimization**: Removed loading states from the QR Scanner, Billing search, and HomePage search for zero-latency feedback.
+- **Branding Loader Refinement**: Simplified the global splash screen by removing the legacy SVG ring animation.
+- **Razorpay Live Ready**: Integrated production-grade payment flow with validated shop-specific credentials.
+
+---
+
 ### 🌐 Landing Page — Feature Showcase
 - Hero section with CTA buttons (Enter 3D Store / Browse Catalog)
 - 3D preview card with animated store emoji
@@ -414,6 +425,8 @@ RAZORPAY_KEY_ID=rzp_test_xxxxx
 | `/billing` | Admin | Billing suite |
 | `/logistics` | Admin | ✨ Fleet overview |
 | `/users` | Admin | User management |
+| `/employees` | Admin | ✨ Team & Permissions |
+| `/superadmin/dashboard` | SuperAdmin | ✨ Global platform control |
 | `/audit-logs` | Admin | Audit trail |
 
 ---
