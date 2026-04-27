@@ -23,10 +23,10 @@ export default {
         surface: "#FFFFFF",
         foreground: "#0F172A",
         primary: {
-          DEFAULT: "#EA580C",
+          DEFAULT: "#f97316",
           foreground: "#FFFFFF",
-          hover: "#C2410C",
-          active: "#9A3412",
+          hover: "#ea580c",
+          active: "#c2410c",
         },
         secondary: {
           DEFAULT: "#16A34A",

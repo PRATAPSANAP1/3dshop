@@ -122,7 +122,7 @@ const MobileSearchOverlay = ({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                         {p.category}{p.brand ? ` • ${p.brand}` : ''}{p.size ? ` • ${p.size}` : ''}
                       </p>
                     </div>
-                    <span className="text-sm font-black text-orange-600">₹{p.price}</span>
+                    <span className="text-sm font-black text-slate-900">₹{p.price}</span>
                   </motion.div>
                 ))}
               </div>
@@ -261,10 +261,10 @@ const HomePage = () => {
       >
         <div className="max-w-7xl mx-auto h-full px-4 md:px-8 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="h-10 w-10 bg-orange-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-500/20 group-hover:rotate-6 transition-transform">
+            <div className="h-10 w-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 group-hover:rotate-6 transition-transform">
               <Zap size={20} fill="currentColor" />
             </div>
-            <span className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter">3D<span className="text-orange-500 uppercase italic">shop.</span></span>
+            <span className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter">3D<span className="text-primary uppercase italic">shop.</span></span>
           </Link>
 
           <div className="hidden lg:flex flex-1 max-w-xl mx-8">
@@ -321,7 +321,7 @@ const HomePage = () => {
           <motion.div 
             animate={{ opacity: [0.03, 0.08, 0.03] }}
             transition={{ duration: 4, repeat: Infinity }}
-            className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-orange-500/10 blur-[120px] rounded-full" 
+            className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-slate-200/20 blur-[120px] rounded-full" 
           />
           <motion.div 
             animate={{ opacity: [0.03, 0.08, 0.03] }}
@@ -338,9 +338,9 @@ const HomePage = () => {
             <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter leading-[0.95] mb-6 uppercase">
               Your Daily
               <br />
-              <span className="text-orange-500 italic">Grocery,</span>
+              <span className="italic">Grocery,</span>
               <br />
-              <span className="text-slate-600 underline decoration-orange-500/30 underline-offset-8">Delivered</span>
+              <span className="text-slate-600 underline decoration-primary/30 underline-offset-8">Delivered</span>
               <br />
               <span className="text-slate-400">Smart.</span>
             </h1>
@@ -350,7 +350,7 @@ const HomePage = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 onClick={() => user ? navigate('/catalog') : navigate('/login')}
-                className="h-14 px-10 rounded-2xl bg-orange-500 hover:bg-slate-900 text-white font-black uppercase tracking-widest text-xs transition-all gap-3 group border-none shadow-xl shadow-orange-500/20"
+                className="h-14 px-10 rounded-2xl bg-primary hover:bg-primary-hover text-white font-black uppercase tracking-widest text-xs transition-all gap-3 group border-none shadow-xl shadow-primary/20"
               >
                 Enter 3D Store <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
               </Button>
@@ -431,7 +431,7 @@ const HomePage = () => {
           <div>
             <p className="text-[11px] font-black text-orange-500 uppercase tracking-[0.3em] mb-2">Curated Trends</p>
             <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">
-              The <span className="text-orange-500 italic underline decoration-orange-500/20 underline-offset-8">Hotlist.</span>
+              The <span className="italic underline decoration-primary/20 underline-offset-8">Hotlist.</span>
             </h2>
           </div>
           <Link to="/catalog" className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-orange-500 transition-colors flex items-center gap-2 group">
@@ -495,7 +495,7 @@ const HomePage = () => {
           <div className="text-center mb-16">
             <p className="text-[11px] font-black text-blue-500 uppercase tracking-[0.3em] mb-2">Platform Capabilities</p>
             <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">
-              Everything <span className="text-orange-500 italic underline decoration-orange-500/20 underline-offset-8">Reimagined.</span>
+              Everything <span className="italic underline decoration-primary/20 underline-offset-8">Reimagined.</span>
             </h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -543,7 +543,7 @@ const HomePage = () => {
       <section className="py-20 md:py-28">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-3 gap-6 md:gap-12 text-center bg-white rounded-[4rem] border border-slate-100 p-12 shadow-sm">
           <div>
-            <p className="text-3xl md:text-6xl font-black text-orange-500 mb-2 md:mb-4 tracking-tighter italic">50k+</p>
+            <p className="text-3xl md:text-6xl font-black text-primary mb-2 md:mb-4 tracking-tighter italic">50k+</p>
             <p className="text-[9px] md:text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] md:tracking-[0.3em]">Customers</p>
           </div>
           <div>
@@ -571,7 +571,7 @@ const HomePage = () => {
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => navigate('/catalog')}
-                className="h-12 md:h-14 px-8 md:px-10 rounded-2xl bg-orange-500 text-white text-[11px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-orange-500/10"
+                className="h-12 md:h-14 px-8 md:px-10 rounded-2xl bg-primary text-white text-[11px] font-black uppercase tracking-widest hover:bg-primary-hover transition-all shadow-lg shadow-primary/10"
               >
                 Start Shopping
               </button>

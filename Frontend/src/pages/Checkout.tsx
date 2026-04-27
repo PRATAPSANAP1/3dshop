@@ -266,7 +266,7 @@ const Checkout = () => {
             <div key={s.id} className="flex items-center gap-3 md:gap-4">
               <div className="flex flex-col items-center gap-2">
                 <div className={`h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl flex items-center justify-center font-black text-sm transition-all ${
-                  step === s.id ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 
+                  step === s.id ? 'bg-primary text-white shadow-lg shadow-primary/20' : 
                   step > s.id ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'
                 }`}>
                   {step > s.id ? <Check size={20} strokeWidth={3} /> : s.id}
@@ -292,7 +292,7 @@ const Checkout = () => {
               className="space-y-8"
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 leading-none">SHIPPING <span className="text-orange-500 not-italic">ADDRESS</span></h2>
+                <h2 className="text-3xl font-black italic tracking-tighter text-slate-900 leading-none">SHIPPING <span className="text-primary not-italic">ADDRESS</span></h2>
                 <Button onClick={() => setShowAddressModal(true)} variant="outline" className="rounded-xl border-slate-200 font-bold gap-2 hover:bg-slate-50 transition-all text-xs h-10 py-1">
                   <Plus size={16} /> New Address
                 </Button>
@@ -310,7 +310,7 @@ const Checkout = () => {
                       className="bg-white rounded-3xl p-8 w-full max-w-md shadow-xl"
                     >
                       <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-xl font-black italic text-slate-900 uppercase">New <span className="text-orange-500 not-italic">Address</span></h3>
+                        <h3 className="text-xl font-black italic text-slate-900 uppercase">New <span className="text-primary not-italic">Address</span></h3>
                         <button onClick={() => setShowAddressModal(false)} className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors">
                           <X size={18} />
                         </button>
@@ -319,7 +319,7 @@ const Checkout = () => {
                         <div className="flex gap-2">
                           {['Home', 'Work', 'Other'].map(l => (
                             <button key={l} onClick={() => setAddressForm({ ...addressForm, label: l })}
-                              className={`flex-1 h-10 rounded-xl text-xs font-black uppercase tracking-wide border-2 transition-all ${addressForm.label === l ? 'border-orange-500 bg-orange-50 text-orange-600' : 'border-slate-200 text-slate-400'
+                              className={`flex-1 h-10 rounded-xl text-xs font-black uppercase tracking-wide border-2 transition-all ${addressForm.label === l ? 'border-primary bg-primary/5 text-primary' : 'border-slate-200 text-slate-400'
                                 }`}>
                               {l}
                             </button>
@@ -339,7 +339,7 @@ const Checkout = () => {
                         <label className="flex items-center gap-3 cursor-pointer">
                           <div
                             onClick={() => setAddressForm({ ...addressForm, isDefault: !addressForm.isDefault })}
-                            className={`h-5 w-5 rounded-md border-2 flex items-center justify-center transition-all ${addressForm.isDefault ? 'bg-orange-500 border-orange-500' : 'border-slate-300'
+                            className={`h-5 w-5 rounded-md border-2 flex items-center justify-center transition-all ${addressForm.isDefault ? 'bg-primary border-primary' : 'border-slate-300'
                               }`}
                           >
                             {addressForm.isDefault && <Check size={12} className="text-white" />}
@@ -349,7 +349,7 @@ const Checkout = () => {
                       </div>
                       <div className="flex gap-3 mt-6">
                         <Button variant="outline" onClick={() => setShowAddressModal(false)} className="flex-1 h-12 rounded-xl font-bold">Cancel</Button>
-                        <Button onClick={handleAddAddress} disabled={savingAddress} className="flex-1 h-12 rounded-xl font-bold bg-orange-500 hover:bg-orange-600 text-white transition-colors">
+                        <Button onClick={handleAddAddress} disabled={savingAddress} className="flex-1 h-12 rounded-xl font-bold bg-primary hover:bg-primary/90 text-white transition-colors">
                           {savingAddress ? 'Saving...' : 'Save & Select'}
                         </Button>
                       </div>
@@ -363,20 +363,20 @@ const Checkout = () => {
                   <div className="col-span-full py-12 flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-[2.5rem] bg-slate-50/50">
                     <MapPin size={40} className="text-slate-300 mb-4" />
                     <p className="text-slate-500 font-bold mb-4">No shipping addresses found</p>
-                    <Button onClick={() => setShowAddressModal(true)} className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl px-6">Add Your First Address</Button>
+                    <Button onClick={() => setShowAddressModal(true)} className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6">Add Your First Address</Button>
                   </div>
                 ) : (
                   (user?.addresses || []).map((addr: any, idx: number) => (
                     <div
                       key={idx}
                       onClick={() => setSelectedAddressIdx(idx)}
-                      className={`p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] border-2 cursor-pointer transition-all ${selectedAddressIdx === idx ? 'border-orange-500 bg-orange-50/30 shadow-md shadow-orange-500/5' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                      className={`p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] border-2 cursor-pointer transition-all ${selectedAddressIdx === idx ? 'border-primary bg-primary/5 shadow-md shadow-primary/5' : 'border-slate-200 bg-white hover:border-slate-300'}`}
                     >
                       <div className="flex items-center justify-between mb-4">
-                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${selectedAddressIdx === idx ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${selectedAddressIdx === idx ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}>
                           {addr.label === 'Home' ? <Home size={18} /> : <Briefcase size={18} />}
                         </div>
-                        {selectedAddressIdx === idx && <CheckCircle2 size={24} className="text-orange-500" />}
+                        {selectedAddressIdx === idx && <CheckCircle2 size={24} className="text-primary" />}
                       </div>
                       <p className="font-black italic text-slate-900 mb-1 tracking-tight">{addr.label}</p>
                       <p className="text-xs font-medium text-slate-500 leading-relaxed line-clamp-2">{addr.street}, {addr.city}, {addr.state} {addr.postalCode}</p>
@@ -403,7 +403,7 @@ const Checkout = () => {
             >
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div className="space-y-4 sm:space-y-6">
-                  <h2 className="text-2xl sm:text-3xl font-black italic tracking-tighter text-slate-900 leading-none">PAYMENT <span className="text-orange-500 not-italic">METHOD</span></h2>
+                  <h2 className="text-2xl sm:text-3xl font-black italic tracking-tighter text-slate-900 leading-none">PAYMENT <span className="text-primary not-italic">METHOD</span></h2>
                   <div className="space-y-4">
                     {[
                       { id: 'COD', name: 'Cash on Delivery', icon: <Truck size={20} /> },
@@ -412,22 +412,22 @@ const Checkout = () => {
                       <div
                         key={m.id}
                         onClick={() => setPaymentMethod(m.id)}
-                        className={`p-5 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${paymentMethod === m.id ? 'border-orange-500 bg-orange-50/30 shadow-md shadow-orange-500/5' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                        className={`p-5 rounded-2xl border-2 flex items-center justify-between cursor-pointer transition-all ${paymentMethod === m.id ? 'border-primary bg-primary/5 shadow-md shadow-primary/5' : 'border-slate-200 bg-white hover:border-slate-300'}`}
                       >
                         <div className="flex items-center gap-4">
-                          <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${paymentMethod === m.id ? 'bg-orange-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                          <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${paymentMethod === m.id ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}>
                             {m.icon}
                           </div>
                           <span className="font-black italic text-slate-700 leading-none tracking-tight">{m.name}</span>
                         </div>
-                        {paymentMethod === m.id && <div className="h-3 w-3 rounded-full bg-orange-500" />}
+                        {paymentMethod === m.id && <div className="h-3 w-3 rounded-full bg-primary" />}
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="bg-slate-900 rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 text-white shadow-xl h-fit">
-                  <h3 className="text-xl font-black italic mb-8 border-b border-white/10 pb-4 tracking-tight">ORDER SUMMARY</h3>
+                <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 text-slate-900 shadow-sm h-fit">
+                  <h3 className="text-xl font-black italic mb-8 border-b border-slate-100 pb-4 tracking-tight uppercase">Order Summary</h3>
                   
                   <div className="mb-6 space-y-2">
                     <div className="flex gap-2">
@@ -435,45 +435,45 @@ const Checkout = () => {
                         placeholder="Coupon Code" 
                         value={couponCode} 
                         onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                        className="h-12 bg-white/10 border-white/30 text-white placeholder:text-white/40 uppercase font-bold" 
+                        className="h-12 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 uppercase font-bold" 
                       />
-                      <Button onClick={applyCoupon} disabled={couponLoading || !couponCode} className="h-12 px-6 bg-orange-500 hover:bg-orange-600 font-black uppercase text-xs tracking-widest">
+                      <Button onClick={applyCoupon} disabled={couponLoading || !couponCode} className="h-12 px-6 bg-primary hover:bg-primary/90 font-black uppercase text-xs tracking-widest text-white">
                         {couponLoading ? '...' : 'Apply'}
                       </Button>
                     </div>
-                    {couponError && <p className="text-rose-400 text-xs font-bold px-1 flex items-center gap-1.5 animate-pulse"><AlertCircle size={12} /> {couponError}</p>}
-                    {discount > 0 && <p className="text-emerald-400 text-xs font-bold px-1 flex items-center gap-1.5"><CheckCircle2 size={12} /> Coupon applied: {discount}% OFF</p>}
+                    {couponError && <p className="text-rose-500 text-xs font-bold px-1 flex items-center gap-1.5 animate-pulse"><AlertCircle size={12} /> {couponError}</p>}
+                    {discount > 0 && <p className="text-emerald-500 text-xs font-bold px-1 flex items-center gap-1.5"><CheckCircle2 size={12} /> Coupon applied: {discount}% OFF</p>}
                   </div>
 
                   <div className="space-y-4 mb-8">
-                    <div className="flex justify-between items-center text-slate-400">
+                    <div className="flex justify-between items-center text-slate-500">
                       <span className="font-black text-[9px] uppercase tracking-[0.2em] leading-none opacity-60">Items Total</span>
                       <span className="font-black italic">₹{totalPrice}</span>
                     </div>
                     {discount > 0 && (
-                      <div className="flex justify-between items-center text-emerald-400">
+                      <div className="flex justify-between items-center text-emerald-500">
                         <span className="font-black text-[9px] uppercase tracking-[0.2em] leading-none">Discount ({discount}%)</span>
                         <span className="font-black italic">-₹{discountAmount}</span>
                       </div>
                     )}
-                    <div className="flex justify-between items-center text-slate-400">
+                    <div className="flex justify-between items-center text-slate-500">
                       <span className="font-black text-[9px] uppercase tracking-[0.2em] leading-none opacity-60">GST (0%)</span>
                       <span className="font-black italic">₹0</span>
                     </div>
-                    <div className="flex justify-between items-center text-slate-400">
+                    <div className="flex justify-between items-center text-slate-500">
                       <span className="font-black text-[9px] uppercase tracking-[0.2em] leading-none opacity-60">Shipping</span>
-                      <span className="font-black italic text-orange-500">₹60</span>
+                      <span className="font-black italic">₹60</span>
                     </div>
-                    <div className="pt-6 border-t border-white/10 flex justify-between items-center">
+                    <div className="pt-6 border-t border-slate-100 flex justify-between items-center">
                       <span className="font-black text-xl italic tracking-tighter leading-none uppercase">GRAND TOTAL</span>
-                      <span className="text-3xl font-black text-orange-500 italic leading-none">₹{finalPrice}</span>
+                      <span className="text-3xl font-black text-slate-900 italic leading-none">₹{finalPrice}</span>
                     </div>
                   </div>
 
-                  <Button onClick={placeOrder} disabled={isProcessing} className="w-full h-14 rounded-2xl bg-orange-500 hover:bg-orange-600 text-white font-black uppercase tracking-[0.15em] text-[11px] gap-3 group active:scale-95 transition-all shadow-lg shadow-orange-500/20">
+                  <Button onClick={placeOrder} disabled={isProcessing} className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-[0.15em] text-[11px] gap-3 group active:scale-95 transition-all shadow-lg shadow-primary/20">
                     {isProcessing ? 'PROCESSING...' : 'COMPLETE ORDER'} {!isProcessing && <ShoppingBag size={18} className="group-hover:rotate-12 transition-transform" />}
                   </Button>
-                  <p className="mt-6 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 leading-none not-italic">
+                  <p className="mt-6 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none not-italic">
                     <ShieldCheck size={14} className="text-emerald-500" /> SECURE SSL ENCRYPTION
                   </p>
                 </div>

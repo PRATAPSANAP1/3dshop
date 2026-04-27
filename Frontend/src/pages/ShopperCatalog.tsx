@@ -89,7 +89,7 @@ const ShopperCatalog = () => {
         {/* Search + filter bar */}
         <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl pt-1 pb-4 space-y-4">
           <div className="relative">
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center z-10 shadow-sm">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center z-10 shadow-sm">
               <Search size={13} className="text-white" />
             </div>
             <Input
@@ -196,7 +196,7 @@ const ShopperCatalog = () => {
                       <div className="mt-auto flex items-end justify-between pt-4 border-t border-slate-200/50">
                         <div className="flex flex-col">
                            <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-0.5 ml-0.5">Price</span>
-                           <span className={`text-xl sm:text-2xl font-black italic tracking-tighter ${pal.txt} leading-none`}>₹{p.price}</span>
+                           <span className="text-xl sm:text-2xl font-black italic tracking-tighter text-slate-900 leading-none">₹{p.price}</span>
                         </div>
                         <motion.button
                           whileTap={{ scale: 0.88 }}

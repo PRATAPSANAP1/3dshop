@@ -122,14 +122,13 @@ const Products = () => {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="font-heading text-3xl sm:text-4xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
-              PRODUCT <span className="text-orange-500 not-italic">CATALOG.</span>
+              PRODUCT <span className="text-primary not-italic">CATALOG.</span>
             </h1>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{products.length} SKUs Registered</p>
           </div>
           <Button
             onClick={() => { setEditingProduct(null); setForm({ productName: '', category: '', price: '', quantity: '', minStockLevel: '', rackId: '', shelfNumber: '', columnNumber: '' }); setShowAddModal(true); }}
-            className="gap-2 h-12 px-6 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-sm shadow-orange-500/20 border-none text-white"
-            style={{ background: 'linear-gradient(135deg, #EA580C 0%, #D97706 100%)' }}
+            className="gap-2 h-12 px-6 rounded-2xl bg-primary hover:bg-primary-hover font-black uppercase tracking-widest text-[10px] shadow-sm shadow-primary/20 border-none text-white"
           >
             <Plus className="h-4 w-4" strokeWidth={3} />
             Add Product
@@ -199,14 +198,14 @@ const Products = () => {
         {/* ── SEARCH & FILTER BAR ── */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center bg-white p-3 rounded-3xl border-2 border-slate-100 shadow-sm">
           <div className="relative flex-1 max-w-sm">
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
               <Search size={13} className="text-white" />
             </div>
             <Input
               placeholder="Search products..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-12 h-11 rounded-xl border-slate-200 focus:ring-orange-500/10 focus:border-orange-400 font-bold text-slate-700"
+              className="pl-12 h-11 rounded-xl border-slate-200 focus:ring-primary/10 focus:border-primary font-bold text-slate-700"
             />
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar flex-wrap">
@@ -263,7 +262,7 @@ const Products = () => {
                     )}
                     <motion.button whileTap={{ scale: 0.9 }}
                       onClick={e => { e.stopPropagation(); openEdit(product); }}
-                      className="h-9 w-9 rounded-xl bg-white shadow-md flex items-center justify-center text-orange-500 hover:bg-orange-500 hover:text-white transition-colors border border-orange-100"
+                      className="h-9 w-9 rounded-xl bg-white shadow-md flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors border border-primary/10"
                     >
                       <Edit2 size={14} />
                     </motion.button>
@@ -313,7 +312,7 @@ const Products = () => {
                     <div className="mt-auto grid grid-cols-2 gap-2.5">
                       <div className={`${pal.soft} rounded-2xl p-3.5 border ${pal.border}`}>
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Price</p>
-                        <p className={`text-xl font-black italic leading-none ${pal.txt}`}>₹{product.price}</p>
+                        <p className="text-xl font-black italic leading-none text-slate-900">₹{product.price}</p>
                       </div>
                       <div className={`${isLow ? 'bg-rose-50 border-rose-100' : `${pal.soft} ${pal.border}`} rounded-2xl p-3.5 border`}>
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Stock</p>
@@ -380,7 +379,7 @@ const Products = () => {
                       <div>
                         <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase italic leading-none">
                           {editingProduct ? 'Edit' : 'New'}{" "}
-                          <span className="bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent not-italic">
+                          <span className="bg-gradient-to-r from-primary to-rose-500 bg-clip-text text-transparent not-italic">
                             Product
                           </span>
                         </h2>
@@ -453,8 +452,7 @@ const Products = () => {
                       <motion.button
                         type="submit"
                         whileTap={{ scale: 0.97 }}
-                        className="w-full h-14 rounded-2xl text-white font-black uppercase tracking-[0.2em] text-[11px] border-none shadow-lg transition-all"
-                        style={{ background: "linear-gradient(135deg, #f43f5e 0%, #f97316 50%, #eab308 100%)" }}
+                        className="w-full h-14 rounded-2xl bg-primary hover:bg-primary-hover text-white font-black uppercase tracking-[0.2em] text-[11px] border-none shadow-lg shadow-primary/20 transition-all"
                       >
                         {editingProduct ? '✦ Save Changes' : '✦ Add to Catalog'}
                       </motion.button>
