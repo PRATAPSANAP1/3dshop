@@ -244,6 +244,8 @@ The platform implements a multi-tenant security architecture where access is str
 
 ### 🛡️ Role Hierarchy & Permissions
 
+| Role | Access Level | Primary Responsibilities |
+| :--- | :--- | :--- |
 | **Admin** | **Highest Access** | Full control over the shop: inventory, 3D layout, billing, team management, and shop configurations. |
 | **Employee** | **Staff / Operational** | Handles day-to-day tasks like scanning (POS), order packing, and delivery fulfillment. |
 | **Shopper** | **End Customer** | Browsing the 3D store, managing cart/wishlist, and tracking personal orders. |
@@ -252,22 +254,18 @@ The platform implements a multi-tenant security architecture where access is str
 
 #### 1. Admin (Administrator Level)
 *   **Shop Management**: Full control over shop identity, branding, and active configurations.
-*   **Global Access**: Manage users, products, and analytics within the assigned shop scope.
-*   **System Integrity**: Access audit logs to monitor all activity within the shop instance.
-
-#### 2. Employee (Operational Level)
 *   **Inventory & Logistics**: Full CRUD on products, racks, and logistics fleet.
 *   **3D Architectural Control**: Design the shop layout using the 3D Shop Builder.
-*   **Team Governance**: Invite employees and manage granular **Employee Permissions** (e.g., View Orders, Manage Stock).
-*   **Financials**: Access the Billing Suite, Revenue Charts, and POS Scanner.
+*   **Team Governance**: Invite employees and manage granular **Employee Permissions**.
+*   **Financials**: Access the Billing Suite, Revenue Charts, and platform analytics.
 
-#### 3. Employee (Staff Level)
+#### 2. Employee (Staff Level)
 *   **Operational Access**: Use the QR Scanner for inventory checks or billing.
 *   **Order Fulfillment**: Update order statuses (Packed, Shipped) based on assigned permissions.
 *   **Delivery Management**: Handle last-mile delivery and verify OTPs at the doorstep.
 *   *Note: Specific access is toggled by the Admin in the Employee Management portal.*
 
-#### 4. Shopper (Public Level)
+#### 3. Shopper (Public Level)
 *   **Spatial Commerce**: Explore the 3D Shop, use the product locator, and view 2D floor plans.
 *   **Personalization**: Manage multiple delivery addresses, wishlists, and order history.
 *   **Secure Checkout**: Place orders via Razorpay or COD and download digital invoices.
