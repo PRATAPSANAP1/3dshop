@@ -368,10 +368,10 @@ export const getPaymentStats = async (req: Request, res: Response) => {
     const unpaid = orders.filter(o => !o.isPaid && o.paymentMethod !== 'COD');
     const pendingCOD = orders.filter(o => o.paymentMethod === 'COD' && !o.isDelivered && o.orderStatus !== 'Delivered');
 
-    const totalRevenue = orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
-    const collectedOnline = paidOnline.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
-    const collectedCOD = paidCOD.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
-    const pendingAmount = unpaid.reduce((sum, o) => sum + (o.totalPrice || 0), 0) + pendingCOD.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+    const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0);
+    const collectedOnline = paidOnline.reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0);
+    const collectedCOD = paidCOD.reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0);
+    const pendingAmount = unpaid.reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0) + pendingCOD.reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0);
 
     // Recent payments (last 20)
     const recentPayments = orders
