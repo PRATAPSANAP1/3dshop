@@ -363,10 +363,10 @@ export const getPaymentStats = async (req: Request, res: Response) => {
     const orders = await Order.find(query);
 
     const totalOrders = orders.length;
-    const paidOnline = orders.filter(o => o.isPaid && o.paymentMethod !== 'COD');
-    const paidCOD = orders.filter(o => o.paymentMethod === 'COD' && (o.isDelivered || o.orderStatus === 'Delivered'));
-    const unpaid = orders.filter(o => !o.isPaid && o.paymentMethod !== 'COD');
-    const pendingCOD = orders.filter(o => o.paymentMethod === 'COD' && !o.isDelivered && o.orderStatus !== 'Delivered');
+    const paidOnline = orders.filter((o: any) => o.isPaid && o.paymentMethod !== 'COD');
+    const paidCOD = orders.filter((o: any) => o.paymentMethod === 'COD' && (o.isDelivered || o.orderStatus === 'Delivered'));
+    const unpaid = orders.filter((o: any) => !o.isPaid && o.paymentMethod !== 'COD');
+    const pendingCOD = orders.filter((o: any) => o.paymentMethod === 'COD' && !o.isDelivered && o.orderStatus !== 'Delivered');
 
     const totalRevenue = orders.reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0);
     const collectedOnline = paidOnline.reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0);
@@ -375,10 +375,10 @@ export const getPaymentStats = async (req: Request, res: Response) => {
 
     // Recent payments (last 20)
     const recentPayments = orders
-      .filter(o => o.isPaid || (o.paymentMethod === 'COD' && o.isDelivered))
-      .sort((a, b) => (b.paidAt || b.deliveredAt || b.createdAt).getTime() - (a.paidAt || a.deliveredAt || a.createdAt).getTime())
+      .filter((o: any) => o.isPaid || (o.paymentMethod === 'COD' && o.isDelivered))
+      .sort((a: any, b: any) => (b.paidAt || b.deliveredAt || b.createdAt).getTime() - (a.paidAt || a.deliveredAt || a.createdAt).getTime())
       .slice(0, 20)
-      .map(o => ({
+      .map((o: any) => ({
         orderId: o._id,
         amount: o.totalPrice,
         method: o.paymentMethod,
