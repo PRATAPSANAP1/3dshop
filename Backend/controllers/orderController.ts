@@ -390,9 +390,9 @@ export const getPaymentStats = async (req: Request, res: Response) => {
       }));
 
     // Populate customer names
-    const populatedOrders = await Order.find({ _id: { $in: recentPayments.map(p => p.orderId) } }).populate('user', 'name email');
-    recentPayments.forEach(p => {
-      const o = populatedOrders.find(po => po._id.toString() === p.orderId.toString());
+    const populatedOrders = await Order.find({ _id: { $in: recentPayments.map((p: any) => p.orderId) } }).populate('user', 'name email');
+    recentPayments.forEach((p: any) => {
+      const o = populatedOrders.find((po: any) => po._id.toString() === p.orderId.toString());
       if (o && o.user) {
         p.customerName = (o.user as any).name || (o.user as any).email;
       }
