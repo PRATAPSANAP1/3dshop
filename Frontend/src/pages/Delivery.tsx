@@ -166,7 +166,7 @@ const Delivery = () => {
   const getStaffName = (order: any) => order.delivery?.assignedTo?.name || (order.delivery?.assignedTo && typeof order.delivery.assignedTo === 'string' ? admins.find(a => a._id === order.delivery.assignedTo)?.name : "Unassigned");
   const getStaffPhone = (order: any) => order.delivery?.assignedTo?.mobile || (order.delivery?.assignedTo && typeof order.delivery.assignedTo === 'string' ? admins.find(a => a._id === order.delivery.assignedTo)?.mobile : "—");
 
-  if (loading) return <div className="flex h-[60vh] items-center justify-center"><div className="page-loader" /></div>;
+
 
   return (
     <PageTransition>

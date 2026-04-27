@@ -46,18 +46,7 @@ const Deals = () => {
       .slice(0, 12);
   }, [products]);
 
-  if (loading) {
-     return (
-        <div className="flex h-[50vh] items-center justify-center">
-           <div className="page-loader">
-             <div className="page-loader-ring" />
-             <div className="page-loader-ring" />
-             <div className="page-loader-ring" />
-             <span className="page-loader-text">Loading Hot Deals</span>
-           </div>
-        </div>
-     );
-  }
+
 
   return (
     <PageTransition>

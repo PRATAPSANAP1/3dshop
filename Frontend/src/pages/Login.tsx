@@ -409,10 +409,7 @@ const Login = () => {
                       disabled={loading}
                     >
                       {loading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="h-5 w-5 animate-spin rounded-full border-[3px] border-white/30 border-t-white" />
-                          <span>Processing...</span>
-                        </div>
+                        <span>Processing...</span>
                       ) : (
                         <>
                           {isRegister ? "Create Account" : "Sign In Now"}

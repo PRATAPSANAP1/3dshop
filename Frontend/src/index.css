@@ -407,55 +407,7 @@
     box-shadow: 0 1px 20px -4px rgba(0, 0, 0, 0.06);
   }
 
-  /* ═══════════ PAGE LOADER ═══════════ */
-  .page-loader {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
 
-  .page-loader-ring {
-    position: absolute;
-    border-radius: 50%;
-    border: 3px solid transparent;
-    animation: spinLoader 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-  }
-
-  .page-loader-ring:nth-child(1) {
-    width: 64px;
-    height: 64px;
-    border-top-color: #EA580C;
-    animation-delay: -0.45s;
-  }
-
-  .page-loader-ring:nth-child(2) {
-    width: 52px;
-    height: 52px;
-    border-top-color: #D97706;
-    animation-delay: -0.3s;
-  }
-
-  .page-loader-ring:nth-child(3) {
-    width: 40px;
-    height: 40px;
-    border-top-color: #DC2626;
-    animation-delay: -0.15s;
-  }
-
-  .page-loader-text {
-    font-family: var(--font-heading);
-    font-size: 9px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: #94A3B8;
-    position: absolute;
-    bottom: -24px;
-    animation: pulseGlow 2s ease-in-out infinite;
-  }
 
   /* ═══════════ ANIMATED BADGE ═══════════ */
   .live-badge {

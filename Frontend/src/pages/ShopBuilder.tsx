@@ -44,7 +44,7 @@ const Loading3D = () => {
           <RotateGroup />
         </Canvas>
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <div className="h-10 w-10 border-4 border-violet border-t-transparent rounded-full animate-spin mb-4" />
+
           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 animate-pulse text-center">Architecting<br/>Environment</span>
         </div>
       </div>

@@ -83,10 +83,7 @@ const SuperAdminDashboard = () => {
           <div className="flex items-center justify-between px-1 mb-2">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">All Shops ({shops.length})</p>
           </div>
-          {loading ? (
-            <div className="flex justify-center py-12"><div className="page-loader" /></div>
-          ) : (
-            shops.map((shop, i) => (
+          {shops.map((shop, i) => (
               <motion.div
                 key={shop._id}
                 initial={{ opacity: 0, y: 5 }}

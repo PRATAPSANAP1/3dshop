@@ -41,7 +41,7 @@ export default function Logistics() {
     { label: 'Total Orders', value: orders.length, icon: Clock },
   ];
 
-  if (loading) return <div className="flex h-[60vh] items-center justify-center"><div className="page-loader" /></div>;
+
 
   return (
     <PageTransition>

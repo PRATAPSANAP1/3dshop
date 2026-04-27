@@ -333,11 +333,7 @@ const Billing = () => {
             onChange={(e) => handleSearch(e.target.value)}
             className="h-12 pl-11 rounded-2xl bg-white border-slate-200 font-bold text-sm focus:border-orange-400 focus:ring-2 focus:ring-orange-500/10"
           />
-          {searchLoading && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-orange-500" />
-            </div>
-          )}
+
         </div>
 
         {/* Bill List */}

@@ -72,12 +72,7 @@ const MobileSearchOverlay = ({ isOpen, onClose }: { isOpen: boolean; onClose: ()
           </div>
           
           <div className="flex-1 overflow-y-auto bg-slate-50/50">
-            {loading ? (
-              <div className="p-12 text-center">
-                <div className="h-10 w-10 border-4 border-slate-100 border-t-orange-500 rounded-full animate-spin mx-auto mb-4" />
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Searching products...</p>
-              </div>
-            ) : query.trim() && results.length === 0 ? (
+            {query.trim() && results.length === 0 ? (
               <div className="p-12 text-center">
                 <p className="text-sm font-bold text-slate-400">No products found for "{query}"</p>
               </div>

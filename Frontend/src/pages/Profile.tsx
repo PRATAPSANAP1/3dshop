@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Store, Mail, Phone, Lock, ShoppingBag, Plus, MapPin, X, Home, Briefcase, Check, Package, ChevronRight, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -328,11 +328,7 @@ const Profile = () => {
                   )}
                 </div>
 
-                {loadingOrders ? (
-                  <div className="flex items-center justify-center py-10">
-                    <div className="h-6 w-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                ) : orders.length > 0 ? (
+                {orders.length > 0 ? (
                   <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
                     {orders.slice(0, 5).map((order: any) => (
                       <motion.div

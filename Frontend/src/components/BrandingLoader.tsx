@@ -19,22 +19,7 @@ const BrandingLoader = () => {
         >
 
           {/* Removed 3D text */}
-          <svg className="absolute inset-0 w-full h-full -rotate-90">
-            <motion.circle
-              cx="64" cy="64" r="60"
-              stroke="url(#grad)" strokeWidth="4" fill="transparent"
-              strokeDasharray="377"
-              initial={{ strokeDashoffset: 377 }}
-              animate={{ strokeDashoffset: 0 }}
-              transition={{ duration: 2, ease: "easeInOut" }}
-            />
-            <defs>
-              <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#f97316" />
-                <stop offset="100%" stopColor="#8b5cf6" />
-              </linearGradient>
-            </defs>
-          </svg>
+
         </motion.div>
       </div>
       <motion.div
