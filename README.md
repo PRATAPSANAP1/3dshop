@@ -319,7 +319,7 @@ appv2/
 cd appv2/Backend
 npm install
 # configure .env (MONGO_URI, JWT_SECRET, RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET)
-npm run dev        # runs on http://localhost:5000 in dev, https://threedshop-dg44.onrender.com in prod
+npm run dev        # runs on http://localhost:5000 in dev, https://threedshop-38fd.onrender.com in prod
 
 # 2. Frontend
 cd appv2/Frontend
@@ -340,7 +340,7 @@ NODE_ENV=development
 
 ### Environment Variables (Frontend `.env`)
 ```env
-API_URL=https://threedshop-dg44.onrender.com/api
+API_URL=https://threedshop-38fd.onrender.com/api
 RAZORPAY_KEY_ID=rzp_test_xxxxx
 ```
 
