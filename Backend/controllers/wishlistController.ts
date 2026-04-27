@@ -22,25 +22,20 @@ export const addToWishlist = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    let list = await Wishlist.findOne({ user: (req.user as any)._id });
-    if (!list) {
-      list = new Wishlist({ 
-        user: (req.user as any)._id, 
-        shopId: (product as any).shopId,
-        products: [] 
-      });
-    }
+    // Atomic update: creates if missing, adds product if not already present
+    const updatedWishlist = await Wishlist.findOneAndUpdate(
+      { user: (req.user as any)._id },
+      { 
+        $addToSet: { products: productId as any },
+        $setOnInsert: { shopId: (product as any).shopId }
+      },
+      { upsert: true, new: true }
+    ).populate('products');
 
-    if (list.products.includes(productId)) {
-        return res.status(400).json({ message: 'Product already in wishlist' });
-    }
-
-    list.products.push(productId);
-    await list.save();
-    const updatedWishlist = await Wishlist.findOne({ user: (req.user as any)._id }).populate('products');
     res.status(201).json(updatedWishlist);
   } catch (err: any) {
-    res.status(500).json({ message: err.message });
+    console.error('[WISHLIST_ADD_ERROR]:', err);
+    res.status(500).json({ message: 'Failed to add to wishlist: ' + err.message });
   }
 };
 
