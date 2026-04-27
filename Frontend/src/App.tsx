@@ -85,19 +85,19 @@ const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  if (loading) return <BrandingLoader />;
+  if (loading && !user) return <BrandingLoader />;
   return user ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading && !user) return null;
   return (user?.role === 'admin' || user?.role === 'superadmin') ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 const EmployeeRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading && !user) return null;
   return (user?.role === 'employee' || user?.role === 'admin' || user?.role === 'superadmin')
     ? <>{children}</>
     : <Navigate to="/login" replace />;
@@ -105,14 +105,14 @@ const EmployeeRoute = ({ children }: { children: React.ReactNode }) => {
 
 const SuperAdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading && !user) return null;
   return user?.role === 'superadmin' ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 // Smart redirect based on role
 const SmartRedirect = () => {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading && !user) return null;
   if (!user) return <Navigate to="/home" replace />;
   switch (user.role) {
     case 'superadmin': return <Navigate to="/superadmin/dashboard" replace />;
@@ -125,7 +125,7 @@ const SmartRedirect = () => {
 // Guests see HomePage, logged-in users see the 3D store
 const GuestOrStoreRoute = () => {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading && !user) return null;
   return user ? <SmartRedirect /> : <Navigate to="/home" replace />;
 };
 

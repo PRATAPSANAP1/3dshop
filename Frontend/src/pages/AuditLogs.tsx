@@ -62,7 +62,7 @@ export default function AuditLogs() {
     }
   };
 
-  if (loading) return null;
+
 
   const getActionColor = (action: string) => {
     if (action.includes('CREATE')) return 'text-emerald-500 bg-emerald-500/10 border-emerald-200';

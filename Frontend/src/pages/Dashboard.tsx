@@ -40,8 +40,6 @@ const Dashboard = () => {
     fetchStats();
   }, []);
 
-  if (loading && !stats) return null;
-
   return (
     <PageTransition>
       <div className="space-y-4 max-w-7xl mx-auto px-4 -mt-4">

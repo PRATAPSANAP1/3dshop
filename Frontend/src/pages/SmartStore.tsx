@@ -35,7 +35,7 @@ const SmartStore = () => {
 
   useEffect(() => { fetchData(); }, []);
 
-  if (loading && !data) return null;
+
 
   const chartCard = (title: string, subtitle: string, children: React.ReactNode, delay: number, index: number) => (
     <motion.div

@@ -108,7 +108,7 @@ const Racks = () => {
     return products.filter(p => (p.rackId?._id === rackId || p.rackId === rackId) && p.quantity < (p.minStockLevel || 10)).length;
   };
 
-  if (loading) return null;
+
 
   return (
     <PageTransition>

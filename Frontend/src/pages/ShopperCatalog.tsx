@@ -72,7 +72,7 @@ const ShopperCatalog = () => {
     'from-rose-500 to-pink-500',
   ];
 
-  if (loading) return null;
+
 
   return (
     <PageTransition>

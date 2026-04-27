@@ -33,7 +33,7 @@ const Categories = () => {
     return Object.entries(catsMap).map(([name, count]) => ({ name, count }));
   }, [products]);
 
-  if (loading) return null;
+
 
   return (
     <PageTransition>

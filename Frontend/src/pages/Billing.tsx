@@ -267,7 +267,7 @@ const Billing = () => {
 
   const paymentIcon: Record<string, string> = { cash: '💵', card: '💳', upi: '📱', other: '🔗' };
 
-  if (loading) return null;
+
 
   return (
     <PageTransition>

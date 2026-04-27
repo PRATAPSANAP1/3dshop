@@ -127,7 +127,7 @@ const Products = () => {
   const totalValue = products.reduce((s, p) => s + ((p.price || 0) * (p.quantity || 0)), 0);
   const lowStockCount = products.filter(p => p.quantity < p.minStockLevel).length;
 
-  if (loading) return null;
+
 
   return (
     <PageTransition>

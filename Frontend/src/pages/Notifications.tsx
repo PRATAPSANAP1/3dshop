@@ -48,7 +48,7 @@ const Notifications = () => {
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
-  if (loading) return null;
+
 
   return (
     <PageTransition>
