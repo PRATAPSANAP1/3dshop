@@ -1,6 +1,6 @@
 import { Suspense, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera, Environment, Text, RoundedBox } from '@react-three/drei';
+import { OrbitControls, PerspectiveCamera, Environment, RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
@@ -34,9 +34,6 @@ function Shelf({ position, color, label, highlighted }: { position: [number, num
           </RoundedBox>
         ))
       )}
-      <Text position={[0, 2.8, 0]} fontSize={0.2} color="#f97316" anchorX="center" anchorY="middle">
-        {label}
-      </Text>
     </group>
   );
 }
