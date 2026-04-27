@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ShoppingBag, Heart, ChevronRight } from "lucide-react";
+import { Search, ShoppingBag, Heart, ChevronRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/PageTransition";
@@ -8,6 +8,23 @@ import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+
+const PALETTES = [
+  { grad: "from-orange-500 to-amber-500", soft: "bg-orange-50/50", txt: "text-orange-600", border: "border-orange-100", dot: "#f97316", btn: "bg-orange-50 text-orange-500 hover:bg-orange-500 hover:text-white" },
+  { grad: "from-violet-500 to-purple-500", soft: "bg-violet-50/50", txt: "text-violet-600", border: "border-violet-100", dot: "#8b5cf6", btn: "bg-violet-50 text-violet-500 hover:bg-violet-500 hover:text-white" },
+  { grad: "from-cyan-500 to-blue-500", soft: "bg-cyan-50/50", txt: "text-cyan-600", border: "border-cyan-100", dot: "#06b6d4", btn: "bg-cyan-50 text-cyan-500 hover:bg-cyan-500 hover:text-white" },
+  { grad: "from-emerald-500 to-green-500", soft: "bg-emerald-50/50", txt: "text-emerald-600", border: "border-emerald-100", dot: "#10b981", btn: "bg-emerald-50 text-emerald-500 hover:bg-emerald-500 hover:text-white" },
+  { grad: "from-rose-500 to-pink-500", soft: "bg-rose-50/50", txt: "text-rose-600", border: "border-rose-100", dot: "#f43f5e", btn: "bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white" },
+  { grad: "from-sky-500 to-indigo-500", soft: "bg-sky-50/50", txt: "text-sky-600", border: "border-sky-100", dot: "#0ea5e9", btn: "bg-sky-50 text-sky-500 hover:bg-sky-500 hover:text-white" },
+  { grad: "from-teal-500 to-emerald-500", soft: "bg-teal-50/50", txt: "text-teal-600", border: "border-teal-100", dot: "#14b8a6", btn: "bg-teal-50 text-teal-500 hover:bg-teal-500 hover:text-white" },
+  { grad: "from-fuchsia-500 to-purple-500", soft: "bg-fuchsia-50/50", txt: "text-fuchsia-600", border: "border-fuchsia-100", dot: "#d946ef", btn: "bg-fuchsia-50 text-fuchsia-500 hover:bg-fuchsia-500 hover:text-white" },
+];
+
+const getColorIndex = (str: string) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return Math.abs(hash) % PALETTES.length;
+};
 
 const ShopperCatalog = () => {
   const [loading, setLoading] = useState(true);
@@ -64,135 +81,144 @@ const ShopperCatalog = () => {
       (p.productName || '').toLowerCase().includes(search.toLowerCase())
   );
 
-  const GRADIENTS = [
-    'from-orange-500 to-amber-500',
-    'from-violet-500 to-purple-500',
-    'from-cyan-500 to-blue-500',
-    'from-emerald-500 to-green-500',
-    'from-rose-500 to-pink-500',
-    'from-sky-500 to-indigo-500',
-    'from-teal-500 to-emerald-500',
-    'from-fuchsia-500 to-purple-500',
-    'from-amber-500 to-orange-500',
-    'from-indigo-500 to-blue-500',
-  ];
-
-  const SOFT_COLORS = [
-    'bg-orange-50/50',
-    'bg-violet-50/50',
-    'bg-cyan-50/50',
-    'bg-emerald-50/50',
-    'bg-rose-50/50',
-    'bg-sky-50/50',
-    'bg-teal-50/50',
-    'bg-fuchsia-50/50',
-    'bg-amber-50/50',
-    'bg-indigo-50/50',
-  ];
-
   return (
     <PageTransition>
-      <div className="space-y-5">
+      <div className="space-y-8">
         {/* Search + filter bar */}
-        <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl pt-1 pb-3 space-y-3">
+        <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-xl pt-1 pb-4 space-y-4">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 h-7 w-7 rounded-lg bg-gradient-to-br from-orange-400 to-pink-500 flex items-center justify-center z-10 shadow-sm">
+              <Search size={13} className="text-white" />
+            </div>
             <Input
               placeholder="Search products..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-12 pl-11 pr-4 rounded-2xl border-slate-200 focus:border-orange-500 focus:ring-orange-500/10 font-bold text-slate-700"
+              className="h-12 pl-12 pr-4 rounded-2xl border-slate-200 focus:border-orange-400 focus:ring-orange-500/10 font-bold text-slate-700 transition-all"
             />
           </div>
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`whitespace-nowrap px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shrink-0 ${
-                  activeCategory === cat
-                    ? "bg-orange-500 text-white shadow-sm"
-                    : "bg-slate-50 text-slate-400 hover:bg-slate-100 border border-slate-100"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar flex-wrap">
+            {categories.map((cat) => {
+               const ci = cat === "All" ? 0 : getColorIndex(cat);
+               const p = PALETTES[ci];
+               const isActive = activeCategory === cat;
+               return (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`whitespace-nowrap px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shrink-0 border-2 ${
+                      isActive
+                        ? "text-white border-transparent shadow-md"
+                        : `bg-white ${p.txt} ${p.border} hover:scale-105`
+                    }`}
+                    style={isActive ? { background: `linear-gradient(135deg, ${p.dot}, ${p.dot}cc)` } : {}}
+                  >
+                    {cat}
+                  </button>
+               )
+            })}
           </div>
         </div>
 
         {/* Product grid */}
-        {filteredProducts.length === 0 ? (
+        {filteredProducts.length === 0 && !loading ? (
           <div className="text-center py-20">
             <ShoppingBag size={40} className="mx-auto text-slate-200 mb-4" />
             <p className="text-slate-400 font-bold text-sm">No products found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
             <AnimatePresence mode="popLayout">
-              {filteredProducts.map((p, i) => (
-                <motion.div
-                  key={p._id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: i * 0.03 }}
-                  className={`group relative flex flex-col ${SOFT_COLORS[i % SOFT_COLORS.length]} rounded-2xl sm:rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm hover:border-orange-200 hover:-translate-y-1 transition-all duration-300 cursor-pointer`}
-                  onClick={() => navigate(`/product/${p._id}`)}
-                >
-                  {/* Color banner */}
-                  <div className={`relative h-20 sm:h-28 flex flex-col justify-between p-2.5 sm:p-4 bg-gradient-to-br ${GRADIENTS[i % GRADIENTS.length]}`}>
-                    <div className="flex items-start justify-between">
-                      <span className="px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-white/90">
-                        {p.category || 'General'}
-                      </span>
-                      <button
-                        onClick={(e) => handleAddToWishlist(e, p._id, p.productName)}
-                        className="p-1.5 rounded-lg bg-white/20 text-white hover:bg-white hover:text-rose-500 transition-all active:scale-95"
-                      >
-                        <Heart size={12} className="sm:w-3.5 sm:h-3.5" />
-                      </button>
-                    </div>
-                    {/* Quick view on hover — desktop only */}
-                    <div className="hidden sm:block opacity-0 group-hover:opacity-100 transition-all duration-300">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); navigate(`/product/${p._id}`); }}
-                        className="w-full h-7 bg-white/20 hover:bg-white backdrop-blur-sm rounded-lg text-white hover:text-slate-900 font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-1 transition-all"
-                      >
-                        Quick View <ChevronRight size={10} />
-                      </button>
-                    </div>
-                  </div>
+              {filteredProducts.map((p, i) => {
+                const ci = getColorIndex(p.category || 'General');
+                const pal = PALETTES[ci];
+                return (
+                  <motion.div
+                    key={p._id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    whileHover={{ y: -5, scale: 1.02 }}
+                    transition={{ delay: i * 0.03, type: 'spring', damping: 20 }}
+                    className="group relative flex flex-col bg-white rounded-2xl sm:rounded-[2.5rem] border-2 border-slate-100 overflow-hidden shadow-sm hover:border-transparent hover:shadow-xl transition-all duration-300 cursor-pointer"
+                    onClick={() => navigate(`/product/${p._id}`)}
+                  >
+                    {/* Gradient Banner */}
+                    <div className={`relative h-24 sm:h-32 flex flex-col justify-between p-3 sm:p-5 bg-gradient-to-br ${pal.grad} overflow-hidden`}>
+                      {/* Decorative blurred circles */}
+                      <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/20 blur-xl" />
+                      <div className="absolute -bottom-10 -left-6 w-32 h-32 rounded-full bg-black/10 blur-2xl" />
 
-                  {/* Info */}
-                  <div className="p-3 sm:p-5 flex flex-col flex-1">
-                    <h3 className="text-xs sm:text-sm font-black text-slate-900 leading-tight line-clamp-2 mb-1 group-hover:text-orange-500 transition-colors">
-                      {p.productName}
-                    </h3>
-                    <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-                      {p.category || 'Collection'}{[p.brand, p.size].filter(Boolean).map(text => ` • ${text}`).join('')}
-                    </p>
-                    <div className="mt-auto flex items-center justify-between border-t border-slate-50 pt-2.5 sm:pt-4">
-                      <span className="text-base sm:text-xl font-black text-slate-900">₹{p.price}</span>
-                      <button
-                        onClick={(e) => handleAddToCart(e, p._id, p.productName)}
-                        className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-orange-50 text-orange-500 hover:bg-orange-500 hover:text-white transition-all flex items-center justify-center active:scale-95"
-                      >
-                        <ShoppingBag size={14} className="sm:w-4 sm:h-4" />
-                      </button>
-                    </div>
-                  </div>
+                      <div className="relative z-10 flex items-start justify-between">
+                        <span className="px-2.5 py-1 bg-white/25 backdrop-blur-md rounded-lg text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-white border border-white/20">
+                          {p.category || 'General'}
+                        </span>
+                        <motion.button
+                          whileTap={{ scale: 0.88 }}
+                          onClick={(e) => handleAddToWishlist(e, p._id, p.productName)}
+                          className="p-2 rounded-xl bg-white/20 backdrop-blur-md text-white hover:bg-white hover:text-rose-500 transition-all shadow-sm"
+                        >
+                          <Heart size={14} fill="currentColor" className="sm:w-4 sm:h-4" />
+                        </motion.button>
+                      </div>
 
-                  {p.quantity === 0 && (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 backdrop-blur-sm pointer-events-none">
-                      <div className="px-4 py-1.5 bg-rose-500 text-white rounded-xl rotate-[-10deg]">
-                        <p className="font-black uppercase tracking-widest text-[10px]">Out of Stock</p>
+                      {/* Quick view on hover */}
+                      <div className="relative z-10 hidden sm:block overflow-hidden">
+                        <motion.button
+                          initial={{ y: 20, opacity: 0 }}
+                          whileHover={{ scale: 1.02 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          className="w-full h-8 bg-white/90 hover:bg-white backdrop-blur-md rounded-xl text-slate-900 font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-1.5 transition-all shadow-sm translate-y-10 group-hover:translate-y-0 duration-300"
+                          onClick={(e) => { e.stopPropagation(); navigate(`/product/${p._id}`); }}
+                        >
+                          Quick View <ChevronRight size={12} strokeWidth={3} />
+                        </motion.button>
                       </div>
                     </div>
-                  )}
-                </motion.div>
-              ))}
+
+                    {/* Card Body */}
+                    <div className={`p-4 sm:p-6 flex flex-col flex-1 ${pal.soft} transition-colors duration-300`}>
+                      <div className="mb-4">
+                        <h3 className="text-sm sm:text-[15px] font-black text-slate-900 leading-snug line-clamp-2 mb-1.5 group-hover:text-slate-700 transition-colors">
+                          {p.productName}
+                        </h3>
+                        <div className="flex items-center gap-1.5 opacity-60">
+                           <Sparkles size={10} className={pal.txt} />
+                           <p className="text-[9px] font-black uppercase tracking-widest text-slate-500">
+                             {p.category || 'Premium Selection'}
+                           </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-auto flex items-end justify-between pt-4 border-t border-slate-200/50">
+                        <div className="flex flex-col">
+                           <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-0.5 ml-0.5">Price</span>
+                           <span className={`text-xl sm:text-2xl font-black italic tracking-tighter ${pal.txt} leading-none`}>₹{p.price}</span>
+                        </div>
+                        <motion.button
+                          whileTap={{ scale: 0.88 }}
+                          onClick={(e) => handleAddToCart(e, p._id, p.productName)}
+                          className={`h-10 w-10 sm:h-12 sm:w-12 rounded-2xl ${pal.btn} transition-all flex items-center justify-center shadow-sm active:scale-90`}
+                        >
+                          <ShoppingBag size={16} strokeWidth={2.5} className="sm:w-5 sm:h-5" />
+                        </motion.button>
+                      </div>
+                    </div>
+
+                    {/* Bottom accent strip */}
+                    <div className={`h-1.5 w-full bg-gradient-to-r ${pal.grad} opacity-40 group-hover:opacity-100 transition-opacity duration-500`} />
+
+                    {p.quantity === 0 && (
+                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/80 backdrop-blur-sm pointer-events-none">
+                        <div className="px-6 py-2 bg-rose-500 text-white rounded-2xl rotate-[-10deg] shadow-lg">
+                          <p className="font-black uppercase tracking-widest text-xs">Out of Stock</p>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                )
+              })}
             </AnimatePresence>
           </div>
         )}
