@@ -173,7 +173,7 @@ const AnimatedRoutes = () => {
 
             {/* Root â†’ Smart redirect */}
             <Route path="/" element={<GuestOrStoreRoute />} />
-            <Route path="/shop-experience" element={<Shop3D />} />
+            <Route path="/shop-experience" element={<CustomerSearch />} />
             <Route path="/explore" element={<Navigate to="/" replace />} />
 
             {/* Shopper routes (protected) */}

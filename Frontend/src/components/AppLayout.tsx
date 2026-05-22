@@ -16,7 +16,7 @@ const AppLayout = () => {
   const isAdmin = user?.role === 'admin';
   const isEmployee = user?.role === 'employee';
   const isAdminLike = isAdmin || isEmployee;
-  const is3DPage = location.pathname === '/';
+  const is3DPage = location.pathname === '/' || location.pathname === '/shop-experience';
 
   return (
     <div className={`flex ${is3DPage ? 'h-[100dvh] md:h-screen overflow-hidden' : 'min-h-screen'} bg-background flex-col md:flex-row`}>
