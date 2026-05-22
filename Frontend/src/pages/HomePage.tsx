@@ -349,7 +349,7 @@ const HomePage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
-                onClick={() => user ? navigate('/catalog') : navigate('/login')}
+                onClick={() => user ? navigate('/shop-experience') : navigate('/login')}
                 className="h-14 px-10 rounded-2xl bg-primary hover:bg-primary-hover text-white font-black uppercase tracking-widest text-xs transition-all gap-3 group border-none shadow-xl shadow-primary/20"
               >
                 Enter 3D Store <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
@@ -439,11 +439,29 @@ const HomePage = () => {
           </Link>
         </div>
 
-        <div className="flex gap-6 overflow-x-auto px-6 md:px-12 pb-8 snap-x snap-mandatory" style={{ scrollbarWidth: 'none' }}>
-          {loading
-            ? Array(4).fill(0).map((_, i) => <div key={i} className="min-w-[280px] h-64 bg-slate-100 rounded-[2.5rem] animate-pulse flex-shrink-0" />)
-            : trending.map((p, i) => <ProductCard key={p._id} product={p} index={i} />)
-          }
+        <div className="relative overflow-hidden w-full py-4 group">
+          {loading ? (
+             <div className="flex gap-6 px-6">
+                {Array(4).fill(0).map((_, i) => <div key={i} className="min-w-[280px] h-64 bg-slate-100 rounded-[2.5rem] animate-pulse flex-shrink-0" />)}
+             </div>
+          ) : trending.length > 0 ? (
+            <motion.div
+              className="flex gap-6 w-max pl-6"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{
+                x: {
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  duration: 40,
+                  ease: "linear",
+                },
+              }}
+            >
+              {[...trending, ...trending, ...trending].map((p, i) => (
+                <ProductCard key={`${p._id}-${i}`} product={p} index={i} />
+              ))}
+            </motion.div>
+          ) : null}
         </div>
       </motion.section>
 
@@ -489,36 +507,6 @@ const HomePage = () => {
         </motion.section>
       )}
 
-      {/* ── FEATURES GRID ── */}
-      <section className="py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="text-[11px] font-black text-blue-500 uppercase tracking-[0.3em] mb-2">Platform Capabilities</p>
-            <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">
-              Everything <span className="italic underline decoration-primary/20 underline-offset-8">Reimagined.</span>
-            </h2>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FEATURES.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                whileHover={{ y: -5 }}
-                className={`bg-white border border-slate-100 p-8 rounded-[3rem] hover:border-slate-200 hover:shadow-xl transition-all group ${f.primary ? 'lg:col-span-2' : ''}`}
-              >
-                <div className={`h-14 w-14 rounded-2xl ${f.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm`}>
-                  <f.icon size={26} className={f.color} />
-                </div>
-                <h3 className="font-black text-xl text-slate-900 uppercase tracking-tight mb-3 group-hover:text-orange-500 transition-colors">{f.title}</h3>
-                <p className="text-sm text-slate-400 font-semibold leading-relaxed">{f.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── TRUST STRIP ── */}
       <section className="py-20 bg-slate-50/50 border-y border-slate-100">
