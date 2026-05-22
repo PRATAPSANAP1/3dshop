@@ -10,16 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 const PALETTES = [
-  { grad: "from-slate-800 to-slate-900", soft: "bg-slate-50/50", txt: "text-slate-800", border: "border-slate-200", dot: "#1e293b", btn: "bg-slate-100 text-slate-800 hover:bg-slate-900 hover:text-white" },
-  { grad: "from-amber-400 to-orange-600", soft: "bg-orange-50/50", txt: "text-orange-600", border: "border-orange-100", dot: "#f59e0b", btn: "bg-orange-50 text-orange-500 hover:bg-orange-500 hover:text-white" },
-  { grad: "from-violet-500 to-indigo-600", soft: "bg-violet-50/50", txt: "text-violet-600", border: "border-violet-100", dot: "#8b5cf6", btn: "bg-violet-50 text-violet-500 hover:bg-violet-500 hover:text-white" },
-  { grad: "from-cyan-400 to-blue-600", soft: "bg-cyan-50/50", txt: "text-cyan-600", border: "border-cyan-100", dot: "#06b6d4", btn: "bg-cyan-50 text-cyan-500 hover:bg-cyan-500 hover:text-white" },
-  { grad: "from-emerald-400 to-teal-600", soft: "bg-emerald-50/50", txt: "text-emerald-600", border: "border-emerald-100", dot: "#10b981", btn: "bg-emerald-50 text-emerald-500 hover:bg-emerald-500 hover:text-white" },
-  { grad: "from-rose-400 to-pink-600", soft: "bg-rose-50/50", txt: "text-rose-600", border: "border-rose-100", dot: "#f43f5e", btn: "bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white" },
-  { grad: "from-sky-400 to-indigo-500", soft: "bg-sky-50/50", txt: "text-sky-600", border: "border-sky-100", dot: "#0ea5e9", btn: "bg-sky-50 text-sky-500 hover:bg-sky-500 hover:text-white" },
-  { grad: "from-fuchsia-500 to-purple-600", soft: "bg-fuchsia-50/50", txt: "text-fuchsia-600", border: "border-fuchsia-100", dot: "#d946ef", btn: "bg-fuchsia-50 text-fuchsia-500 hover:bg-fuchsia-500 hover:text-white" },
-  { grad: "from-indigo-600 to-blue-700", soft: "bg-indigo-50/50", txt: "text-indigo-600", border: "border-indigo-100", dot: "#4f46e5", btn: "bg-indigo-50 text-indigo-500 hover:bg-indigo-500 hover:text-white" },
-  { grad: "from-teal-400 to-emerald-500", soft: "bg-teal-50/50", txt: "text-teal-600", border: "border-teal-100", dot: "#14b8a6", btn: "bg-teal-50 text-teal-500 hover:bg-teal-500 hover:text-white" },
+  { grad: "from-amber-400 to-orange-600", soft: "bg-orange-50", txt: "text-orange-600", border: "border-orange-200", dot: "#f59e0b", btn: "bg-orange-500 text-white hover:bg-orange-600" },
 ];
 
 const getColorIndex = (str: string) => {
@@ -33,6 +24,7 @@ const ShopperCatalog = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
+  const [wishlistIds, setWishlistIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -42,6 +34,16 @@ const ShopperCatalog = () => {
     const cat = searchParams.get('category');
     if (cat) setActiveCategory(cat);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (user) {
+      api.get('/wishlist').then(({ data }) => {
+        if (data && data.products) {
+          setWishlistIds(new Set(data.products.map((p: any) => p._id)));
+        }
+      }).catch(console.error);
+    }
+  }, [user]);
 
   useEffect(() => {
     api.get('/public/all')
@@ -64,11 +66,24 @@ const ShopperCatalog = () => {
   const handleAddToWishlist = async (e: React.MouseEvent, productId: string, productName: string) => {
     e.stopPropagation();
     if (!user) { navigate('/login'); return; }
+    
+    const isWished = wishlistIds.has(productId);
     try {
-      await api.post('/wishlist/add', { productId });
-      toast({ title: '✓ Saved to Wishlist', description: `${productName} added to wishlist` });
+      if (isWished) {
+        await api.delete(`/wishlist/${productId}`);
+        setWishlistIds(prev => {
+          const next = new Set(prev);
+          next.delete(productId);
+          return next;
+        });
+        toast({ title: 'Removed from Wishlist' });
+      } else {
+        await api.post('/wishlist/add', { productId });
+        setWishlistIds(prev => new Set(prev).add(productId));
+        toast({ title: '✓ Saved to Wishlist', description: `${productName} added to wishlist` });
+      }
     } catch {
-      toast({ variant: 'destructive', title: 'Could not add to wishlist' });
+      toast({ variant: 'destructive', title: 'Action failed' });
     }
   };
 
@@ -143,7 +158,7 @@ const ShopperCatalog = () => {
                     exit={{ opacity: 0, scale: 0.95 }}
                     whileHover={{ y: -5, scale: 1.02 }}
                     transition={{ delay: i * 0.03, type: 'spring', damping: 20 }}
-                    className="group relative flex flex-col bg-white rounded-2xl sm:rounded-[2.5rem] border-2 border-slate-100 overflow-hidden shadow-sm hover:border-transparent hover:shadow-xl transition-all duration-300 cursor-pointer"
+                    className="group relative flex flex-col bg-orange-50 rounded-2xl sm:rounded-[2.5rem] border-2 border-slate-100 border-b-4 border-b-orange-500 overflow-hidden shadow-sm hover:border-transparent hover:border-b-orange-600 hover:shadow-xl transition-all duration-300 cursor-pointer"
                     onClick={() => navigate(`/product/${p._id}`)}
                   >
                     {/* Gradient Banner */}
@@ -161,7 +176,7 @@ const ShopperCatalog = () => {
                           onClick={(e) => handleAddToWishlist(e, p._id, p.productName)}
                           className="p-2 rounded-xl bg-white/20 backdrop-blur-md text-white hover:bg-white hover:text-rose-500 transition-all shadow-sm"
                         >
-                          <Heart size={14} fill="currentColor" className="sm:w-4 sm:h-4" />
+                          <Heart size={14} fill={wishlistIds.has(p._id) ? "currentColor" : "none"} className={`sm:w-4 sm:h-4 ${wishlistIds.has(p._id) ? 'text-pink-500' : ''}`} />
                         </motion.button>
                       </div>
 

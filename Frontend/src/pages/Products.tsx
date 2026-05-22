@@ -10,14 +10,7 @@ import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 const CARD_PALETTES = [
-  { grad: "from-fuchsia-500 via-pink-500 to-rose-500", soft: "bg-fuchsia-50", txt: "text-fuchsia-600", border: "border-fuchsia-100", dot: "#e879f9" },
-  { grad: "from-violet-500 via-indigo-500 to-blue-500", soft: "bg-violet-50", txt: "text-violet-600", border: "border-violet-100", dot: "#8b5cf6" },
-  { grad: "from-cyan-400 via-teal-500 to-emerald-500", soft: "bg-cyan-50", txt: "text-cyan-600", border: "border-cyan-100", dot: "#22d3ee" },
-  { grad: "from-amber-400 via-orange-500 to-red-500", soft: "bg-amber-50", txt: "text-amber-600", border: "border-amber-100", dot: "#f59e0b" },
-  { grad: "from-lime-400 via-green-500 to-teal-500", soft: "bg-lime-50", txt: "text-lime-600", border: "border-lime-100", dot: "#a3e635" },
-  { grad: "from-sky-400 via-blue-500 to-indigo-600", soft: "bg-sky-50", txt: "text-sky-600", border: "border-sky-100", dot: "#38bdf8" },
-  { grad: "from-rose-400 via-pink-500 to-fuchsia-600", soft: "bg-rose-50", txt: "text-rose-600", border: "border-rose-100", dot: "#fb7185" },
-  { grad: "from-orange-400 via-amber-500 to-yellow-400", soft: "bg-orange-50", txt: "text-orange-600", border: "border-orange-100", dot: "#fb923c" },
+  { grad: "from-orange-400 via-amber-500 to-orange-500", soft: "bg-orange-50", txt: "text-orange-600", border: "border-orange-200", dot: "#f97316" },
 ];
 
 const getColorIndex = (str: string) => {
@@ -260,7 +253,7 @@ const Products = () => {
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
                   whileHover={{ y: -5, scale: 1.02 }}
                   transition={{ delay: i * 0.03, type: "spring", damping: 18, stiffness: 260 }}
-                  className="group relative bg-white rounded-3xl border-2 border-slate-100 overflow-hidden hover:border-transparent hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full"
+                  className="group relative bg-orange-50 rounded-3xl border-2 border-slate-100 border-b-4 border-b-orange-500 overflow-hidden hover:border-transparent hover:border-b-orange-600 hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col h-full"
                 >
                   {/* Action buttons */}
                   <div className="absolute top-3 right-3 z-20 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
