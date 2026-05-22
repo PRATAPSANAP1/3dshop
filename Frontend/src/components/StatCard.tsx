@@ -53,15 +53,6 @@ const StatCard = ({
       <div>
         <p className="text-sm font-medium text-muted-foreground">{title}</p>
         <p className="mt-2 font-heading text-3xl font-bold text-foreground">{value}</p>
-        {change && (
-          <p className={`mt-1 text-sm font-medium ${
-            changeType === "positive" ? "text-success" :
-            changeType === "negative" ? "text-destructive" :
-            "text-muted-foreground"
-          }`}>
-            {change}
-          </p>
-        )}
       </div>
       <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${accentBg} ${accentColor} transition-all duration-300`}>
         <Icon className="h-5 w-5" />
