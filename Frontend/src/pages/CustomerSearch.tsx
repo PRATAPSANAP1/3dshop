@@ -184,6 +184,7 @@ const CustomerSearch: React.FC = () => {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [clickedProductId, setClickedProductId] = useState<string | null>(null);
+  const [clickedLegendRackId, setClickedLegendRackId] = useState<string | null>(null);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [shopSuggestions, setShopSuggestions] = useState<string[]>([]);
@@ -562,12 +563,21 @@ const CustomerSearch: React.FC = () => {
             <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Rack Legend</p>
             <div className="space-y-2">
               {racks.map((rack, i) => (
-                <div key={rack._id} className="flex items-center gap-2.5 group">
+                <div 
+                  key={rack._id} 
+                  className="flex items-center gap-2.5 group cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition-colors"
+                  onClick={() => {
+                    setClickedLegendRackId(rack._id);
+                    setTimeout(() => {
+                      setClickedLegendRackId(current => current === rack._id ? null : current);
+                    }, 5000);
+                  }}
+                >
                   <div
                     className="h-3.5 w-3.5 rounded-full shrink-0 shadow-sm ring-2 ring-white group-hover:scale-125 transition-transform"
                     style={{ backgroundColor: rack.color || ['#EA580C', '#10B981', '#8B5CF6', '#06B6D4', '#F43F5E', '#F59E0B'][i % 6] }}
                   />
-                  <span className="text-[11px] font-bold text-slate-600 truncate">{rack.rackName}</span>
+                  <span className={`text-[11px] font-bold truncate transition-colors ${clickedLegendRackId === rack._id ? 'text-primary' : 'text-slate-600'}`}>{rack.rackName}</span>
                 </div>
               ))}
             </div>
@@ -651,7 +661,7 @@ const CustomerSearch: React.FC = () => {
                 key={rack._id}
                 rack={rack}
                 products={rackProducts[rack._id] || []}
-                isHighlighted={showArrow && foundProduct && foundProduct.rackId?._id === rack._id}
+                isHighlighted={(showArrow && foundProduct && foundProduct.rackId?._id === rack._id) || clickedLegendRackId === rack._id}
                 highlightedProductId={foundProduct?._id}
                 setSelectedProduct={handleProductClick}
                 searchActive={showArrow}
