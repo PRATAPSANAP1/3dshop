@@ -19,15 +19,15 @@ import {
 import { useAuth } from "@/context/AuthContext";
 
 const navItems = [
-  { to: "/",           icon: Box,          label: "3D Shop",    desc: "Explore store in 3D",  color: "text-violet-500", bg: "bg-violet-500/10", activeBg: "bg-gradient-to-r from-violet-500/15 to-purple-500/10" },
-  { to: "/home",       icon: Home,         label: "Home",       desc: "Landing & features",  color: "text-orange-500", bg: "bg-orange-500/10",  activeBg: "bg-gradient-to-r from-orange-500/15 to-amber-500/10" },
-  { to: "/catalog",    icon: Search,       label: "Products",   desc: "Find products",       color: "text-orange-500", bg: "bg-orange-500/10",  activeBg: "bg-gradient-to-r from-orange-500/15 to-amber-500/10" },
-  { to: "/categories", icon: LayoutGrid,   label: "Categories", desc: "By department",       color: "text-amber-600",  bg: "bg-amber-500/10",  activeBg: "bg-gradient-to-r from-amber-500/15 to-orange-500/10" },
-  { to: "/orders",     icon: Package,      label: "Orders",     desc: "Track purchases",     color: "text-orange-500", bg: "bg-orange-500/10",  activeBg: "bg-gradient-to-r from-orange-500/15 to-amber-500/10" },
-  { to: "/delivery",   icon: Truck,        label: "Delivery",   desc: "Shipping status",     color: "text-amber-600",  bg: "bg-amber-500/10",  activeBg: "bg-gradient-to-r from-amber-500/15 to-orange-500/10" },
-  { to: "/cart",       icon: ShoppingCart, label: "Cart",       desc: "Your items",          color: "text-orange-500", bg: "bg-orange-500/10",  activeBg: "bg-gradient-to-r from-orange-500/15 to-amber-500/10" },
-  { to: "/wishlist",   icon: Heart,        label: "Wishlist",   desc: "Saved items",         color: "text-rose-500",   bg: "bg-rose-500/10",   activeBg: "bg-gradient-to-r from-rose-500/15 to-pink-500/10" },
-  { to: "/help",       icon: HelpCircle,   label: "Help",       desc: "Support & FAQs",      color: "text-slate-500",  bg: "bg-slate-500/10",  activeBg: "bg-gradient-to-r from-slate-500/15 to-slate-400/10" },
+  { to: "/",           icon: Box,          label: "3D Shop",      color: "text-violet-500", bg: "bg-violet-500/10", activeBg: "bg-gradient-to-r from-violet-500/15 to-purple-500/10" },
+  { to: "/home",       icon: Home,         label: "Home",        color: "text-orange-500", bg: "bg-orange-500/10",  activeBg: "bg-gradient-to-r from-orange-500/15 to-amber-500/10" },
+  { to: "/catalog",    icon: Search,       label: "Products",         color: "text-orange-500", bg: "bg-orange-500/10",  activeBg: "bg-gradient-to-r from-orange-500/15 to-amber-500/10" },
+  { to: "/categories", icon: LayoutGrid,   label: "Categories",       color: "text-amber-600",  bg: "bg-amber-500/10",  activeBg: "bg-gradient-to-r from-amber-500/15 to-orange-500/10" },
+  { to: "/orders",     icon: Package,      label: "Orders",          color: "text-orange-500", bg: "bg-orange-500/10",  activeBg: "bg-gradient-to-r from-orange-500/15 to-amber-500/10" },
+  { to: "/delivery",   icon: Truck,        label: "Delivery",       color: "text-amber-600",  bg: "bg-amber-500/10",  activeBg: "bg-gradient-to-r from-amber-500/15 to-orange-500/10" },
+  { to: "/cart",       icon: ShoppingCart, label: "Cart",               color: "text-orange-500", bg: "bg-orange-500/10",  activeBg: "bg-gradient-to-r from-orange-500/15 to-amber-500/10" },
+  { to: "/wishlist",   icon: Heart,        label: "Wishlist",           color: "text-rose-500",   bg: "bg-rose-500/10",   activeBg: "bg-gradient-to-r from-rose-500/15 to-pink-500/10" },
+  { to: "/help",       icon: HelpCircle,   label: "Help",            color: "text-slate-500",  bg: "bg-slate-500/10",  activeBg: "bg-gradient-to-r from-slate-500/15 to-slate-400/10" },
 ];
 
 const bottomItems = [
