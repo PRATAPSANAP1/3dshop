@@ -582,7 +582,7 @@ const Delivery = () => {
                       <div className="p-5 bg-white rounded-2xl border border-slate-100 mt-auto">
                         <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Timeline</p>
                         <div className="space-y-3">
-                          {selectedOrder.statusHistory.slice().reverse().map((h: any, idx: number) => (
+                          {selectedOrder.statusHistory.slice().map((h: any, idx: number) => (
                             <div key={idx} className="flex items-start gap-3">
                               <div className="mt-0.5 h-2 w-2 rounded-full bg-orange-400 shrink-0" />
                               <div>
