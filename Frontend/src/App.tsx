@@ -64,6 +64,7 @@ const Checkout = lazy(() => import("./pages/Checkout"));
 const Users = lazy(() => import("./pages/Users"));
 const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const Coupons = lazy(() => import("./pages/Coupons"));
+const Settings = lazy(() => import("./pages/Settings"));
 const HelpCenter = lazy(() => import("./pages/HelpCenter"));
 const Shops = lazy(() => import("./pages/Shops"));
 const Collection = lazy(() => import("./pages/Collection"));
@@ -190,6 +191,7 @@ const AnimatedRoutes = () => {
             <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
             <Route path="/delivery" element={<ProtectedRoute><Delivery /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/help" element={<HelpCenter />} />
           </Route>

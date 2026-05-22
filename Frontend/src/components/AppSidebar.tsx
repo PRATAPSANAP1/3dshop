@@ -24,6 +24,7 @@ import {
   UserPlus,
   Building2,
   BrainCircuit,
+  Settings,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -106,7 +107,22 @@ export const AppSidebarContent = () => {
              </div>
              <div className="flex-1 overflow-hidden">
                 <p className="text-[13px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">My Profile</p>
-                <p className="text-[10px] text-slate-400 font-medium">Account Settings</p>
+                <p className="text-[10px] text-slate-400 font-medium">Personal info</p>
+             </div>
+           </NavLink>
+
+           <NavLink
+             to="/settings"
+             className={({ isActive }) => `group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 mt-1 ${
+               isActive ? "bg-slate-50 border border-slate-100 shadow-sm" : "hover:bg-slate-50"
+             }`}
+           >
+             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 group-hover:bg-slate-100 transition-all">
+                <Settings className="h-[18px] w-[18px] text-slate-400" />
+             </div>
+             <div className="flex-1 overflow-hidden">
+                <p className="text-[13px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">Settings</p>
+                <p className="text-[10px] text-slate-400 font-medium">Security & Preferences</p>
              </div>
            </NavLink>
         </div>

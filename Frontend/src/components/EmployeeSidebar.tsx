@@ -2,7 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Store, Package, ShoppingCart, User, LogOut, Truck,
-  Search, Bell, LayoutDashboard, ScanLine,
+  Search, Bell, LayoutDashboard, ScanLine, Settings,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { usePermission, EmployeePermission } from "@/hooks/usePermission";
@@ -92,12 +92,21 @@ export const EmployeeSidebarContent = () => {
           <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] px-3 mb-2">Account</p>
           <NavLink
             to="/profile"
-            className="group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-slate-50"
+            className={({ isActive }) => `group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${isActive ? "bg-slate-50 shadow-sm" : "hover:bg-slate-50"}`}
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 group-hover:bg-slate-100">
-              <User className="h-4 w-4 text-slate-400" />
+            <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${isActive ? "bg-slate-100" : "bg-slate-50 group-hover:bg-slate-100"}`}>
+              <User className={`h-4 w-4 ${isActive ? "text-slate-900" : "text-slate-400"}`} />
             </div>
-            <span className="text-[13px] font-bold text-slate-500">Profile</span>
+            <span className={`text-[13px] font-bold ${isActive ? "text-slate-900" : "text-slate-500"}`}>Profile</span>
+          </NavLink>
+          <NavLink
+            to="/settings"
+            className={({ isActive }) => `group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${isActive ? "bg-slate-50 shadow-sm" : "hover:bg-slate-50"}`}
+          >
+            <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${isActive ? "bg-slate-100" : "bg-slate-50 group-hover:bg-slate-100"}`}>
+              <Settings className={`h-4 w-4 ${isActive ? "text-slate-900" : "text-slate-400"}`} />
+            </div>
+            <span className={`text-[13px] font-bold ${isActive ? "text-slate-900" : "text-slate-500"}`}>Settings</span>
           </NavLink>
         </div>
       </div>

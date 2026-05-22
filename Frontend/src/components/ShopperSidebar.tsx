@@ -15,6 +15,7 @@ import {
   Home,
   HelpCircle,
   Box,
+  Settings,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -32,6 +33,7 @@ const navItems = [
 
 const bottomItems = [
   { to: "/profile", icon: User, label: "Profile", color: "text-slate-500", bg: "bg-slate-500/10" },
+  { to: "/settings", icon: Settings, label: "Settings", color: "text-slate-500", bg: "bg-slate-500/10" },
 ];
 
 export const ShopperSidebarContent = () => {

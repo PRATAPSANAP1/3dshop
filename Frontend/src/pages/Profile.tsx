@@ -55,12 +55,6 @@ const Profile = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
 
-  // OTP Password state
-  const [otpFlowStep, setOtpFlowStep] = useState<0 | 1>(0); // 0 = not started, 1 = otp sent
-  const [otpInput, setOtpInput] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [isProcessingOtp, setIsProcessingOtp] = useState(false);
-
   useEffect(() => {
     if (!isAdmin) {
       const fetchOrders = async () => {
@@ -154,46 +148,6 @@ const Profile = () => {
       });
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleRequestOtp = async () => {
-    if (!formData.mobile) {
-      toast({ variant: "destructive", title: "Error", description: "Please add a mobile number and save your profile first." });
-      return;
-    }
-    setIsProcessingOtp(true);
-    try {
-      const { data } = await api.post('/auth/profile/request-password-otp');
-      setOtpFlowStep(1);
-      toast({ title: "OTP Sent", description: data.message });
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.response?.data?.message || "Failed to send OTP." });
-    } finally {
-      setIsProcessingOtp(false);
-    }
-  };
-
-  const handleUpdatePassword = async () => {
-    if (!otpInput || !newPassword) {
-      toast({ variant: "destructive", title: "Missing Fields", description: "OTP and new password are required." });
-      return;
-    }
-    if (newPassword.length < 6) {
-      toast({ variant: "destructive", title: "Weak Password", description: "Password must be at least 6 characters long." });
-      return;
-    }
-    setIsProcessingOtp(true);
-    try {
-      await api.post('/auth/profile/update-password-otp', { otp: otpInput, newPassword });
-      setOtpFlowStep(0);
-      setOtpInput('');
-      setNewPassword('');
-      toast({ title: "Success", description: "Your password has been updated." });
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.response?.data?.message || "Failed to update password." });
-    } finally {
-      setIsProcessingOtp(false);
     }
   };
 
