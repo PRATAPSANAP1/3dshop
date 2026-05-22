@@ -501,6 +501,7 @@ export const updateDeliveryDetails = async (req: Request, res: Response) => {
 
   if (order) {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
 
     (order as any).delivery = {
       assignedTo,
@@ -509,6 +510,7 @@ export const updateDeliveryDetails = async (req: Request, res: Response) => {
       timeSlot,
       status: 'Assigned',
       otp,
+      otpExpiresAt,
       otpVerified: false,
       notes,
       priority: priority || 'Normal'
@@ -531,7 +533,11 @@ export const verifyDeliveryOtp = async (req: Request, res: Response) => {
   const order = await Order.findById(req.params.id);
 
   if (order && (order as any).delivery) {
-    if ((order as any).delivery.otp === otp) {
+    if (new Date() > (order as any).delivery.otpExpiresAt) {
+      return res.status(400).json({ message: 'OTP expired' });
+    }
+
+    if ((order as any).delivery.otp === otp && !(order as any).delivery.otpVerified) {
       (order as any).delivery.otpVerified = true;
       (order as any).delivery.status = 'Delivered';
       order.orderStatus = 'Delivered';
@@ -544,7 +550,7 @@ export const verifyDeliveryOtp = async (req: Request, res: Response) => {
       if (io) io.to(order._id.toString()).emit('order_status_updated', populatedOrder);
       res.json(populatedOrder);
     } else {
-      res.status(400).json({ message: 'Invalid OTP' });
+      res.status(400).json({ message: 'Invalid or already verified OTP' });
     }
   } else {
     res.status(404).json({ message: 'Order not found' });

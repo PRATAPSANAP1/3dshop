@@ -313,28 +313,29 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
     // Send Email
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.error('[MAIL_ERROR]: Gmail credentials missing in environment variables.');
-      return res.status(500).json({ message: 'Mail server unconfigured. Please contact administrator.' });
+      console.warn('[MAIL_WARN]: Gmail credentials missing. Simulating OTP send in console.');
+      console.log(`[SIMULATED OTP for ${email}]: ${otp}`);
+      // Proceed without sending email
+    } else {
+      await mailer.sendMail({
+        from: `"SmartStore Security" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: 'Your Password Reset OTP - SmartStore',
+        html: `
+          <div style="font-family: sans-serif; padding: 20px; color: #334155;">
+            <h2 style="color: #EA580C;">SmartStore Security</h2>
+            <p>You requested a password reset for your SmartStore account. Use the 6-digit OTP below to proceed:</p>
+            <div style="background: #f1f5f9; padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0;">
+              <span style="font-size: 32px; font-weight: 900; letter-spacing: 5px; color: #0f172a;">${otp}</span>
+            </div>
+            <p style="font-size: 12px; color: #64748b;">This OTP will expire in 10 minutes. If you did not request this, please ignore this email.</p>
+          </div>
+        `
+      });
+      console.log(`[PASS_RESET] OTP sent successfully to ${email}`);
     }
 
-    await mailer.sendMail({
-      from: `"SmartStore Security" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: 'Your Password Reset OTP - SmartStore',
-      html: `
-        <div style="font-family: sans-serif; padding: 20px; color: #334155;">
-          <h2 style="color: #EA580C;">SmartStore Security</h2>
-          <p>You requested a password reset for your SmartStore account. Use the 6-digit OTP below to proceed:</p>
-          <div style="background: #f1f5f9; padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0;">
-            <span style="font-size: 32px; font-weight: 900; letter-spacing: 5px; color: #0f172a;">${otp}</span>
-          </div>
-          <p style="font-size: 12px; color: #64748b;">This OTP will expire in 10 minutes. If you did not request this, please ignore this email.</p>
-        </div>
-      `
-    });
-    console.log(`[PASS_RESET] OTP sent successfully to ${email}`);
-
-    res.json({ message: 'OTP sent to your email address' });
+    res.json({ message: 'OTP sent to your email address (check console if email not configured)' });
   } catch (error: any) {
     console.error('ForgotPassword Error:', error.code, error.message);
     const userMessage =

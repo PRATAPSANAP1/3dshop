@@ -84,6 +84,7 @@ const orderSchema = new mongoose.Schema({
       default: 'Pending'
     },
     otp: { type: String },
+    otpExpiresAt: { type: Date },
     otpVerified: { type: Boolean, default: false },
     notes: { type: String },
     priority: { type: String, enum: ['Normal', 'Urgent'], default: 'Normal' }
