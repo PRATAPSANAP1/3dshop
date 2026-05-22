@@ -1,6 +1,17 @@
 import { Request, Response } from 'express';
 import nodemailer from 'nodemailer';
 import { OAuth2Client } from 'google-auth-library';
+
+// Singleton transporter — created once, reused for all requests
+const mailer = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
 import { createAuditLog } from '../middleware/audit';
@@ -100,6 +111,7 @@ export const login = async (req: Request, res: Response) => {
         shopName: user.shopName, 
         role: user.role,
         shopId: user.shopId || null,
+        employeePermissions: user.employeePermissions || [],
         accessToken,
         refreshToken
       });
@@ -159,7 +171,7 @@ export const getMe = async (req: Request, res: Response) => {
   if (req.user) {
     const user = await User.findById((req.user as any)._id).select('-password -token -refreshToken');
     if (user) {
-      res.json(user);
+      res.json({ ...user.toObject(), employeePermissions: user.employeePermissions || [] });
     } else {
       res.status(404).json({ message: 'User not found' });
     }
@@ -254,20 +266,8 @@ export const forgotPassword = async (req: Request, res: Response) => {
       return res.status(500).json({ message: 'Mail server unconfigured. Please contact administrator.' });
     }
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      },
-      pool: true // Use pooled connections for better stability
-    });
-
-    const mailOptions = {
-      from: `"SmartStore Security" <${process.env.EMAIL_USER || 'no-reply@smartstore.com'}>`,
+    await mailer.sendMail({
+      from: `"SmartStore Security" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: 'Your Password Reset OTP - SmartStore',
       html: `
@@ -280,28 +280,18 @@ export const forgotPassword = async (req: Request, res: Response) => {
           <p style="font-size: 12px; color: #64748b;">This OTP will expire in 10 minutes. If you did not request this, please ignore this email.</p>
         </div>
       `
-    };
-
-    await transporter.sendMail(mailOptions);
+    });
     console.log(`[PASS_RESET] OTP sent successfully to ${email}`);
-    
+
     res.json({ message: 'OTP sent to your email address' });
   } catch (error: any) {
-    console.error('ForgotPassword System Error:', {
-      message: error.message,
-      code: error.code,
-      command: error.command
-    });
-    
-    // Provide user-friendly hints for common Gmail errors
-    let userMessage = 'Failed to send OTP. Please try again later.';
-    if (error.code === 'EAUTH') userMessage = 'SMTP Authentication failed. Check your App Password.';
-    if (error.code === 'ECONNREFUSED') userMessage = 'Connection to mail server failed.';
+    console.error('ForgotPassword Error:', error.code, error.message);
+    const userMessage =
+      error.code === 'EAUTH' ? 'SMTP Authentication failed.' :
+      error.code === 'ECONNREFUSED' ? 'Connection to mail server failed.' :
+      'Failed to send OTP. Please try again later.';
 
-    res.status(500).json({ 
-      message: userMessage, 
-      error: process.env.NODE_ENV === 'production' ? undefined : error.message 
-    });
+    res.status(500).json({ message: userMessage });
   }
 };
 

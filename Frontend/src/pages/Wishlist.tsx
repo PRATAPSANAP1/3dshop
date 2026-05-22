@@ -55,7 +55,7 @@ const Wishlist = () => {
 
   return (
     <PageTransition>
-      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12 h-screen overflow-hidden">
         <div className="flex items-center gap-4 mb-10 md:mb-16">
           <div className="h-14 w-14 md:h-16 md:w-16 rounded-[1.5rem] bg-orange-500 flex items-center justify-center text-white ">
             <Heart size={28} className="md:w-8 md:h-8" />

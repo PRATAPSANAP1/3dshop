@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   Plus, 
@@ -17,52 +17,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import api from "@/lib/api";
 
 const GodownStock = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [stockItems, setStockItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const stockItems = [
-    { 
-      id: "SKU-9021", 
-      name: "Organic Honey 500g", 
-      category: "Grocery", 
-      location: "G1 > R1 > S2", 
-      qty: 240, 
-      min: 50, 
-      expiry: "24 Dec 2026", 
-      status: "In Stock" 
-    },
-    { 
-      id: "SKU-4412", 
-      name: "Fresh Amul Butter 100g", 
-      category: "Dairy", 
-      location: "G1 > R2 > S1", 
-      qty: 12, 
-      min: 40, 
-      expiry: "15 May 2026", 
-      status: "Low Stock" 
-    },
-    { 
-      id: "SKU-3122", 
-      name: "Parle-G Gold 200g", 
-      category: "Biscuits", 
-      location: "G2 > R4 > S1", 
-      qty: 850, 
-      min: 100, 
-      expiry: "10 Feb 2027", 
-      status: "In Stock" 
-    },
-    { 
-      id: "SKU-1029", 
-      name: "Dhara Refined Oil 1L", 
-      category: "Oils", 
-      location: "G1 > R1 > S3", 
-      qty: 0, 
-      min: 20, 
-      expiry: "N/A", 
-      status: "Out of Stock" 
-    },
-  ];
+  useEffect(() => {
+    const fetchStock = async () => {
+      try {
+        const { data } = await api.get('/godowns/stock/all');
+        setStockItems(data);
+      } catch (err) {
+        console.error("Failed to fetch stock", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStock();
+  }, []);
 
   return (
     <div className="space-y-8 pb-10">
@@ -140,9 +114,13 @@ const GodownStock = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-orange-50">
-              {stockItems.map((item, i) => (
+              {loading ? (
+                <tr><td colSpan={6} className="text-center py-6 text-slate-400">Loading stock...</td></tr>
+              ) : stockItems.length === 0 ? (
+                <tr><td colSpan={6} className="text-center py-6 text-slate-400">No stock found.</td></tr>
+              ) : stockItems.map((item, i) => (
                 <motion.tr 
-                  key={item.id}
+                  key={item._id || i}
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
@@ -154,10 +132,10 @@ const GodownStock = () => {
                         <Package size={28} />
                       </div>
                       <div>
-                        <p className="text-sm font-black text-slate-800 uppercase tracking-tight italic group-hover:text-[#EA580C] transition-colors">{item.name}</p>
+                        <p className="text-sm font-black text-slate-800 uppercase tracking-tight italic group-hover:text-[#EA580C] transition-colors">{item.productId?.name || 'Unknown Product'}</p>
                         <div className="flex items-center gap-3 mt-2">
-                           <span className="font-mono text-[10px] font-black text-[#EA580C] bg-orange-50 px-2 py-0.5 rounded uppercase tracking-widest">{item.id}</span>
-                           <Badge variant="outline" className="bg-slate-50 border-none text-[8px] font-black text-slate-400 tracking-[0.1em] uppercase px-2">{item.category}</Badge>
+                           <span className="font-mono text-[10px] font-black text-[#EA580C] bg-orange-50 px-2 py-0.5 rounded uppercase tracking-widest">{item.productId?.sku || item._id}</span>
+                           <Badge variant="outline" className="bg-slate-50 border-none text-[8px] font-black text-slate-400 tracking-[0.1em] uppercase px-2">Godown Stock</Badge>
                         </div>
                       </div>
                     </div>
@@ -165,24 +143,24 @@ const GodownStock = () => {
                   <td className="px-6 py-7">
                      <div className="flex items-center gap-2 text-slate-500">
                         <MapPin size={14} className="text-orange-500" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.1em]">{item.location}</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.1em]">{item.godownId?.name || 'Godown'} &gt; Rack {item.rackId || 'Unknown'}</span>
                      </div>
                   </td>
                   <td className="px-6 py-7 text-center">
-                     <div className={`text-lg font-black font-mono tracking-tighter ${item.qty === 0 ? 'text-red-500' : item.qty < item.min ? 'text-amber-500' : 'text-slate-900'}`}>
-                       {item.qty.toLocaleString()}
+                     <div className={`text-lg font-black font-mono tracking-tighter ${item.quantity === 0 ? 'text-red-500' : item.quantity < (item.minLevel || 10) ? 'text-amber-500' : 'text-slate-900'}`}>
+                       {item.quantity?.toLocaleString() || 0}
                      </div>
-                     <p className={`text-[8px] font-black uppercase tracking-widest ${item.qty < item.min ? 'text-amber-500' : 'text-slate-400'}`}>
-                        {item.status}
+                     <p className={`text-[8px] font-black uppercase tracking-widest ${item.quantity < (item.minLevel || 10) ? 'text-amber-500' : 'text-slate-400'}`}>
+                        {item.quantity === 0 ? 'Out of Stock' : item.quantity < (item.minLevel || 10) ? 'Low Stock' : 'In Stock'}
                      </p>
                   </td>
                   <td className="px-6 py-7 text-center">
-                     <span className="text-xs font-black text-slate-400 font-mono italic">Min: {item.min}</span>
+                     <span className="text-xs font-black text-slate-400 font-mono italic">Min: {item.minLevel || 10}</span>
                   </td>
                   <td className="px-6 py-7 text-center">
                      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-100">
                         <Calendar size={12} className="text-slate-400" />
-                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{item.expiry}</span>
+                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{item.batchExpiryDate ? new Date(item.batchExpiryDate).toLocaleDateString() : 'N/A'}</span>
                      </div>
                   </td>
                   <td className="px-8 py-7">

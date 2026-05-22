@@ -18,19 +18,30 @@ import { Link } from "react-router-dom";
 
 const GodownOverview = () => {
   const [stats, setStats] = useState({
-    totalGodowns: 3,
-    totalRacks: 24,
-    totalProducts: 1240,
-    lowStock: 12,
-    capacity: 75
+    totalGodowns: 0,
+    totalRacks: 0,
+    totalProducts: 0,
+    lowStock: 0,
+    capacity: 0
   });
 
-  const [recentActivity, setRecentActivity] = useState([
-    { id: 1, action: "50 units of Parle-G moved to Store", time: "2 mins ago", type: "transfer" },
-    { id: 2, action: "Rack B-04 added in Godown 2", time: "1 hour ago", type: "creation" },
-    { id: 3, action: "Low stock alert: Amul Butter", time: "3 hours ago", type: "alert" },
-    { id: 4, action: "Weekly stock audit completed", time: "5 hours ago", type: "audit" },
-  ]);
+  const [godowns, setGodowns] = useState<any[]>([]);
+
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchOverview = async () => {
+      try {
+        const { data } = await api.get('/godowns/overview');
+        setStats(data.stats);
+        setGodowns(data.godowns || []);
+        setRecentActivity(data.recentActivity || []);
+      } catch (err) {
+        console.error("Failed to fetch godown overview", err);
+      }
+    };
+    fetchOverview();
+  }, []);
 
   const statsCards = [
     { 
@@ -134,15 +145,20 @@ const GodownOverview = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[1, 2, 3].map((g) => (
+            {godowns.length === 0 ? (
+              <div className="col-span-2 text-center p-8 text-slate-400 font-bold border-2 border-dashed rounded-2xl">
+                No godowns found. Create one to get started.
+              </div>
+            ) : (
+              godowns.map((g: any, index: number) => (
               <motion.div
-                key={g}
+                key={g._id || index}
                 whileHover={{ y: -5 }}
                 className="bg-white rounded-[2rem] border border-orange-100 overflow-hidden shadow-sm hover:shadow-xl transition-all group"
               >
                 <div className="h-16 bg-gradient-to-r from-[#EA580C] to-orange-600 p-6 flex items-center justify-between">
                   <h3 className="font-heading text-white font-black tracking-tight uppercase">
-                    Godown {g}
+                    {g.name || `Godown ${index + 1}`}
                   </h3>
                   <div className="h-6 w-6 rounded-lg bg-white/20 flex items-center justify-center">
                     <Zap size={12} className="text-white" />
@@ -153,29 +169,29 @@ const GodownOverview = () => {
                     <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
                       <Warehouse size={14} />
                     </div>
-                    <span className="text-xs font-black uppercase tracking-widest">Mumbai Hub - Sector {g * 12}</span>
+                    <span className="text-xs font-black uppercase tracking-widest">{g.location || `Location ${index + 1}`}</span>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Racks</p>
-                       <p className="font-mono text-lg font-black text-slate-900">{8 + g * 2}</p>
+                       <p className="font-mono text-lg font-black text-slate-900">{g.racksCount || 0}</p>
                     </div>
                     <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Products</p>
-                       <p className="font-mono text-lg font-black text-[#EA580C]">{120 + g * 50}</p>
+                       <p className="font-mono text-lg font-black text-[#EA580C]">{g.productsCount || 0}</p>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex justify-between items-center px-1">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Capacity Used</p>
-                      <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{60 + g * 5}%</p>
+                      <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{g.capacityUsed || 0}%</p>
                     </div>
                     <div className="h-2 w-full bg-orange-100 rounded-full overflow-hidden">
                       <motion.div 
                         initial={{ width: 0 }}
-                        animate={{ width: `${60 + g * 5}%` }}
+                        animate={{ width: `${g.capacityUsed || 0}%` }}
                         transition={{ duration: 1, delay: 0.5 }}
                         className="h-full bg-[#EA580C]" 
                       />
@@ -192,7 +208,8 @@ const GodownOverview = () => {
                   </div>
                 </div>
               </motion.div>
-            ))}
+            ))
+            )}
           </div>
         </div>
 

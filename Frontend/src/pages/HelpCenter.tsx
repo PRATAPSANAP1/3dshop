@@ -4,12 +4,22 @@ import PageTransition from '@/components/PageTransition';
 import { useState } from 'react';
 
 const FAQS = [
-  { q: 'How do I track my order?', a: 'Go to Orders page and click on any order to see real-time tracking with status timeline.' },
-  { q: 'How does OTP delivery verification work?', a: 'When your order is out for delivery, you receive a 6-digit OTP. Share it with the delivery person to confirm receipt.' },
-  { q: 'What payment methods are supported?', a: 'We support UPI, Credit/Debit Cards, Netbanking via Razorpay, and Cash on Delivery.' },
-  { q: 'How do I navigate the 3D store?', a: 'Use mouse drag to rotate, scroll to zoom, and click on products to view details. Search to highlight rack locations.' },
-  { q: 'Can I return a product?', a: 'Yes, after delivery you can request a return from the Orders page. Our team reviews within 24 hours.' },
-  { q: 'How do I add multiple addresses?', a: 'Go to Profile → Addresses and add up to 5 delivery addresses.' },
+  // Delivery & Tracking
+  { category: 'Delivery & Tracking', q: 'How do I track my order?', a: 'Go to Orders page and click on any order to see real-time tracking with status timeline.' },
+  { category: 'Delivery & Tracking', q: 'How does OTP delivery verification work?', a: 'When your order is out for delivery, you receive a 6-digit OTP. Share it with the delivery person to confirm receipt.' },
+  { category: 'Delivery & Tracking', q: 'What to do if there are delivery issues?', a: 'You can contact our support or raise an issue from the tracking page.' },
+  // Payments & Billing
+  { category: 'Payments & Billing', q: 'What payment methods are supported?', a: 'We support UPI, Credit/Debit Cards, Netbanking via Razorpay, and Cash on Delivery.' },
+  { category: 'Payments & Billing', q: 'How do I get my invoices?', a: 'Invoices are available for download in the Order Details page.' },
+  { category: 'Payments & Billing', q: 'When will I receive my refund?', a: 'Refunds are processed within 5-7 business days after return approval.' },
+  // Orders & Returns
+  { category: 'Orders & Returns', q: 'Can I cancel my order?', a: 'Orders can be cancelled before they are shipped from the Orders page.' },
+  { category: 'Orders & Returns', q: 'Can I return a product?', a: 'Yes, after delivery you can request a return from the Orders page. Our team reviews within 24 hours.' },
+  { category: 'Orders & Returns', q: 'How do I navigate the 3D store?', a: 'Use mouse drag to rotate, scroll to zoom, and click on products to view details. Search to highlight rack locations.' },
+  // Account & Security
+  { category: 'Account & Security', q: 'How do I add multiple addresses?', a: 'Go to Profile → Addresses and add up to 5 delivery addresses.' },
+  { category: 'Account & Security', q: 'How can I change my password?', a: 'Go to Account Settings to update your password securely.' },
+  { category: 'Account & Security', q: 'What are the privacy settings?', a: 'You can manage your data and privacy preferences in the Security section of your Profile.' },
 ];
 
 const TOPICS = [
@@ -22,8 +32,12 @@ const TOPICS = [
 export default function HelpCenter() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [search, setSearch] = useState('');
+  const [activeTopic, setActiveTopic] = useState<string | null>(null);
 
-  const filtered = FAQS.filter(f => f.q.toLowerCase().includes(search.toLowerCase()) || f.a.toLowerCase().includes(search.toLowerCase()));
+  const filtered = FAQS.filter(f => 
+    (activeTopic ? f.category === activeTopic : true) && 
+    (f.q.toLowerCase().includes(search.toLowerCase()) || f.a.toLowerCase().includes(search.toLowerCase()))
+  );
 
   return (
     <PageTransition>
@@ -60,7 +74,8 @@ export default function HelpCenter() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="bg-white border border-slate-100 rounded-2xl p-5 hover:border-orange-200 hover:shadow-sm transition-all cursor-pointer group"
+              onClick={() => setActiveTopic(activeTopic === t.title ? null : t.title)}
+              className={`bg-white border ${activeTopic === t.title ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-100'} rounded-2xl p-5 hover:border-orange-200 hover:shadow-sm transition-all cursor-pointer group`}
             >
               <div className={`h-10 w-10 rounded-xl ${t.bg} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
                 <t.icon size={18} className={t.color} />

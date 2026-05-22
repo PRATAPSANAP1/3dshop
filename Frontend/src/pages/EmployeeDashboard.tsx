@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { usePermission } from "@/hooks/usePermission";
 import { useAuth } from "@/context/AuthContext";
@@ -7,6 +8,7 @@ import {
   ShieldAlert, ArrowRight
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import api from "@/lib/api";
 
 const PermissionCard = ({
   title, desc, icon: Icon, color, bg, available, onClick
@@ -50,6 +52,7 @@ const PermissionCard = ({
 const EmployeeDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [stats, setStats] = useState({ todayOrders: 0, pendingDelivery: 0, lowStock: 0 });
 
   const canViewStats = usePermission("VIEW_DASHBOARD_STATS");
   const canViewOrders = usePermission("VIEW_ORDERS");
@@ -57,6 +60,11 @@ const EmployeeDashboard = () => {
   const canUseScanner = usePermission("USE_SCANNER");
   const canViewProducts = usePermission("VIEW_PRODUCTS");
   const canManageStock = usePermission("MANAGE_INVENTORY_STOCK");
+
+  useEffect(() => {
+    if (!canViewStats) return;
+    api.get('/employee/stats').then(({ data }) => setStats(data)).catch(() => {});
+  }, [canViewStats]);
 
   return (
     <PageTransition>
@@ -78,13 +86,12 @@ const EmployeeDashboard = () => {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-3"
+            className="grid grid-cols-2 sm:grid-cols-3 gap-3"
           >
             {[
-              { label: "Today's Orders", value: "—", color: "text-blue-600" },
-              { label: "Pending Delivery", value: "—", color: "text-amber-600" },
-              { label: "Low Stock Items", value: "—", color: "text-rose-500" },
-              { label: "Scanner Sessions", value: "—", color: "text-purple-600" },
+              { label: "Today's Orders", value: stats.todayOrders, color: "text-blue-600" },
+              { label: "Pending Delivery", value: stats.pendingDelivery, color: "text-amber-600" },
+              { label: "Low Stock Items", value: stats.lowStock, color: "text-rose-500" },
             ].map((stat, i) => (
               <div key={i} className="bg-white rounded-2xl border border-slate-100 p-4">
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>

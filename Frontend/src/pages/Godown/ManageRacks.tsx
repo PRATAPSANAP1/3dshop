@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   Plus, 
@@ -15,16 +15,26 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import api from "@/lib/api";
 
 const ManageRacks = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [racks, setRacks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const racks = [
-    { id: "RCK-001", name: "Alpha Main 1", zone: "DRY STORE", pos: "0.0, 0.0, 0.0", shelves: 6, products: 45, status: "Active" },
-    { id: "RCK-002", name: "Beta Side A", zone: "COLD STORE", pos: "2.4, 0.0, 1.2", shelves: 4, products: 12, status: "Active" },
-    { id: "RCK-003", name: "Gamma Bulk 2", zone: "BULK AREA", pos: "5.0, 0.0, -2.0", shelves: 2, products: 8, status: "Inactive" },
-    { id: "RCK-004", name: "Delta Front", zone: "DRY STORE", pos: "-1.2, 0.0, 4.5", shelves: 5, products: 30, status: "Active" },
-  ];
+  useEffect(() => {
+    const fetchRacks = async () => {
+      try {
+        const { data } = await api.get('/godowns/racks/all');
+        setRacks(data);
+      } catch (err) {
+        console.error("Failed to fetch racks", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRacks();
+  }, []);
 
   return (
     <div className="space-y-8 pb-10">
@@ -87,16 +97,20 @@ const ManageRacks = () => {
             </tr>
           </thead>
           <tbody>
-            {racks.map((rack, i) => (
+            {loading ? (
+               <tr><td colSpan={8} className="text-center py-6 text-slate-400">Loading racks...</td></tr>
+            ) : racks.length === 0 ? (
+               <tr><td colSpan={8} className="text-center py-6 text-slate-400">No racks found.</td></tr>
+            ) : racks.map((rack, i) => (
               <motion.tr 
-                key={rack.id}
+                key={rack._id || i}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
                 className="group border-b border-orange-50 hover:bg-orange-50/50 transition-colors"
               >
                 <td className="px-6 py-6">
-                  <span className="font-mono text-[11px] font-black text-[#EA580C] bg-orange-50 px-2 py-1 rounded-md">{rack.id}</span>
+                  <span className="font-mono text-[11px] font-black text-[#EA580C] bg-orange-50 px-2 py-1 rounded-md">{rack.code || rack._id}</span>
                 </td>
                 <td className="px-6 py-6">
                   <div className="flex items-center gap-3">
@@ -105,7 +119,7 @@ const ManageRacks = () => {
                     </div>
                     <div>
                       <p className="text-sm font-black text-slate-900 group-hover:text-[#EA580C] transition-colors">{rack.name}</p>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Industrial Grade</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{rack.godownId?.name || 'Godown'}</p>
                     </div>
                   </div>
                 </td>
@@ -115,17 +129,17 @@ const ManageRacks = () => {
                    </Badge>
                 </td>
                 <td className="px-6 py-6">
-                  <span className="font-mono text-xs text-slate-500 font-bold tracking-tight">{rack.pos}</span>
+                  <span className="font-mono text-xs text-slate-500 font-bold tracking-tight">{rack.position?.x}, {rack.position?.y}, {rack.position?.z}</span>
                 </td>
                 <td className="px-6 py-6 text-center">
                   <div className="flex items-center justify-center gap-1.5">
                     <Layers size={14} className="text-orange-300" />
-                    <span className="font-black text-slate-900">{rack.shelves}</span>
+                    <span className="font-black text-slate-900">{rack.shelvesCount}</span>
                   </div>
                 </td>
                 <td className="px-6 py-6 text-center">
                   <div className="inline-flex flex-col items-center">
-                    <span className="font-black text-slate-900 leading-none">{rack.products}</span>
+                    <span className="font-black text-slate-900 leading-none">0</span>
                     <span className="text-[8px] font-black text-slate-400 uppercase mt-1">SKUs</span>
                   </div>
                 </td>

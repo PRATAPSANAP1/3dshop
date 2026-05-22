@@ -65,10 +65,12 @@ const AuditLogs = lazy(() => import("./pages/AuditLogs"));
 const Coupons = lazy(() => import("./pages/Coupons"));
 const HelpCenter = lazy(() => import("./pages/HelpCenter"));
 const Shops = lazy(() => import("./pages/Shops"));
+const Collection = lazy(() => import("./pages/Collection"));
 
 // New multi-tenant pages
 const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
 const Employees = lazy(() => import("./pages/Employees"));
+const JoinPage = lazy(() => import("./pages/JoinPage"));
 
 // Godown lazy imports
 const GodownLayout = lazy(() => import("./components/GodownLayout"));
@@ -133,6 +135,7 @@ const AnimatedRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/landing" element={<Landing />} />
+          <Route path="/join" element={<JoinPage />} />
 
           {/* â”€â”€ App shell (sidebar + layout) â”€â”€ */}
           <Route element={<AppLayout />}>
@@ -178,6 +181,7 @@ const AnimatedRoutes = () => {
             <Route path="/product/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
             <Route path="/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
             <Route path="/deals" element={<ProtectedRoute><Deals /></ProtectedRoute>} />
+            <Route path="/collection" element={<Collection />} />
             <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
             <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
             <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
