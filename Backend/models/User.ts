@@ -11,7 +11,8 @@ const userSchema = new mongoose.Schema({
     type: String, 
     enum: ['VIEW_ORDERS', 'UPDATE_DELIVERY_STATUS', 'USE_SCANNER', 'VIEW_PRODUCTS', 'VIEW_DASHBOARD_STATS', 'MANAGE_INVENTORY_STOCK'] 
   }],
-  shopName: { type: String }, // Optional for regular customers
+  shopName: { type: String }, // Optional for regular customers (Admins)
+  preferredShops: [{ type: String }], // Multi-choice for shoppers
   mobile: { type: String },
   addresses: [{
     label: { type: String, default: 'Home' }, // Home, Work, etc

@@ -47,13 +47,13 @@ const setCookies = (res: Response, accessToken: string, refreshToken: string) =>
 };
 
 export const register = async (req: Request, res: Response) => {
-  const { name, email, password, shopName, mobile, role } = req.body;
+  const { name, email, password, shopName, mobile, role, preferredShops } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: 'User already exists' });
 
-    const user = new User({ name, email, password, shopName, mobile, role: role || 'shopper' });
+    const user = new User({ name, email, password, shopName, mobile, role: role || 'shopper', preferredShops: preferredShops || [] });
 
     const accessToken = generateAccessToken(user._id.toString(), user.role, user.shopId?.toString());
     const refreshToken = generateRefreshToken(user._id.toString());
@@ -74,6 +74,7 @@ export const register = async (req: Request, res: Response) => {
       shopName, 
       role: user.role,
       shopId: user.shopId || null,
+      preferredShops: user.preferredShops || [],
       accessToken,
       refreshToken
     });
@@ -112,6 +113,7 @@ export const login = async (req: Request, res: Response) => {
         role: user.role,
         shopId: user.shopId || null,
         employeePermissions: user.employeePermissions || [],
+        preferredShops: user.preferredShops || [],
         accessToken,
         refreshToken
       });
@@ -171,7 +173,7 @@ export const getMe = async (req: Request, res: Response) => {
   if (req.user) {
     const user = await User.findById((req.user as any)._id).select('-password -token -refreshToken');
     if (user) {
-      res.json({ ...user.toObject(), employeePermissions: user.employeePermissions || [] });
+      res.json({ ...user.toObject(), employeePermissions: user.employeePermissions || [], preferredShops: user.preferredShops || [] });
     } else {
       res.status(404).json({ message: 'User not found' });
     }
@@ -181,7 +183,7 @@ export const getMe = async (req: Request, res: Response) => {
 };
 
 export const updateProfile = async (req: Request, res: Response) => {
-  const { name, email, mobile, shopName, password, addresses } = req.body;
+  const { name, email, mobile, shopName, password, addresses, preferredShops } = req.body;
   const user = await User.findById((req.user as any)._id);
 
   if (user) {
@@ -190,6 +192,7 @@ export const updateProfile = async (req: Request, res: Response) => {
     user.mobile = mobile || user.mobile;
     user.shopName = shopName || user.shopName;
     if (addresses) user.addresses = addresses;
+    if (preferredShops) user.preferredShops = preferredShops;
     if (password) user.password = password;
 
     const updatedUser = await user.save();
@@ -200,7 +203,8 @@ export const updateProfile = async (req: Request, res: Response) => {
       shopName: updatedUser.shopName, 
       role: updatedUser.role,
       mobile: updatedUser.mobile,
-      addresses: updatedUser.addresses
+      addresses: updatedUser.addresses,
+      preferredShops: updatedUser.preferredShops
     });
   } else {
     res.status(404).json({ message: 'User not found' });

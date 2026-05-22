@@ -23,10 +23,23 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [role, setRole] = useState<'admin' | 'shopper'>('shopper');
-  const [form, setForm] = useState({ name: '', email: '', password: '', shopName: '', mobile: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', shopName: '', mobile: '', preferredShops: [] as string[] });
   const [showForgot, setShowForgot] = useState(false);
   const [forgotStep, setForgotStep] = useState(1); // 1: Email, 2: OTP & New Pass
   const [forgotData, setForgotData] = useState({ email: '', otp: '', newPassword: '' });
+  const [availableShops, setAvailableShops] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchShops = async () => {
+      try {
+        const { data } = await api.get('/shop-config/public/shops/list');
+        setAvailableShops(data || []);
+      } catch (err) {
+        console.error("Failed to fetch shops", err);
+      }
+    };
+    fetchShops();
+  }, []);
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -76,7 +89,7 @@ const Login = () => {
     try {
       const endpoint = isRegister ? '/auth/register' : '/auth/login';
       const payload = isRegister
-        ? { ...form, role: role === 'admin' ? 'admin' : 'shopper', shopName: "SmartStore" }
+        ? { ...form, role: role === 'admin' ? 'admin' : 'shopper', shopName: "SmartStore", preferredShops: form.preferredShops }
         : { email: form.email, password: form.password };
 
       const { data } = await api.post(endpoint, payload);
@@ -357,7 +370,39 @@ const Login = () => {
                             <label className="text-sm font-bold text-slate-700 ml-1">Mobile Number</label>
                             <Input name="mobile" value={form.mobile} onChange={handleInputChange} placeholder="937047xxx" className="h-12 rounded-xl border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium" required />
                           </div>
-
+                          
+                          {role === 'shopper' && availableShops.length > 0 && (
+                            <div className="space-y-2">
+                              <label className="text-sm font-bold text-slate-700 ml-1">Select Preferred Shops</label>
+                              <div className="flex flex-wrap gap-2">
+                                {availableShops.map(shop => {
+                                  const isSelected = form.preferredShops.includes(shop);
+                                  return (
+                                    <button
+                                      key={shop}
+                                      type="button"
+                                      onClick={() => {
+                                        setForm(prev => ({
+                                          ...prev,
+                                          preferredShops: isSelected
+                                            ? prev.preferredShops.filter(s => s !== shop)
+                                            : [...prev.preferredShops, shop]
+                                        }));
+                                      }}
+                                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border-2 flex items-center gap-1.5 ${
+                                        isSelected 
+                                          ? 'border-primary bg-primary/10 text-primary' 
+                                          : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                                      }`}
+                                    >
+                                      {isSelected && <Check size={12} />}
+                                      {shop}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </motion.div>
                       )}
                     </AnimatePresence>

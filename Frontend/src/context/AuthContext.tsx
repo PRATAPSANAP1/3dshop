@@ -11,6 +11,7 @@ interface User {
   mobile?: string;
   addresses?: any[];
   employeePermissions?: string[];
+  preferredShops?: string[];
 }
 
 interface AuthContextType {

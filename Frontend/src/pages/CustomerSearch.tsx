@@ -442,7 +442,7 @@ const CustomerSearch: React.FC = () => {
                   <div className="p-2 border-b border-slate-50">
                     <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest px-2">Active Neighborhoods</p>
                   </div>
-                  {allShopNames.map((name) => (
+                  {(user?.preferredShops?.length ? user.preferredShops : allShopNames).map((name) => (
                     <button
                       key={name}
                       onClick={() => { setShopName(name); autoLoadShop(name); setShowShopDropdown(false); }}

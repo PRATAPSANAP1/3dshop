@@ -33,7 +33,9 @@ const Profile = () => {
     mobile: user?.mobile || "",
     shopName: user?.shopName || "",
     password: "",
+    preferredShops: user?.preferredShops || [],
   });
+  const [availableShops, setAvailableShops] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [savingAddress, setSavingAddress] = useState(false);
@@ -68,6 +70,16 @@ const Profile = () => {
       };
       fetchOrders();
     }
+    
+    const fetchShops = async () => {
+      try {
+        const { data } = await api.get('/shop-config/public/shops/list');
+        setAvailableShops(data || []);
+      } catch (err) {
+        console.error("Failed to fetch shops", err);
+      }
+    };
+    fetchShops();
   }, [isAdmin]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -263,6 +275,39 @@ const Profile = () => {
                   </label>
                   <Input name="password" type="password" value={formData.password} onChange={handleInputChange} placeholder="•••••••• (leave blank to keep current)" className="h-12 rounded-xl border-slate-200" />
                 </div>
+
+                {!isAdmin && availableShops.length > 0 && (
+                  <div className="space-y-2 md:col-span-2">
+                    <label className="text-sm font-bold text-slate-700 ml-1">Preferred Shops</label>
+                    <div className="flex flex-wrap gap-2">
+                      {availableShops.map(shop => {
+                        const isSelected = formData.preferredShops.includes(shop);
+                        return (
+                          <button
+                            key={shop}
+                            type="button"
+                            onClick={() => {
+                              setFormData(prev => ({
+                                ...prev,
+                                preferredShops: isSelected
+                                  ? prev.preferredShops.filter(s => s !== shop)
+                                  : [...prev.preferredShops, shop]
+                              }));
+                            }}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border-2 flex items-center gap-1.5 ${
+                              isSelected 
+                                ? 'border-primary bg-primary/10 text-primary' 
+                                : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                            }`}
+                          >
+                            {isSelected && <Check size={12} />}
+                            {shop}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <Button disabled={saving} onClick={handleSave} size="lg" className="w-full md:w-auto px-10 h-12 rounded-xl font-bold bg-primary hover:bg-primary/90 shadow-sm active:scale-95 transition-all">

@@ -174,9 +174,9 @@ const ShopperCatalog = () => {
                         <motion.button
                           whileTap={{ scale: 0.88 }}
                           onClick={(e) => handleAddToWishlist(e, p._id, p.productName)}
-                          className="p-2 rounded-xl bg-white/20 backdrop-blur-md text-white hover:bg-white hover:text-rose-500 transition-all shadow-sm"
+                          className="p-2 rounded-xl bg-white/60 backdrop-blur-md hover:bg-white transition-all shadow-sm"
                         >
-                          <Heart size={14} fill={wishlistIds.has(p._id) ? "currentColor" : "none"} className={`sm:w-4 sm:h-4 ${wishlistIds.has(p._id) ? 'text-pink-500' : ''}`} />
+                          <Heart size={14} fill={wishlistIds.has(p._id) ? "currentColor" : "none"} className={`sm:w-4 sm:h-4 transition-colors ${wishlistIds.has(p._id) ? 'text-rose-500' : 'text-orange-500'}`} />
                         </motion.button>
                       </div>
 
