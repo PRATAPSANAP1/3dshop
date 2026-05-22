@@ -32,6 +32,7 @@ import couponRoutes from './routes/coupons';
 import shopRoutes from './routes/shops';
 import godownRoutes from './routes/godowns';
 import employeeRoutes from './routes/employee';
+import mlRoutes from './routes/mlRoutes';
 
 import { apiLimiter } from './middleware/security';
 
@@ -119,6 +120,7 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/shops', shopRoutes);
 app.use('/api/godowns', godownRoutes);
 app.use('/api/employee', employeeRoutes);
+app.use('/api/ml', mlRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ 

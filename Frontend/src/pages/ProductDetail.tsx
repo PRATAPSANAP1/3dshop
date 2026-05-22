@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Heart, Star, ChevronLeft, ShieldCheck, Truck, RefreshCw, MessageSquare, Plus, Minus, Tag, Zap, X, User } from "lucide-react";
+import { ShoppingBag, Heart, Star, ChevronLeft, ShieldCheck, Truck, RefreshCw, MessageSquare, Plus, Minus, Tag, Zap, X, User, BrainCircuit, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PageTransition from "@/components/PageTransition";
 import api from "@/lib/api";
@@ -13,6 +13,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState<any>(null);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [predictedNextProduct, setPredictedNextProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
   const [reviews, setReviews] = useState<any[]>([]);
@@ -27,12 +28,19 @@ const ProductDetail = () => {
     try {
       const { data } = await api.get(`/products/${id}`);
       setProduct(data);
-      const [catRes, reviewRes] = await Promise.all([
+      const [catRes, reviewRes, aprioriRes, seqRes] = await Promise.all([
         api.get(`/public/catalog?category=${data.category}`),
         api.get(`/products/${id}/reviews`),
+        api.get(`/ml/recommendations/apriori/${id}`),
+        api.post(`/ml/recommendations/sequence`, { currentProductId: id })
       ]);
-      setRelatedProducts(catRes.data.filter((p: any) => p._id !== id).slice(0, 4));
+      setRelatedProducts(aprioriRes.data.length > 0 ? aprioriRes.data : catRes.data.filter((p: any) => p._id !== id).slice(0, 4));
       setReviews(reviewRes.data);
+      if (seqRes.data?.predictedProduct) {
+        setPredictedNextProduct(seqRes.data.predictedProduct);
+      } else {
+        setPredictedNextProduct(null);
+      }
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: "Product not found" });
       navigate("/catalog");
@@ -216,9 +224,9 @@ const ProductDetail = () => {
 
             <div className="mt-16 pt-16 border-t border-slate-100">
                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-2xl font-black italic tracking-tighter text-slate-900 leading-none">PEOPLE <span className="text-orange-500 not-italic">ALSO BOUGHT.</span></h3>
+                  <h3 className="text-2xl font-black italic tracking-tighter text-slate-900 leading-none">FREQUENTLY <span className="text-orange-500 not-italic">BOUGHT TOGETHER</span></h3>
                   <Badge variant="outline" className="rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 border-orange-200 text-orange-500">
-                     <Zap size={14} /> AI Suggested
+                     <Zap size={14} /> Apriori ML
                   </Badge>
                </div>
                
@@ -358,6 +366,38 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* AI Next Product Prediction Float */}
+      <AnimatePresence>
+        {predictedNextProduct && (
+          <motion.div
+            initial={{ opacity: 0, x: 50, y: 50 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, x: 50, y: 50 }}
+            className="fixed bottom-6 right-6 z-40 max-w-sm"
+          >
+            <div 
+              onClick={() => navigate(`/product/${predictedNextProduct._id}`)}
+              className="bg-slate-900 text-white p-4 rounded-3xl shadow-2xl border border-slate-700 flex items-center gap-4 cursor-pointer hover:scale-105 hover:bg-slate-800 transition-all group"
+            >
+              <div className="h-12 w-12 rounded-2xl bg-orange-500/20 flex items-center justify-center shrink-0">
+                <BrainCircuit size={20} className="text-orange-500" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <Sparkles size={10} className="text-orange-400" />
+                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-400">AI Predicts Next</p>
+                </div>
+                <p className="text-sm font-bold text-white truncate max-w-[160px]">{predictedNextProduct.productName}</p>
+                <p className="text-xs text-slate-400 font-medium">${predictedNextProduct.price}</p>
+              </div>
+              <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
+                <ChevronRight size={14} className="text-white" />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </PageTransition>
   );
 };

@@ -23,6 +23,7 @@ import {
   Ticket,
   UserPlus,
   Building2,
+  BrainCircuit,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -37,6 +38,7 @@ const navItems = [
   { to: "/delivery",    icon: Truck,          label: "Delivery Hub", desc: "Assign & verify",      color: "text-amber-600",  bg: "bg-amber-500/10" },
   { to: "/logistics",   icon: Truck,          label: "Logistics",    desc: "Fleet overview",       color: "text-blue-500",   bg: "bg-blue-500/10" },
   { to: "/smartstore",  icon: BarChart3,      label: "AI Insights",  desc: "Smart predictions",    color: "text-amber-600",  bg: "bg-amber-500/10" },
+  { to: "/ai-dashboard",icon: BrainCircuit,   label: "ML Dashboard", desc: "Clustering & Heatmap", color: "text-blue-500", bg: "bg-blue-500/10" },
   { to: "/users",       icon: Users,          label: "User Base",    desc: "Manage members",       color: "text-orange-500", bg: "bg-orange-500/10" },
   { to: "/billing",     icon: Receipt,        label: "Billing",      desc: "Transactions",         color: "text-amber-600",  bg: "bg-amber-500/10" },
   { to: "/orders",      icon: ShoppingCart,   label: "Orders",       desc: "Manage fulfillment",   color: "text-orange-500", bg: "bg-orange-500/10" },

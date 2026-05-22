@@ -41,6 +41,7 @@ const Landing = lazy(() => import("./pages/Landing"));
 const Shop3D = lazy(() => import("./pages/Shop3D"));
 const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const AdminAIDashboard = lazy(() => import("./pages/AdminAIDashboard"));
 const Products = lazy(() => import("./pages/Products"));
 const Racks = lazy(() => import("./pages/Racks"));
 const ShopBuilder = lazy(() => import("./pages/ShopBuilder"));
@@ -141,6 +142,7 @@ const AnimatedRoutes = () => {
           <Route element={<AppLayout />}>
             {/* Admin-only */}
             <Route path="/dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} />
+            <Route path="/ai-dashboard" element={<AdminRoute><AdminAIDashboard /></AdminRoute>} />
             <Route path="/products" element={<AdminRoute><Products /></AdminRoute>} />
             <Route path="/users" element={<AdminRoute><Users /></AdminRoute>} />
             <Route path="/racks" element={<AdminRoute><Racks /></AdminRoute>} />

@@ -8,6 +8,7 @@ import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { Package, ShoppingCart as ShoppingCartIcon } from "lucide-react";
 
 const PALETTES = [
   { grad: "from-amber-400 to-orange-600", soft: "bg-orange-50", txt: "text-orange-600", border: "border-orange-200", dot: "#f59e0b", btn: "bg-orange-500 text-white hover:bg-orange-600" },
@@ -22,6 +23,7 @@ const getColorIndex = (str: string) => {
 const ShopperCatalog = () => {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<any[]>([]);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(new Set());
@@ -41,6 +43,11 @@ const ShopperCatalog = () => {
         if (data && data.products) {
           setWishlistIds(new Set(data.products.map((p: any) => p._id)));
         }
+      }).catch(console.error);
+
+      // Fetch Collaborative Filtering Recommendations
+      api.get('/ml/recommendations/cf').then(({ data }) => {
+        if (data && Array.isArray(data)) setRecommendations(data);
       }).catch(console.error);
     }
   }, [user]);
@@ -136,6 +143,35 @@ const ShopperCatalog = () => {
             })}
           </div>
         </div>
+
+        {/* AI Recommendations */}
+        {recommendations.length > 0 && !search && activeCategory === "All" && (
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles size={16} className="text-orange-500" />
+              <h2 className="text-sm font-black text-slate-800 uppercase tracking-widest">Recommended For You</h2>
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+              {recommendations.map((p, i) => {
+                 const ci = getColorIndex(p.category || 'General');
+                 const pal = PALETTES[ci];
+                 return (
+                   <div key={`rec-${p._id}`} onClick={() => navigate(`/product/${p._id}`)} className={`shrink-0 w-[200px] bg-white rounded-2xl p-3 border-b-4 ${pal.border} cursor-pointer hover:shadow-lg transition-all`}>
+                     <div className={`aspect-square rounded-xl ${pal.soft} mb-3 flex items-center justify-center p-4 relative`}>
+                        {p.imageUrl ? <img src={p.imageUrl} alt={p.productName} className="object-contain h-full w-full drop-shadow-md" /> : <Package size={40} className={pal.txt} />}
+                     </div>
+                     <p className="text-xs font-black text-slate-800 truncate">{p.productName}</p>
+                     <p className="text-[10px] font-bold text-slate-400 mt-0.5">{p.category}</p>
+                     <div className="mt-2 flex items-center justify-between">
+                       <p className={`font-black ${pal.txt}`}>${(p.price || 0).toFixed(2)}</p>
+                       <button onClick={(e) => handleAddToCart(e, p._id, p.productName)} className={`h-6 w-6 rounded-md ${pal.btn} flex items-center justify-center`}><ShoppingCart size={12} /></button>
+                     </div>
+                   </div>
+                 )
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Product grid */}
         {filteredProducts.length === 0 && !loading ? (
