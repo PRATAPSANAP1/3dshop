@@ -51,10 +51,9 @@ const Delivery = () => {
     try {
       const endpoint = isAdmin ? "/orders" : "/orders/mine";
       const { data } = await api.get(endpoint);
-      // Admin sees all orders, staff sees only assigned to them, shopper sees their deliveries
       let filtered = data;
       if (isStaff) {
-        filtered = data.filter((o: any) => o.delivery?.assignedTo === user?._id);
+        filtered = data.filter((o: any) => o.delivery?.assignedTo === user?._id && !o.delivery?.otpVerified && o.orderStatus !== 'Delivered');
       } else if (!isAdmin) {
         filtered = data.filter((o: any) =>
           ["Packed", "Shipped", "OutForDelivery", "Delivered", "FailedDelivery"].includes(o.orderStatus)
@@ -203,7 +202,6 @@ const Delivery = () => {
           )}
         </header>
 
-        {/* Filters */}
         <div className="flex gap-2 flex-wrap">
           {(isAdmin
             ? [
@@ -214,6 +212,11 @@ const Delivery = () => {
                 { key: "out", label: "In Transit" },
                 { key: "delivered", label: "Delivered" },
                 { key: "failed", label: "Failed" },
+              ]
+            : isStaff 
+            ? [
+                { key: "all", label: "All Tasks" },
+                { key: "out", label: "In Transit" },
               ]
             : [
                 { key: "all", label: "All" },
@@ -530,12 +533,17 @@ const Delivery = () => {
 
                     {/* ══════ Delivery Completed Badge ══════ */}
                     {selectedOrder.delivery?.otpVerified && (
-                      <div className="p-5 bg-emerald-50 rounded-2xl border-2 border-emerald-200 flex items-center gap-4">
-                        <CheckCircle2 size={28} className="text-emerald-500 shrink-0" />
-                        <div>
-                          <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-1">Delivery Verified</p>
-                          <p className="text-sm font-semibold text-emerald-700">OTP confirmed. Order delivered successfully.</p>
+                      <div className="p-5 bg-emerald-50 rounded-2xl border-2 border-emerald-200 flex flex-col gap-4">
+                        <div className="flex items-center gap-4">
+                          <CheckCircle2 size={28} className="text-emerald-500 shrink-0" />
+                          <div>
+                            <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-1">Delivery Verified</p>
+                            <p className="text-sm font-semibold text-emerald-700">OTP confirmed. Order delivered successfully.</p>
+                          </div>
                         </div>
+                        <Button onClick={() => setSelectedOrder(null)} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-11 rounded-xl uppercase tracking-wider text-xs">
+                          Finish & Close
+                        </Button>
                       </div>
                     )}
 
