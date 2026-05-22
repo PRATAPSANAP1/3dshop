@@ -228,9 +228,18 @@ const CustomerSearch: React.FC = () => {
     API.get('/shop-config/public/shops/list')
       .then(({ data }) => {
         setAllShopNames(data);
-        if (data && data.length > 0) {
-          setShopName(data[0]);
-          loadShopData(data[0]);
+        let initialShop = '';
+        if (user?.role === 'shopper' && user.preferredShops && user.preferredShops.length > 0) {
+          initialShop = user.preferredShops[0];
+        } else if (user?.shopName && user.role !== 'shopper') {
+          initialShop = user.shopName;
+        } else if (data && data.length > 0) {
+          initialShop = data[0];
+        }
+
+        if (initialShop) {
+          setShopName(initialShop);
+          loadShopData(initialShop);
         } else {
           setIsLoading(false);
           toast({ variant: 'destructive', title: 'No stores found', description: 'No active stores found in the system.' });
