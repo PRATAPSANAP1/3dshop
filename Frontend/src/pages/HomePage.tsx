@@ -502,43 +502,6 @@ const HomePage = () => {
 
 
 
-      {/* ── TRUST STRIP ── */}
-      <section className="py-20 bg-slate-50/50 border-y border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
-          {[
-            { icon: <ShieldCheck size={32} />, bg: 'bg-emerald-50 text-emerald-500', title: 'Secure Checkout', desc: 'End-to-end encryption for all transactions.' },
-            { icon: <Clock size={32} />, bg: 'bg-amber-50 text-amber-500', title: 'Fast Delivery', desc: 'Real-time dispatch and live tracking.' },
-            { icon: <BarChart3 size={32} />, bg: 'bg-orange-50 text-orange-500', title: 'Smart Catalog', desc: 'Personalized product discoveries.' },
-          ].map((f, i) => (
-            <div key={i} className="flex items-center gap-6 group">
-              <div className={`h-16 w-16 ${f.bg} rounded-2xl flex items-center justify-center border border-white shadow-md shrink-0 group-hover:rotate-6 transition-transform`}>{f.icon}</div>
-              <div>
-                <h4 className="text-base font-black text-slate-900 uppercase tracking-tight mb-1">{f.title}</h4>
-                <p className="text-xs font-semibold text-slate-400">{f.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── STATS ── */}
-      <section className="py-20 md:py-28">
-        <div className="max-w-6xl mx-auto px-6 grid grid-cols-3 gap-6 md:gap-12 text-center bg-white rounded-[4rem] border border-slate-100 p-12 shadow-sm">
-          <div>
-            <p className="text-3xl md:text-6xl font-black text-primary mb-2 md:mb-4 tracking-tighter italic">50k+</p>
-            <p className="text-[9px] md:text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] md:tracking-[0.3em]">Customers</p>
-          </div>
-          <div>
-            <p className="text-3xl md:text-6xl font-black text-slate-900 mb-2 md:mb-4 tracking-tighter">30min</p>
-            <p className="text-[9px] md:text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] md:tracking-[0.3em]">Avg. Dispatch</p>
-          </div>
-          <div>
-            <p className="text-3xl md:text-6xl font-black text-slate-900 mb-2 md:mb-4 tracking-tighter italic">99.9%</p>
-            <p className="text-[9px] md:text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] md:tracking-[0.3em]">Uptime</p>
-          </div>
-        </div>
-      </section>
-
       {/* ── FOOTER ── */}
       <footer className="bg-slate-50 text-slate-900 pt-16 md:pt-24 pb-16 md:pb-12 border-t-2 border-slate-100">
         <div className="max-w-7xl mx-auto h-full px-6 md:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16 mb-12 md:mb-24">
