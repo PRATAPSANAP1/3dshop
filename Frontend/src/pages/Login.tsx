@@ -257,7 +257,6 @@ const Login = () => {
                         type="email" 
                         value={forgotData.email} 
                         onChange={(e) => setForgotData({...forgotData, email: e.target.value})}
-                        placeholder="name@example.com" 
                         className="h-12 rounded-xl" 
                         required 
                       />
@@ -271,7 +270,6 @@ const Login = () => {
                           maxLength={6}
                           value={forgotData.otp} 
                           onChange={(e) => setForgotData({...forgotData, otp: e.target.value})}
-                          placeholder="" 
                           className="h-12 rounded-xl text-center text-lg tracking-[0.5em] font-black" 
                           required 
                         />
@@ -282,7 +280,6 @@ const Login = () => {
                           type="password" 
                           value={forgotData.newPassword} 
                           onChange={(e) => setForgotData({...forgotData, newPassword: e.target.value})}
-                          placeholder="••••••••" 
                           className="h-12 rounded-xl" 
                           required 
                         />
@@ -364,11 +361,11 @@ const Login = () => {
                         >
                           <div className="space-y-1.5">
                             <label className="text-sm font-bold text-slate-700 ml-1">Full Name</label>
-                            <Input name="name" value={form.name} onChange={handleInputChange} placeholder="John Doe" className="h-12 rounded-xl border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium" required />
+                            <Input name="name" value={form.name} onChange={handleInputChange} className="h-12 rounded-xl border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium" required />
                           </div>
                           <div className="space-y-1.5">
                             <label className="text-sm font-bold text-slate-700 ml-1">Mobile Number</label>
-                            <Input name="mobile" value={form.mobile} onChange={handleInputChange} placeholder="937047xxx" className="h-12 rounded-xl border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium" required />
+                            <Input name="mobile" value={form.mobile} onChange={handleInputChange} className="h-12 rounded-xl border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium" required />
                           </div>
                           
                           {role === 'shopper' && availableShops.length > 0 && (
@@ -409,7 +406,7 @@ const Login = () => {
 
                     <div className="space-y-1.5">
                       <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
-                      <Input type="email" name="email" value={form.email} onChange={handleInputChange} placeholder="name@example.com" className="h-12 rounded-xl border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium" required />
+                      <Input type="email" name="email" value={form.email} onChange={handleInputChange} className="h-12 rounded-xl border-slate-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium" required />
                     </div>
 
                     <div className="space-y-1.5">
@@ -422,7 +419,6 @@ const Login = () => {
                           name="password"
                           value={form.password}
                           onChange={handleInputChange}
-                          placeholder="••••••••"
                           className="h-12 rounded-xl border-slate-200 pr-12 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all font-medium"
                           required
                         />

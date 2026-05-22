@@ -32,7 +32,6 @@ const Profile = () => {
     email: user?.email || "",
     mobile: user?.mobile || "",
     shopName: user?.shopName || "",
-    password: "",
     preferredShops: user?.preferredShops || [],
   });
   const [availableShops, setAvailableShops] = useState<string[]>([]);
@@ -55,6 +54,12 @@ const Profile = () => {
   // Orders state
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+
+  // OTP Password state
+  const [otpFlowStep, setOtpFlowStep] = useState<0 | 1>(0); // 0 = not started, 1 = otp sent
+  const [otpInput, setOtpInput] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [isProcessingOtp, setIsProcessingOtp] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) {
@@ -141,7 +146,6 @@ const Profile = () => {
         title: "Profile Saved",
         description: "Your account settings have been successfully updated.",
       });
-      setFormData(prev => ({ ...prev, password: "" }));
     } catch (error) {
       toast({
         variant: "destructive",
@@ -150,6 +154,46 @@ const Profile = () => {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleRequestOtp = async () => {
+    if (!formData.mobile) {
+      toast({ variant: "destructive", title: "Error", description: "Please add a mobile number and save your profile first." });
+      return;
+    }
+    setIsProcessingOtp(true);
+    try {
+      const { data } = await api.post('/auth/profile/request-password-otp');
+      setOtpFlowStep(1);
+      toast({ title: "OTP Sent", description: data.message });
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.response?.data?.message || "Failed to send OTP." });
+    } finally {
+      setIsProcessingOtp(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!otpInput || !newPassword) {
+      toast({ variant: "destructive", title: "Missing Fields", description: "OTP and new password are required." });
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast({ variant: "destructive", title: "Weak Password", description: "Password must be at least 6 characters long." });
+      return;
+    }
+    setIsProcessingOtp(true);
+    try {
+      await api.post('/auth/profile/update-password-otp', { otp: otpInput, newPassword });
+      setOtpFlowStep(0);
+      setOtpInput('');
+      setNewPassword('');
+      toast({ title: "Success", description: "Your password has been updated." });
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error.response?.data?.message || "Failed to update password." });
+    } finally {
+      setIsProcessingOtp(false);
     }
   };
 
@@ -263,17 +307,11 @@ const Profile = () => {
                   </label>
                   <Input name="email" value={formData.email} onChange={handleInputChange} className="h-12 rounded-xl border-slate-200" />
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 md:col-span-2">
                   <label className="flex items-center gap-2 text-sm font-bold text-slate-700 ml-1">
                     <Phone className="h-4 w-4 text-amber" /> Mobile
                   </label>
                   <Input name="mobile" value={formData.mobile} onChange={handleInputChange} placeholder="+91 98765 43210" className="h-12 rounded-xl border-slate-200" />
-                </div>
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="flex items-center gap-2 text-sm font-bold text-slate-700 ml-1">
-                    <Lock className="h-4 w-4 text-violet" /> Update Password
-                  </label>
-                  <Input name="password" type="password" value={formData.password} onChange={handleInputChange} placeholder="•••••••• (leave blank to keep current)" className="h-12 rounded-xl border-slate-200" />
                 </div>
 
                 {!isAdmin && availableShops.length > 0 && (

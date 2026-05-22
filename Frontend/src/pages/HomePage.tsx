@@ -439,29 +439,22 @@ const HomePage = () => {
           </Link>
         </div>
 
-        <div className="relative overflow-hidden w-full py-4 group">
+        <div className="overflow-hidden whitespace-nowrap px-6 md:px-12 pb-8">
           {loading ? (
-             <div className="flex gap-6 px-6">
-                {Array(4).fill(0).map((_, i) => <div key={i} className="min-w-[280px] h-64 bg-slate-100 rounded-[2.5rem] animate-pulse flex-shrink-0" />)}
-             </div>
-          ) : trending.length > 0 ? (
+            <div className="flex gap-6">
+              {Array(4).fill(0).map((_, i) => <div key={i} className="inline-block min-w-[280px] h-64 bg-slate-100 rounded-[2.5rem] animate-pulse flex-shrink-0" />)}
+            </div>
+          ) : (
             <motion.div
-              className="flex gap-6 w-max pl-6"
-              animate={{ x: ["0%", "-50%"] }}
-              transition={{
-                x: {
-                  repeat: Infinity,
-                  repeatType: "loop",
-                  duration: 40,
-                  ease: "linear",
-                },
-              }}
+              animate={{ x: [0, -1000] }}
+              transition={{ repeat: Infinity, ease: "linear", duration: 20 }}
+              className="flex gap-6 inline-flex"
             >
               {[...trending, ...trending, ...trending].map((p, i) => (
                 <ProductCard key={`${p._id}-${i}`} product={p} index={i} />
               ))}
             </motion.div>
-          ) : null}
+          )}
         </div>
       </motion.section>
 
@@ -506,6 +499,7 @@ const HomePage = () => {
           </div>
         </motion.section>
       )}
+
 
 
       {/* ── TRUST STRIP ── */}

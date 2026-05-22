@@ -211,6 +211,53 @@ export const updateProfile = async (req: Request, res: Response) => {
   }
 };
 
+export const requestProfilePasswordOtp = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findById((req.user as any)._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user.mobile) return res.status(400).json({ message: 'No mobile number associated with this profile. Please update your profile first.' });
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.resetPasswordToken = otp;
+    user.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+    await user.save();
+
+    console.log(`[PROFILE_PASS_UPDATE] OTP for ${user.mobile} is: ${otp}`);
+    
+    // Simulate SMS sending by returning the OTP in the response for easy testing
+    res.json({ message: 'OTP sent to your mobile number', otp });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to request OTP', error });
+  }
+};
+
+export const updateProfilePasswordWithOtp = async (req: Request, res: Response) => {
+  try {
+    const { otp, newPassword } = req.body;
+    const user = await User.findById((req.user as any)._id);
+    
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (!user.resetPasswordToken || user.resetPasswordToken !== otp) {
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+
+    if (user.resetPasswordExpire && user.resetPasswordExpire < new Date()) {
+      return res.status(400).json({ message: 'OTP has expired' });
+    }
+
+    user.password = newPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update password', error });
+  }
+};
+
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
     const users = await User.find({}).select('-password -token -refreshToken').sort({ createdAt: -1 });
