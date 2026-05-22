@@ -18,7 +18,9 @@ export const getProductsByRack = async (req: Request, res: Response) => {
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const products = await Product.find({ shopId: (req as any).shopId }).populate('rackId');
+    const shopId = (req as any).shopId;
+    const query = shopId ? { shopId } : {};
+    const products = await Product.find(query).populate('rackId');
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

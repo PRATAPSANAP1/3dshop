@@ -4,10 +4,12 @@ import Product from '../models/Product';
 
 export const getRacks = async (req: Request, res: Response) => {
   try {
-    const racks = await Rack.find({ shopId: (req as any).shopId }).lean();
+    const shopId = (req as any).shopId;
+    const query = shopId ? { shopId } : {};
+    const racks = await Rack.find(query).lean();
     
     const racksWithStatus = await Promise.all(racks.map(async (rack) => {
-      const products = await Product.find({ rackId: rack._id, shopId: (req as any).shopId });
+      const products = await Product.find({ rackId: rack._id, ...query });
       
       let status = 'normal';
       const now = new Date();

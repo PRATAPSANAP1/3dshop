@@ -4,7 +4,8 @@ import Order from '../models/Order';
 
 export const getStats = async (req: Request, res: Response) => {
   try {
-    const query = { shopId: (req as any).shopId };
+    const shopId = (req as any).shopId;
+    const query = shopId ? { shopId } : {};
     const products = await Product.find(query);
     const orders = await Order.find(query).sort({ createdAt: -1 });
 
