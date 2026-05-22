@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import Wishlist from '../models/Wishlist';
 import Product from '../models/Product';
 

@@ -30,6 +30,7 @@ import wishlistRoutes from './routes/wishlist';
 import auditLogRoutes from './routes/auditLogs';
 import couponRoutes from './routes/coupons';
 import shopRoutes from './routes/shops';
+import godownRoutes from './routes/godowns';
 
 import { apiLimiter } from './middleware/security';
 
@@ -115,6 +116,7 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/audit-logs', auditLogRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/shops', shopRoutes);
+app.use('/api/godowns', godownRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ 
