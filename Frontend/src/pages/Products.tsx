@@ -216,7 +216,7 @@ const Products = () => {
           <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar flex-wrap">
             {categories.map((cat) => {
               const isActive = activeCategory === cat;
-              const ci = cat === "All" ? 3 : getColorIndex(cat);
+              const ci = cat === "All" ? 0 : getColorIndex(cat);
               const p = CARD_PALETTES[ci];
               return (
                 <motion.button
