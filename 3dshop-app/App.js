@@ -11,6 +11,7 @@ export default function App() {
   const webViewRef = useRef(null);
   const [canGoBack, setCanGoBack] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
 
@@ -19,6 +20,12 @@ export default function App() {
     if (Platform.OS !== 'android') return;
 
     const onBackPress = () => {
+      if (hasError) {
+        setHasError(false);
+        setIsLoading(true);
+        if (webViewRef.current) webViewRef.current.reload();
+        return true;
+      }
       if (canGoBack && webViewRef.current) {
         webViewRef.current.goBack();
         return true; 
@@ -28,13 +35,11 @@ export default function App() {
 
     const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
     return () => subscription.remove();
-  }, [canGoBack]);
+  }, [canGoBack, hasError]);
 
   // Safety Timeout: If loading takes more than 15 seconds, allow manual bypass
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Don't auto-hide, but we could show a "Skip" button if we wanted.
-      // For now, let's just log it.
       console.log("Loading taking longer than expected...");
     }, 15000);
     return () => clearTimeout(timer);
@@ -43,6 +48,7 @@ export default function App() {
   const handleRetry = () => {
     setHasError(false);
     setIsLoading(true);
+    setIsInitialLoad(true);
     setLoadProgress(0);
     if (webViewRef.current) {
       webViewRef.current.reload();
@@ -51,6 +57,7 @@ export default function App() {
 
   const skipLoading = () => {
     setIsLoading(false);
+    setIsInitialLoad(false);
   };
 
   if (hasError) {
@@ -79,14 +86,14 @@ export default function App() {
         <StatusBar style="light" />
 
         {/* Enhanced Loading Overlay */}
-        {isLoading && (
+        {(isLoading && isInitialLoad) && (
           <View style={styles.loadingOverlay}>
             <View style={styles.loadingContent}>
               <Image source={require('./assets/adaptive-icon.png')} style={{ width: 150, height: 150, marginBottom: 20 }} resizeMode="contain" />
               <ActivityIndicator size="large" color="#EA580C" />
               <Text style={styles.loadingTitle}>3D SHOP</Text>
               
-              {/* Progress indicator (optional but helpful) */}
+              {/* Progress indicator */}
               <View style={styles.progressContainer}>
                 <View style={[styles.progressBar, { width: `${loadProgress * 100}%` }]} />
               </View>
@@ -104,10 +111,11 @@ export default function App() {
         <WebView
           ref={webViewRef}
           source={{ uri: PRODUCTION_URL }}
-          style={[styles.webview, isLoading && { opacity: 0 }]}
+          style={[styles.webview, (isLoading && isInitialLoad) && { opacity: 0 }]}
           startInLoadingState={true}
           javaScriptEnabled={true}
           domStorageEnabled={true}
+          thirdPartyCookiesEnabled={true}
           originWhitelist={['*']}
           allowsBackForwardNavigationGestures={true}
           allowsInlineMediaPlayback={true}
@@ -116,9 +124,8 @@ export default function App() {
           allowsFullscreenVideo={true}
           setSupportMultipleWindows={false}
           cacheEnabled={true}
-          // Android specific performance
+          // Android specific performance configuration (omitting hardware layer type to prevent WebGL black screen crashes)
           {...(Platform.OS === 'android' && {
-            androidLayerType: 'hardware',
             geolocationEnabled: true,
             mixedContentMode: 'always',
           })}
@@ -127,39 +134,42 @@ export default function App() {
             setCanGoBack(navState.canGoBack);
           }}
           onLoadStart={() => {
-            console.log("WebView Loading Started");
-            setIsLoading(true);
+            if (isInitialLoad) {
+              setIsLoading(true);
+            }
           }}
           onLoadProgress={({ nativeEvent }) => {
             setLoadProgress(nativeEvent.progress);
             if (nativeEvent.progress === 1) {
               setIsLoading(false);
+              setIsInitialLoad(false);
             }
           }}
           onLoad={() => {
-            console.log("WebView Loading Finished");
             setIsLoading(false);
+            setIsInitialLoad(false);
           }}
           onLoadEnd={() => {
             setIsLoading(false);
+            setIsInitialLoad(false);
           }}
           onError={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
             console.warn('WebView error: ', nativeEvent);
             setHasError(true);
             setIsLoading(false);
+            setIsInitialLoad(false);
           }}
           onHttpError={(event) => {
             if (event.nativeEvent.statusCode >= 400) {
               console.warn('HTTP error: ', event.nativeEvent.statusCode);
-              // Only set error for fatal status codes
               if (event.nativeEvent.statusCode >= 500) {
                 setHasError(true);
               }
             }
           }}
-          // Specific User Agent to identify mobile traffic if needed
-          userAgent={`3DshopMobile/1.0.0 (${Platform.OS})`}
+          // Specific User Agent to identify mobile traffic
+          userAgent={`3DshopMobile/1.2.0 (${Platform.OS})`}
         />
       </SafeAreaView>
     </SafeAreaProvider>
