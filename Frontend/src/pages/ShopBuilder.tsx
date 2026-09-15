@@ -1,9 +1,9 @@
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { Store, Maximize, Plus, Trash2, Edit2, X, Move, RotateCw, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/PageTransition";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Box, Text, Plane, Environment, ContactShadows } from "@react-three/drei";
 import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
