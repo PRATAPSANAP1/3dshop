@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import Door from '../models/Door';
 import User from '../models/User';
+import Shop from '../models/Shop';
 
 export const getDoors = async (req: Request, res: Response) => {
   try {
@@ -39,10 +40,13 @@ export const createDoor = async (req: Request, res: Response) => {
 
     const door = new Door(doorData);
     await door.save();
-    res.status(201).json(door);
+    return res.status(201).json(door);
   } catch (error: any) {
     console.error('[CREATE_DOOR_ERROR]:', error);
-    res.status(500).json({ message: 'Failed to create door', details: error.message || String(error) });
+    return res.status(400).json({ 
+      message: error.message || 'Failed to create door', 
+      details: error.stack || String(error) 
+    });
   }
 };
 
