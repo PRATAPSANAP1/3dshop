@@ -148,13 +148,23 @@ app.get('/api/test', (req, res) => {
 });
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('🚨 [SERVER_API_ERROR]:', {
+    url: req.originalUrl,
+    method: req.method,
+    message: err.message,
+    stack: err.stack,
+    details: err.details
+  });
   logger.error(`Unhandled Error: ${err.message}`, { 
     stack: err.stack, 
     url: req.originalUrl, 
     method: req.method 
   });
-  res.status(err.status || 500).json({
-    message: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message,
+  const statusCode = err.status || err.statusCode || 500;
+  res.status(statusCode).json({
+    message: err.message || 'Server Error',
+    details: err.details || err.stack || String(err),
+    path: req.originalUrl
   });
 });
 
