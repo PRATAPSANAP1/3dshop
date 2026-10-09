@@ -332,6 +332,22 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
     return route;
   }, [shoppingList, doors, racks, rackProducts, shopConfig]);
 
+  const stepDistances = useMemo(() => {
+    if (optimizedRoute.length === 0) return [];
+    const entryDoor = doors.find(d => d.doorType === 'entry') || { positionX: 0, positionZ: (shopConfig.depth || 20) / 2 };
+    let prevX = entryDoor.positionX;
+    let prevZ = entryDoor.positionZ;
+
+    return optimizedRoute.map(step => {
+      const dx = step.x - prevX;
+      const dz = step.z - prevZ;
+      const dist = Math.sqrt(dx * dx + dz * dz);
+      prevX = step.x;
+      prevZ = step.z;
+      return dist.toFixed(1);
+    });
+  }, [optimizedRoute, doors, shopConfig]);
+
   const routePoints = useMemo(() => {
     if (optimizedRoute.length === 0) return [];
     const entryDoor = doors.find(d => d.doorType === 'entry') || { positionX: 0, positionZ: (shopConfig.depth || 20) / 2 };
@@ -686,33 +702,54 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">All Products ({filteredProducts.length})</p>
                     </div>
                   )}
-                  {filteredProducts.map((product, idx) => (
-                    <button
-                      key={product._id}
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => {
-                        setSearchQuery(product.productName);
-                        setFilteredProducts([]);
-                        setShowAllProducts(false);
-                        setTimeout(() => handleSearch(), 50);
-                      }}
-                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-orange-50/60 transition-colors text-left"
-                      style={{ borderBottom: idx < filteredProducts.length - 1 ? '1px solid #f8fafc' : 'none' }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
-                          <Package size={14} className="text-slate-400" />
+                  {filteredProducts.map((product, idx) => {
+                    const inRoute = shoppingList.some(p => p._id === product._id);
+                    return (
+                      <div
+                        key={product._id}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => {
+                          setSearchQuery(product.productName);
+                          setFilteredProducts([]);
+                          setShowAllProducts(false);
+                          setTimeout(() => handleSearch(), 50);
+                        }}
+                        className="w-full flex items-center justify-between px-4 py-3 hover:bg-orange-50/60 transition-colors text-left cursor-pointer"
+                        style={{ borderBottom: idx < filteredProducts.length - 1 ? '1px solid #f8fafc' : 'none' }}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
+                            <Package size={14} className="text-slate-400" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-slate-800 truncate">{product.productName}</p>
+                            <p className="text-[10px] text-slate-400 font-medium truncate">{product.category} • ₹{product.price}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-800">{product.productName}</p>
-                          <p className="text-[10px] text-slate-400 font-medium">{product.category}{[product.brand, product.size].filter(Boolean).map(text => ` • ${text}`).join('')}</p>
+                        <div className="flex items-center gap-2 shrink-0 ml-2">
+                          <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-black uppercase tracking-wider rounded">
+                            {product.rackId?.rackName || 'Store'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleShoppingListItem(product);
+                              toast({ title: inRoute ? 'Removed from Route' : '✓ Added to Shortest Path Route', description: `${product.productName}` });
+                            }}
+                            className={`h-7 px-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1 transition-all ${
+                              inRoute
+                                ? 'bg-emerald-500 text-white shadow-sm'
+                                : 'bg-orange-500 hover:bg-orange-600 text-white shadow-sm active:scale-95'
+                            }`}
+                          >
+                            <Plus size={11} className={inRoute ? 'rotate-45' : ''} />
+                            {inRoute ? 'In Route' : 'Add Route'}
+                          </button>
                         </div>
                       </div>
-                      <div className="px-2.5 py-1 bg-orange-50 text-orange-600 text-[10px] font-black uppercase tracking-widest rounded-lg shrink-0 ml-2">
-                        {product.rackId?.rackName || 'Store'}
-                      </div>
-                    </button>
-                  ))}
+                    );
+                  })}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -731,7 +768,7 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
         </div>
       </motion.div>
 
-      <div className="flex-1 relative overflow-hidden" style={{ margin: 0 }}>
+      <div className={`relative overflow-hidden w-full ${isMobile || isQRMode ? 'h-[75vh]' : 'flex-1'}`} style={{ margin: 0 }}>
         <AnimatePresence>
           {notFound && (
             <motion.div
@@ -1094,8 +1131,13 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
                             {step.product.productName}
                           </p>
                         </div>
-                        <p className="text-[10px] font-bold text-slate-400 mt-0.5 truncate">
-                          {step.rackName} • Shelf {step.product.shelfNumber || 1}
+                        <p className="text-[10px] font-bold text-slate-400 mt-0.5 truncate flex items-center gap-1.5">
+                          <span>{step.rackName} • Shelf {step.product.shelfNumber || 1}</span>
+                          {stepDistances[idx] !== undefined && (
+                            <span className="text-[9px] font-black text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100/60">
+                              {stepDistances[idx]}m away
+                            </span>
+                          )}
                         </p>
                       </div>
 
