@@ -246,11 +246,11 @@ const ShopBuilder = () => {
       if (editingRack) {
         await api.put(`/racks/${editingRack._id}`, payload);
         setRacks(racks.map(r => r._id === editingRack._id ? { ...r, ...payload } : r));
-        toast({ title: "✓ Unit Updated", description: `${payload.rackName} successfully updated.` });
+        toast({ title: "✓ Rack Updated successfully", description: `${payload.rackName} updated successfully.` });
       } else {
         const { data } = await api.post('/racks', payload);
         setRacks([...racks, data]);
-        toast({ title: "✓ Unit Created", description: `${payload.rackName} created successfully.` });
+        toast({ title: "✓ Rack Created successfully", description: `${payload.rackName} created successfully.` });
       }
       setShowForm(false);
       setEditingRack(null);
@@ -266,7 +266,7 @@ const ShopBuilder = () => {
       const { data } = await api.post('/doors', doorFormData);
       setDoors([...doors, data]);
       setShowDoorForm(false);
-      toast({ title: "✓ Portal Created", description: `${doorFormData.doorType.toUpperCase()} door added successfully.` });
+      toast({ title: "✓ Door Created successfully", description: `${doorFormData.doorType.toUpperCase()} door added successfully.` });
     } catch (err: any) {
       const msg = err.response?.data?.details || err.response?.data?.message || err.message || "Failed to add door";
       toast({ variant: "destructive", title: "Door Creation Error", description: msg });
