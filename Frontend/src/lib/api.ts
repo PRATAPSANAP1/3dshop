@@ -1,7 +1,15 @@
 import axios from 'axios';
 
+export const getApiUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl || envUrl.includes('38fd.onrender.com')) {
+    return 'https://threedshop-dg44.onrender.com/api';
+  }
+  return envUrl;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://threedshop-dg44.onrender.com/api',
+  baseURL: getApiUrl(),
   withCredentials: true,
 });
 
@@ -67,7 +75,7 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await axios.post(`${import.meta.env.VITE_API_URL || 'https://threedshop-dg44.onrender.com/api'}/auth/refresh`, {}, { withCredentials: true });
+        await axios.post(`${getApiUrl()}/auth/refresh`, {}, { withCredentials: true });
 
         isRefreshing = false;
         processQueue(null, 'Refreshed');
