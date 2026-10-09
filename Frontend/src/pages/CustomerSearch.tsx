@@ -375,7 +375,7 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
     if (!user) { navigate('/login'); return; }
     try {
       await API.post('/cart/add', { productId: product._id, qty: 1 });
-      toast({ title: '✓ Added to Cart', description: `${product.productName} added successfully` });
+      toast({ title: 'Added to Cart', description: `${product.productName} added successfully` });
     } catch {
       toast({ variant: 'destructive', title: 'Failed', description: 'Could not add to cart' });
     }
@@ -385,7 +385,7 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
     if (!user) { navigate('/login'); return; }
     try {
       await API.post('/wishlist/add', { productId: product._id });
-      toast({ title: '✓ Saved to Wishlist', description: `${product.productName} added to wishlist` });
+      toast({ title: 'Saved to Wishlist', description: `${product.productName} added to wishlist` });
     } catch {
       toast({ variant: 'destructive', title: 'Failed', description: 'Could not add to wishlist' });
     }
