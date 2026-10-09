@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import Rack from '../models/Rack';
 import Product from '../models/Product';
 
@@ -33,8 +34,13 @@ export const getRacks = async (req: Request, res: Response) => {
 
 export const createRack = async (req: Request, res: Response) => {
   try {
-    const shopId = (req as any).shopId || req.user?.shopId || req.user?._id;
-    if (!shopId) return res.status(400).json({ message: 'Shop ID is required' });
+    const rawShopId = (req as any).shopId || req.user?.shopId || req.user?._id;
+    if (!rawShopId) return res.status(400).json({ message: 'Shop ID is required' });
+
+    let shopId = rawShopId;
+    if (typeof rawShopId === 'string' && mongoose.Types.ObjectId.isValid(rawShopId)) {
+      shopId = new mongoose.Types.ObjectId(rawShopId);
+    }
     
     const rackName = req.body.rackName && req.body.rackName.trim() ? req.body.rackName.trim() : `Rack ${Date.now().toString().slice(-4)}`;
     

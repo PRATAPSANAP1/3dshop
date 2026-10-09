@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import Door from '../models/Door';
 import User from '../models/User';
 
@@ -16,13 +17,17 @@ export const getDoors = async (req: Request, res: Response) => {
 
 export const createDoor = async (req: Request, res: Response) => {
   try {
-    const shopId = (req as any).shopId || req.user?.shopId || req.user?._id;
-    if (!shopId) return res.status(400).json({ message: 'Shop ID is required' });
+    const rawShopId = (req as any).shopId || req.user?.shopId || req.user?._id;
+    if (!rawShopId) return res.status(400).json({ message: 'Shop ID is required' });
 
-    const doorType = req.body.doorType === 'exit' ? 'exit' : 'entry';
+    let shopId = rawShopId;
+    if (typeof rawShopId === 'string' && mongoose.Types.ObjectId.isValid(rawShopId)) {
+      shopId = new mongoose.Types.ObjectId(rawShopId);
+    }
+
+    const doorType = (req.body.doorType || '').toLowerCase() === 'exit' ? 'exit' : 'entry';
 
     const doorData = {
-      ...req.body,
       doorType,
       shopId,
       positionX: Number(req.body.positionX) || 0,
@@ -35,9 +40,9 @@ export const createDoor = async (req: Request, res: Response) => {
     const door = new Door(doorData);
     await door.save();
     res.status(201).json(door);
-  } catch (error) {
+  } catch (error: any) {
     console.error('[CREATE_DOOR_ERROR]:', error);
-    res.status(400).json({ message: 'Failed to create door', details: (error as Error).message });
+    res.status(500).json({ message: 'Failed to create door', details: error.message || String(error) });
   }
 };
 
