@@ -1,10 +1,10 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Box, Text, Plane, Environment, ContactShadows } from '@react-three/drei';
+import { OrbitControls, Box, Text, Plane, Environment, ContactShadows, Line } from '@react-three/drei';
 import API from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Package, AlertCircle, X, ShoppingCart, Heart, Store, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Search, MapPin, Package, AlertCircle, X, ShoppingCart, Heart, Store, ChevronRight, QrCode, Route, Footprints, CheckCircle2, ListOrdered, Plus, Trash2, Sparkles, Check } from 'lucide-react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -165,7 +165,56 @@ const SupermarketRack = ({ rack, products, isHighlighted, highlightedProductId, 
   );
 };
 
-const CustomerSearch: React.FC = () => {
+const RoutePath3D = ({ points, activeStepIndex }: { points: [number, number, number][]; activeStepIndex: number }) => {
+  if (!points || points.length < 2) return null;
+  return (
+    <group position={[0, 0.05, 0]}>
+      <Line
+        points={points}
+        color="#f97316"
+        lineWidth={4}
+        dashed={true}
+        dashScale={2}
+        dashSize={0.4}
+      />
+      {points.map((pt, i) => {
+        const isEntry = i === 0;
+        const isExit = i === points.length - 1;
+        const isActive = i === activeStepIndex + 1;
+        const stepLabel = isEntry ? 'START: ENTRY GATE' : isExit ? 'FINISH: EXIT / CHECKOUT' : `STOP ${i}`;
+
+        return (
+          <group key={`route-pt-${i}`} position={pt}>
+            <mesh position={[0, 0.4, 0]}>
+              <sphereGeometry args={[isEntry || isExit ? 0.35 : 0.25, 16, 16]} />
+              <meshStandardMaterial
+                color={isEntry ? '#10b981' : isExit ? '#f43f5e' : isActive ? '#22c55e' : '#f97316'}
+                emissive={isEntry ? '#10b981' : isExit ? '#f43f5e' : isActive ? '#22c55e' : '#f97316'}
+                emissiveIntensity={isActive ? 1.5 : 0.5}
+              />
+            </mesh>
+            <Text
+              position={[0, 0.9, 0]}
+              fontSize={0.28}
+              color={isEntry ? '#10b981' : isExit ? '#f43f5e' : '#ffffff'}
+              fontWeight="900"
+              anchorX="center"
+              anchorY="bottom"
+            >
+              {stepLabel}
+            </Text>
+          </group>
+        );
+      })}
+    </group>
+  );
+};
+
+interface CustomerSearchProps {
+  isQRMode?: boolean;
+}
+
+const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => {
   const [shopName, setShopName] = useState('');
   const [shopSelected, setShopSelected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -191,7 +240,118 @@ const CustomerSearch: React.FC = () => {
   const [allShopNames, setAllShopNames] = useState<string[]>([]);
   const [showShopDropdown, setShowShopDropdown] = useState(false);
   const [webglLost, setWebglLost] = useState(false);
+
+  const [shoppingList, setShoppingList] = useState<Product[]>([]);
+  const [completedItemIds, setCompletedItemIds] = useState<Set<string>>(new Set());
+  const [showShoppingListPanel, setShowShoppingListPanel] = useState(false);
+  const [activeRouteStepIndex, setActiveRouteStepIndex] = useState(0);
+
+  const toggleShoppingListItem = (product: Product) => {
+    setShoppingList(prev => {
+      const exists = prev.some(p => p._id === product._id);
+      if (exists) {
+        return prev.filter(p => p._id !== product._id);
+      } else {
+        return [...prev, product];
+      }
+    });
+  };
+
+  const removeFromShoppingList = (productId: string) => {
+    setShoppingList(prev => prev.filter(p => p._id !== productId));
+    setCompletedItemIds(prev => {
+      const next = new Set(prev);
+      next.delete(productId);
+      return next;
+    });
+  };
+
+  const toggleItemCompleted = (productId: string) => {
+    setCompletedItemIds(prev => {
+      const next = new Set(prev);
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
+      return next;
+    });
+  };
+
+  const optimizedRoute = useMemo(() => {
+    if (shoppingList.length === 0) return [];
+
+    const entryDoor = doors.find(d => d.doorType === 'entry') || { positionX: 0, positionZ: (shopConfig.depth || 20) / 2 };
+
+    const itemsWithPos = shoppingList.map(prod => {
+      let x = 0;
+      let z = 0;
+      let rackName = 'Store Floor';
+
+      if (prod.rackId && typeof prod.rackId === 'object' && prod.rackId.positionX !== undefined) {
+        x = prod.rackId.positionX;
+        z = prod.rackId.positionZ;
+        rackName = prod.rackId.rackName || 'Rack';
+      } else {
+        const foundRack = racks.find(r => {
+          const prods = rackProducts[r._id] || [];
+          return prods.some(p => p._id === prod._id);
+        });
+        if (foundRack) {
+          x = foundRack.positionX;
+          z = foundRack.positionZ;
+          rackName = foundRack.rackName;
+        }
+      }
+      return { product: prod, x, z, rackName };
+    });
+
+    const route: typeof itemsWithPos = [];
+    const remaining = [...itemsWithPos];
+    let currPos = { x: entryDoor.positionX, z: entryDoor.positionZ };
+
+    while (remaining.length > 0) {
+      let nearestIdx = 0;
+      let minDistance = Infinity;
+
+      for (let i = 0; i < remaining.length; i++) {
+        const dx = remaining[i].x - currPos.x;
+        const dz = remaining[i].z - currPos.z;
+        const dist = Math.sqrt(dx * dx + dz * dz);
+        if (dist < minDistance) {
+          minDistance = dist;
+          nearestIdx = i;
+        }
+      }
+
+      const nextItem = remaining.splice(nearestIdx, 1)[0];
+      route.push(nextItem);
+      currPos = { x: nextItem.x, z: nextItem.z };
+    }
+
+    return route;
+  }, [shoppingList, doors, racks, rackProducts, shopConfig]);
+
+  const routePoints = useMemo(() => {
+    if (optimizedRoute.length === 0) return [];
+    const entryDoor = doors.find(d => d.doorType === 'entry') || { positionX: 0, positionZ: (shopConfig.depth || 20) / 2 };
+    const exitDoor = doors.find(d => d.doorType === 'exit') || { positionX: 0, positionZ: -(shopConfig.depth || 20) / 2 };
+
+    const pts: [number, number, number][] = [
+      [entryDoor.positionX, 0.2, entryDoor.positionZ]
+    ];
+
+    optimizedRoute.forEach(step => {
+      pts.push([step.x, 0.5, step.z]);
+    });
+
+    pts.push([exitDoor.positionX, 0.2, exitDoor.positionZ]);
+    return pts;
+  }, [optimizedRoute, doors, shopConfig]);
+  
   const navigate = useNavigate();
+  const params = useParams<{ shopName?: string }>();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -224,17 +384,33 @@ const CustomerSearch: React.FC = () => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
 
+    const urlShop = params.shopName || searchParams.get('shop') || searchParams.get('shopName');
+    if (urlShop && urlShop !== 'null' && urlShop !== 'undefined') {
+      setShopName(urlShop);
+      loadShopData(urlShop);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+
     setIsLoading(true);
     API.get('/shop-config/public/shops/list')
       .then(({ data }) => {
-        setAllShopNames(data);
+        const validShops = (Array.isArray(data) ? data : []).filter(
+          (s): s is string => typeof s === 'string' && s.trim() !== '' && s !== 'null' && s !== 'undefined'
+        );
+        setAllShopNames(validShops);
+
         let initialShop = '';
         if (user?.role === 'shopper' && user.preferredShops && user.preferredShops.length > 0) {
-          initialShop = user.preferredShops[0];
-        } else if (user?.shopName && user.role !== 'shopper') {
+          const pref = user.preferredShops.find(s => typeof s === 'string' && s.trim() !== '' && s !== 'null' && s !== 'undefined');
+          if (pref) initialShop = pref;
+        }
+
+        if (!initialShop && user?.shopName && user.role !== 'shopper' && user.shopName !== 'null' && user.shopName !== 'undefined') {
           initialShop = user.shopName;
-        } else if (data && data.length > 0) {
-          initialShop = data[0];
+        }
+
+        if (!initialShop && validShops.length > 0) {
+          initialShop = validShops[0];
         }
 
         if (initialShop) {
@@ -254,6 +430,11 @@ const CustomerSearch: React.FC = () => {
   }, []);
 
   const loadShopData = async (name: string) => {
+    if (!name || typeof name !== 'string' || name === 'null' || name === 'undefined' || !name.trim()) {
+      setIsLoading(false);
+      return;
+    }
+
     setDoors([]);
     setRacks([]);
     setRackProducts({});
@@ -433,14 +614,22 @@ const CustomerSearch: React.FC = () => {
       >
         <div className={`flex items-center justify-between ${isMobile ? 'mb-2' : 'mb-3'}`}>
           <div className="relative">
-            <button
-              onClick={() => setShowShopDropdown(!showShopDropdown)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-50 text-orange-600 border border-orange-100/50 hover:bg-orange-100 transition-all group"
-            >
-              <Store size={16} className="group-hover:rotate-12 transition-transform" />
-              <span className="text-[10px] font-black uppercase tracking-widest">{shopName || 'Select Store'}</span>
-              <ChevronRight size={14} className={`transition-transform duration-300 ${showShopDropdown ? 'rotate-90' : ''}`} />
-            </button>
+            {isQRMode || params.shopName ? (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white shadow-sm border border-slate-800">
+                <QrCode size={16} className="text-orange-500 animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-orange-400">In-Store 3D Navigator</span>
+                <span className="text-[10px] font-bold text-slate-300">| {shopName}</span>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowShopDropdown(!showShopDropdown)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-50 text-orange-600 border border-orange-100/50 hover:bg-orange-100 transition-all group"
+              >
+                <Store size={16} className="group-hover:rotate-12 transition-transform" />
+                <span className="text-[10px] font-black uppercase tracking-widest">{shopName || 'Select Store'}</span>
+                <ChevronRight size={14} className={`transition-transform duration-300 ${showShopDropdown ? 'rotate-90' : ''}`} />
+              </button>
+            )}
             <AnimatePresence>
               {showShopDropdown && (
                 <motion.div
@@ -604,8 +793,8 @@ const CustomerSearch: React.FC = () => {
             style={{ background: '#0f172a' }}
             gl={{ 
               antialias: false, 
-              powerPreference: 'high-performance', 
-              failIfMajorPerformanceCaveat: true, 
+              powerPreference: 'default', 
+              failIfMajorPerformanceCaveat: false, 
               stencil: false,
               alpha: false,
               depth: true
@@ -677,6 +866,8 @@ const CustomerSearch: React.FC = () => {
                 clickedProductId={clickedProductId}
               />
             ))}
+
+            <RoutePath3D points={routePoints} activeStepIndex={activeRouteStepIndex} />
 
             <OrbitControls
               maxPolarAngle={Math.PI / 2.1}
@@ -787,6 +978,16 @@ const CustomerSearch: React.FC = () => {
                 </div>
 
                 <div className="mt-8 flex flex-col gap-3">
+                  <button
+                    onClick={() => {
+                      toggleShoppingListItem(selectedProduct);
+                      toast({ title: '✓ Added to In-Store Shopping List', description: `${selectedProduct.productName} added to shortest path route` });
+                    }}
+                    className="w-full h-12 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-600 text-white font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-2 hover:from-orange-600 hover:to-amber-700 transition-all active:scale-95 shadow-md"
+                  >
+                    <Route size={16} />
+                    {shoppingList.some(p => p._id === selectedProduct._id) ? '✓ Added to Route' : '+ Add to Shortest Path Route'}
+                  </button>
                   <div className="flex gap-3">
                     <button
                       onClick={() => handleAddToCart(selectedProduct)}
@@ -807,6 +1008,156 @@ const CustomerSearch: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Floating Shortest Route Button & Panel */}
+      <div className="absolute bottom-6 right-6 z-40 flex flex-col items-end gap-3 max-w-sm w-full pointer-events-none">
+        {/* Route Drawer Panel */}
+        <AnimatePresence>
+          {showShoppingListPanel && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="w-full bg-white/95 backdrop-blur-2xl border border-slate-200 rounded-[2rem] shadow-2xl p-5 pointer-events-auto flex flex-col max-h-[75vh] overflow-hidden"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="h-9 w-9 rounded-xl bg-orange-500 text-white flex items-center justify-center shadow-sm">
+                    <Route size={18} />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Shortest Shopping Path</h3>
+                    <p className="text-[10px] font-bold text-slate-400">Entry Gate → Items → Exit Gate</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowShoppingListPanel(false)}
+                  className="h-7 w-7 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-900"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
+              {/* Waypoint steps */}
+              <div className="overflow-y-auto space-y-2.5 pr-1 flex-1">
+                {/* Entry door */}
+                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-800">
+                  <div className="h-7 w-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0 font-black text-xs">
+                    🚪
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-black uppercase tracking-wider">Start: Entry Gate</p>
+                    <p className="text-[9px] font-bold text-emerald-600">Enter store floor</p>
+                  </div>
+                </div>
+
+                {/* Optimized item stops */}
+                {optimizedRoute.map((step, idx) => {
+                  const isCompleted = completedItemIds.has(step.product._id);
+                  const isCurrentTarget = idx === activeRouteStepIndex && !isCompleted;
+
+                  return (
+                    <div
+                      key={`route-step-${step.product._id}`}
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                        isCompleted
+                          ? 'bg-slate-50 border-slate-200 opacity-60'
+                          : isCurrentTarget
+                          ? 'bg-orange-50 border-orange-200 shadow-sm ring-2 ring-orange-400/30'
+                          : 'bg-white border-slate-100 hover:bg-slate-50'
+                      }`}
+                      onClick={() => {
+                        setActiveRouteStepIndex(idx);
+                        setFoundProduct(step.product);
+                        setShowArrow(true);
+                      }}
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleItemCompleted(step.product._id);
+                        }}
+                        className={`h-6 w-6 rounded-lg flex items-center justify-center shrink-0 transition-all ${
+                          isCompleted ? 'bg-emerald-500 text-white' : 'border-2 border-slate-300 hover:border-orange-500'
+                        }`}
+                      >
+                        {isCompleted && <Check size={14} strokeWidth={3} />}
+                      </button>
+
+                      <div className="flex-1 overflow-hidden">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+                            Stop {idx + 1}
+                          </span>
+                          <p className={`text-xs font-black truncate ${isCompleted ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+                            {step.product.productName}
+                          </p>
+                        </div>
+                        <p className="text-[10px] font-bold text-slate-400 mt-0.5 truncate">
+                          {step.rackName} • Shelf {step.product.shelfNumber || 1}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeFromShoppingList(step.product._id);
+                        }}
+                        className="p-1 text-slate-300 hover:text-rose-500 shrink-0"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  );
+                })}
+
+                {/* Exit door */}
+                <div className="flex items-center gap-3 p-2.5 rounded-xl bg-rose-50 border border-rose-100 text-rose-800">
+                  <div className="h-7 w-7 rounded-lg bg-rose-500 text-white flex items-center justify-center shrink-0 font-black text-xs">
+                    🏁
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-black uppercase tracking-wider">Finish: Exit Gate</p>
+                    <p className="text-[9px] font-bold text-rose-600">Proceed to checkout counter</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  {completedItemIds.size} of {shoppingList.length} items collected
+                </span>
+                <button
+                  onClick={() => {
+                    setShoppingList([]);
+                    setCompletedItemIds(new Set());
+                    setShowShoppingListPanel(false);
+                  }}
+                  className="text-[10px] font-black text-rose-500 hover:underline uppercase tracking-widest"
+                >
+                  Clear Route
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Floating Route Trigger Button */}
+        <button
+          onClick={() => setShowShoppingListPanel(!showShoppingListPanel)}
+          className="pointer-events-auto flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs uppercase tracking-widest shadow-2xl transition-all active:scale-95 border border-slate-700"
+        >
+          <Route size={18} className="text-orange-500 animate-pulse" />
+          <span>Shortest Path Route ({shoppingList.length})</span>
+          {shoppingList.length > 0 && (
+            <span className="h-5 px-2 rounded-full bg-orange-500 text-white font-black text-[10px] flex items-center justify-center">
+              {shoppingList.length}
+            </span>
+          )}
+        </button>
+      </div>
 
     </div>
   );

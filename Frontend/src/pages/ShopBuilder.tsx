@@ -1,5 +1,5 @@
 import { useState, useEffect, Suspense, useRef } from "react";
-import { Store, Maximize, Plus, Trash2, Edit2, X, Move, RotateCw, ArrowUpRight } from "lucide-react";
+import { Store, Maximize, Plus, Trash2, Edit2, X, Move, RotateCw, ArrowUpRight, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/PageTransition";
@@ -7,6 +7,8 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Box, Text, Plane, Environment, ContactShadows } from "@react-three/drei";
 import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
+import StoreQRModal from "@/components/StoreQRModal";
 
 const AxisArrows = () => (
   <group>
@@ -186,9 +188,11 @@ const ShopBuilder = () => {
   const [doors, setDoors] = useState<any[]>([]);
   const [showDoorForm, setShowDoorForm] = useState(false);
   const [doorFormData, setDoorFormData] = useState({ doorType: 'entry', positionX: 0, positionZ: 0, rotation: 0, width: 1.5, height: 2.5 });
+  const [showQRModal, setShowQRModal] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleResize = () => setIsMobileScreen(window.innerWidth < 1280);
@@ -295,13 +299,23 @@ const ShopBuilder = () => {
              </div>
           </div>
 
+          <div className="absolute top-8 right-8 z-10">
+             <button
+               onClick={() => setShowQRModal(true)}
+               className="glass-card px-4 py-2 flex items-center gap-2 text-slate-800 hover:text-orange-600 hover:border-orange-200 transition-all font-black text-[10px] uppercase tracking-widest pointer-events-auto bg-white/90 shadow-sm"
+             >
+               <QrCode size={14} className="text-orange-500" />
+               <span>Store 3D QR Code</span>
+             </button>
+          </div>
+
           <Canvas 
             camera={{ position: [20, 20, 20], fov: 40 }} 
             shadows 
             dpr={[1, 1.2]} 
             frameloop="demand"
             gl={{ 
-              powerPreference: 'high-performance', 
+              powerPreference: 'default', 
               antialias: false,
               stencil: false,
               depth: true,
@@ -536,6 +550,11 @@ const ShopBuilder = () => {
           </div>
         </div>
       </div>
+      <StoreQRModal
+        open={showQRModal}
+        onClose={() => setShowQRModal(false)}
+        shopName={user?.shopName || 'MainStore'}
+      />
     </PageTransition>
   );
 };

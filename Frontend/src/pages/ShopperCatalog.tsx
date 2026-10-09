@@ -164,7 +164,7 @@ const ShopperCatalog = () => {
                      <p className="text-[10px] font-bold text-slate-400 mt-0.5">{p.category}</p>
                      <div className="mt-2 flex items-center justify-between">
                        <p className={`font-black ${pal.txt}`}>${(p.price || 0).toFixed(2)}</p>
-                       <button onClick={(e) => handleAddToCart(e, p._id, p.productName)} className={`h-6 w-6 rounded-md ${pal.btn} flex items-center justify-center`}><ShoppingCart size={12} /></button>
+                       <button onClick={(e) => handleAddToCart(e, p._id, p.productName)} className={`h-6 w-6 rounded-md ${pal.btn} flex items-center justify-center`}><ShoppingCartIcon size={12} /></button>
                      </div>
                    </div>
                  )

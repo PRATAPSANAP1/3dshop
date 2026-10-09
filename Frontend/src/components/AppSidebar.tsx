@@ -25,34 +25,68 @@ import {
   Building2,
   BrainCircuit,
   Settings,
+  Code2,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
-const navItems = [
-  { to: "/shop-experience", icon: Sparkles,       label: "Shop Vision",  desc: "Interactive 3D Map",   color: "text-amber-600",  bg: "bg-amber-500/10" },
-  { to: "/dashboard",   icon: LayoutDashboard,label: "Analytics",    desc: "Performance metrics",  color: "text-orange-500", bg: "bg-orange-500/10" },
-  { to: "/products",    icon: Package,        label: "Products",     desc: "Manage SKUs",          color: "text-orange-500", bg: "bg-orange-500/10" },
-  { to: "/racks",       icon: Box,            label: "Racks",        desc: "Spatial mapping",      color: "text-amber-600",  bg: "bg-amber-500/10" },
-  { to: "/shop-builder",icon: Store,          label: "3D Builder",   desc: "Store design",         color: "text-amber-600",  bg: "bg-amber-500/10" },
-  { to: "/godown",      icon: Warehouse,      label: "Godown",       desc: "Private warehouse",    color: "text-orange-600", bg: "bg-orange-500/10" },
-  { to: "/scanner",     icon: ScanLine,       label: "QR Scanner",   desc: "Batch operations",     color: "text-orange-500", bg: "bg-orange-500/10" },
-  { to: "/delivery",    icon: Truck,          label: "Delivery Hub", desc: "Assign & verify",      color: "text-amber-600",  bg: "bg-amber-500/10" },
-  { to: "/logistics",   icon: Truck,          label: "Logistics",    desc: "Fleet overview",       color: "text-blue-500",   bg: "bg-blue-500/10" },
-  { to: "/smartstore",  icon: BarChart3,      label: "AI Insights",  desc: "Smart predictions",    color: "text-amber-600",  bg: "bg-amber-500/10" },
-  { to: "/ai-dashboard",icon: BrainCircuit,   label: "ML Dashboard", desc: "Clustering & Heatmap", color: "text-blue-500", bg: "bg-blue-500/10" },
-  { to: "/users",       icon: Users,          label: "User Base",    desc: "Manage members",       color: "text-orange-500", bg: "bg-orange-500/10" },
-  { to: "/billing",     icon: Receipt,        label: "Billing",      desc: "Transactions",         color: "text-amber-600",  bg: "bg-amber-500/10" },
-  { to: "/orders",      icon: ShoppingCart,   label: "Orders",       desc: "Manage fulfillment",   color: "text-orange-500", bg: "bg-orange-500/10" },
-  { to: "/audit-logs",  icon: ScrollText,     label: "Audit Logs",   desc: "System activity",      color: "text-slate-600",  bg: "bg-slate-500/10" },
-  { to: "/coupons",     icon: Ticket,         label: "Coupons",      desc: "Marketing engine",     color: "text-rose-500",   bg: "bg-rose-500/10" },
-  { to: "/employees",   icon: UserPlus,       label: "Employees",    desc: "Team management",      color: "text-violet-500", bg: "bg-violet-500/10" },
-  { to: "/shops",       icon: Building2,      label: "Shops",        desc: "Manage instances",     color: "text-emerald-600",bg: "bg-emerald-500/10" },
+type NavItem = {
+  to: string;
+  icon: any;
+  label: string;
+  desc: string;
+  color: string;
+  bg: string;
+  roles?: string[]; // if omitted, visible to all roles that pass sidebar
+};
+
+const navItems: NavItem[] = [
+  // Developer-only
+  { to: "/developer",     icon: Code2,          label: "Dev Console",  desc: "System control",       color: "text-violet-600", bg: "bg-violet-500/10", roles: ["developer"] },
+  // Admin + Developer
+  { to: "/shop-experience", icon: Sparkles,     label: "Shop Vision",  desc: "Interactive 3D Map",   color: "text-amber-600",  bg: "bg-amber-500/10",  roles: ["developer", "admin"] },
+  { to: "/dashboard",   icon: LayoutDashboard,  label: "Analytics",    desc: "Performance metrics",  color: "text-orange-500", bg: "bg-orange-500/10", roles: ["developer", "admin"] },
+  { to: "/products",    icon: Package,          label: "Products",     desc: "Manage SKUs",          color: "text-orange-500", bg: "bg-orange-500/10", roles: ["developer", "admin"] },
+  { to: "/racks",       icon: Box,              label: "Racks",        desc: "Spatial mapping",      color: "text-amber-600",  bg: "bg-amber-500/10",  roles: ["developer", "admin"] },
+  { to: "/shop-builder",icon: Store,            label: "3D Builder",   desc: "Store design",         color: "text-amber-600",  bg: "bg-amber-500/10",  roles: ["developer", "admin"] },
+  { to: "/godown",      icon: Warehouse,        label: "Godown",       desc: "Private warehouse",    color: "text-orange-600", bg: "bg-orange-500/10", roles: ["developer", "admin"] },
+  { to: "/scanner",     icon: ScanLine,         label: "QR Scanner",   desc: "Batch operations",     color: "text-orange-500", bg: "bg-orange-500/10", roles: ["developer", "admin", "employee"] },
+  { to: "/delivery",    icon: Truck,            label: "Delivery Hub", desc: "Assign & verify",      color: "text-amber-600",  bg: "bg-amber-500/10",  roles: ["developer", "admin", "employee"] },
+  { to: "/logistics",   icon: Truck,            label: "Logistics",    desc: "Fleet overview",       color: "text-blue-500",   bg: "bg-blue-500/10",   roles: ["developer", "admin"] },
+  { to: "/smartstore",  icon: BarChart3,        label: "AI Insights",  desc: "Smart predictions",    color: "text-amber-600",  bg: "bg-amber-500/10",  roles: ["developer", "admin"] },
+  { to: "/ai-dashboard",icon: BrainCircuit,     label: "ML Dashboard", desc: "Clustering & Heatmap", color: "text-blue-500",   bg: "bg-blue-500/10",   roles: ["developer", "admin"] },
+  { to: "/users",       icon: Users,            label: "User Base",    desc: "Manage members",       color: "text-orange-500", bg: "bg-orange-500/10", roles: ["developer", "admin"] },
+  { to: "/billing",     icon: Receipt,          label: "Billing",      desc: "Transactions",         color: "text-amber-600",  bg: "bg-amber-500/10",  roles: ["developer", "admin"] },
+  { to: "/orders",      icon: ShoppingCart,      label: "Orders",       desc: "Manage fulfillment",   color: "text-orange-500", bg: "bg-orange-500/10", roles: ["developer", "admin", "employee", "shopper"] },
+  { to: "/audit-logs",  icon: ScrollText,       label: "Audit Logs",   desc: "System activity",      color: "text-slate-600",  bg: "bg-slate-500/10",  roles: ["developer", "admin"] },
+  { to: "/coupons",     icon: Ticket,           label: "Coupons",      desc: "Marketing engine",     color: "text-rose-500",   bg: "bg-rose-500/10",   roles: ["developer", "admin"] },
+  { to: "/employees",   icon: UserPlus,         label: "Employees",    desc: "Team management",      color: "text-violet-500", bg: "bg-violet-500/10", roles: ["developer", "admin"] },
+  { to: "/shops",       icon: Building2,        label: "Shops",        desc: "Manage instances",     color: "text-emerald-600",bg: "bg-emerald-500/10", roles: ["developer"] },
 ];
+
+// Shopper-specific items (shown when sidebar is visible for shoppers)
+const shopperItems: NavItem[] = [
+  { to: "/catalog",     icon: ShoppingBag,      label: "Store Catalog",desc: "Browse products",      color: "text-orange-500", bg: "bg-orange-500/10" },
+  { to: "/cart",        icon: ShoppingCart,     label: "My Cart",      desc: "Cart items",           color: "text-amber-600",  bg: "bg-amber-500/10" },
+  { to: "/orders",      icon: Package,          label: "My Orders",    desc: "Order history",        color: "text-orange-500", bg: "bg-orange-500/10" },
+  { to: "/delivery",    icon: Truck,            label: "Tracking",     desc: "Delivery status",      color: "text-amber-600",  bg: "bg-amber-500/10" },
+];
+
+const PORTAL_LABELS: Record<string, string> = {
+  developer: "Developer Portal",
+  admin: "Admin Portal",
+  employee: "Staff Portal",
+  shopper: "Shop",
+};
+
 export const AppSidebarContent = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
   
-  const filteredItems = navItems;
+  const role = user?.role || "shopper";
+  
+  const filteredItems = role === "shopper"
+    ? shopperItems
+    : navItems.filter(item => !item.roles || item.roles.includes(role));
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
@@ -63,7 +97,7 @@ export const AppSidebarContent = () => {
       <div className="flex-1 overflow-y-auto px-3">
         <div className="space-y-1">
           {filteredItems.map((item, i) => {
-            const isActive = location.pathname === item.to;
+            const isActive = location.pathname === item.to || (item.to !== "/" && location.pathname.startsWith(item.to));
             return (
               <motion.div
                 key={item.to}
@@ -141,6 +175,9 @@ export const AppSidebarContent = () => {
 };
 
 const AppSidebar = () => {
+  const { user } = useAuth();
+  const portalLabel = PORTAL_LABELS[user?.role || "shopper"] || "Admin Portal";
+  
   return (
     <motion.aside
       initial={{ x: -20, opacity: 0 }}
@@ -151,13 +188,13 @@ const AppSidebar = () => {
       <div className="p-6 border-b border-slate-50 flex items-center gap-3">
         <motion.div 
           whileHover={{ rotate: 10, scale: 1.1 }}
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm"
+          className={`flex h-10 w-10 items-center justify-center rounded-xl shadow-sm text-white ${user?.role === 'developer' ? 'bg-violet-600' : 'bg-slate-900'}`}
         >
-          <Store size={22} />
+          {user?.role === 'developer' ? <Code2 size={22} /> : <Store size={22} />}
         </motion.div>
         <div>
           <p className="font-heading text-lg font-black text-slate-900 tracking-tighter uppercase">3D<span className="text-primary lowercase font-bold tracking-tight">shop</span></p>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">Admin Portal</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">{portalLabel}</p>
         </div>
       </div>
       <AppSidebarContent />

@@ -73,6 +73,7 @@ const Collection = lazy(() => import("./pages/Collection"));
 const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
 const Employees = lazy(() => import("./pages/Employees"));
 const JoinPage = lazy(() => import("./pages/JoinPage"));
+const DeveloperDashboard = lazy(() => import("./pages/DeveloperDashboard"));
 
 // Godown lazy imports
 const GodownLayout = lazy(() => import("./components/GodownLayout"));
@@ -96,15 +97,21 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   if (loading && !user) return null;
-  return user?.role === 'admin' ? <>{children}</> : <Navigate to="/login" replace />;
+  return (user?.role === 'admin' || user?.role === 'developer') ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 const EmployeeRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   if (loading && !user) return null;
-  return (user?.role === 'employee' || user?.role === 'admin')
+  return (user?.role === 'employee' || user?.role === 'admin' || user?.role === 'developer')
     ? <>{children}</>
     : <Navigate to="/login" replace />;
+};
+
+const DeveloperRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  if (loading && !user) return null;
+  return user?.role === 'developer' ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 
@@ -114,13 +121,14 @@ const SmartRedirect = () => {
   if (loading && !user) return null;
   if (!user) return <Navigate to="/home" replace />;
   switch (user.role) {
+    case 'developer': return <Navigate to="/developer" replace />;
     case 'admin': return <Navigate to="/dashboard" replace />;
     case 'employee': return <Navigate to="/employee-dashboard" replace />;
-    default: return <CustomerSearch />;
+    default: return <Navigate to="/catalog" replace />;
   }
 };
 
-// Guests see HomePage, logged-in users see the 3D store
+// Guests see HomePage, logged-in users see their portal
 const GuestOrStoreRoute = () => {
   const { user, loading } = useAuth();
   if (loading && !user) return null;
@@ -133,13 +141,16 @@ const AnimatedRoutes = () => {
     <Suspense fallback={null}>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
-          {/* â”€â”€ Public / Guest routes â”€â”€ */}
+          {/* ── Public / Guest / QR routes ── */}
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/landing" element={<Landing />} />
           <Route path="/join" element={<JoinPage />} />
+          <Route path="/store-map/:shopName" element={<CustomerSearch isQRMode={true} />} />
+          <Route path="/store-map" element={<CustomerSearch isQRMode={true} />} />
+          <Route path="/in-store/:shopName" element={<CustomerSearch isQRMode={true} />} />
 
-          {/* â”€â”€ App shell (sidebar + layout) â”€â”€ */}
+          {/* ── App shell (sidebar + layout) ── */}
           <Route element={<AppLayout />}>
             {/* Admin-only */}
             <Route path="/dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} />
@@ -157,6 +168,9 @@ const AnimatedRoutes = () => {
             <Route path="/employees" element={<AdminRoute><Employees /></AdminRoute>} />
             <Route path="/shops" element={<AdminRoute><Shops /></AdminRoute>} />
 
+            {/* Developer-only */}
+            <Route path="/developer" element={<DeveloperRoute><DeveloperDashboard /></DeveloperRoute>} />
+
             {/* Employee dashboard */}
             <Route path="/employee-dashboard" element={<EmployeeRoute><EmployeeDashboard /></EmployeeRoute>} />
 
@@ -168,16 +182,16 @@ const AnimatedRoutes = () => {
               <Route path="builder" element={<GodownBuilder />} />
               <Route path="racks" element={<ManageRacks />} />
               <Route path="shelves" element={<ManageShelves />} />
-              <Route path="stock" element={<GodownStock />} />
+              <Route path="stock" element={<StockTransfer />} />
               <Route path="transfer" element={<StockTransfer />} />
               <Route path="reports" element={<GodownReports />} />
               <Route path="settings" element={<GodownSettings />} />
             </Route>
 
-            {/* Root â†’ Smart redirect */}
+            {/* Root → Smart redirect */}
             <Route path="/" element={<GuestOrStoreRoute />} />
             <Route path="/shop-experience" element={<CustomerSearch />} />
-            <Route path="/explore" element={<Navigate to="/" replace />} />
+            <Route path="/explore" element={<Navigate to="/catalog" replace />} />
 
             {/* Shopper routes (protected) */}
             <Route path="/catalog" element={<ProtectedRoute><ShopperCatalog /></ProtectedRoute>} />

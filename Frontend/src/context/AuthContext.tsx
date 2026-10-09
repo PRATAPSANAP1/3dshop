@@ -5,7 +5,7 @@ interface User {
   _id: string;
   name: string;
   email: string;
-  role: 'superadmin' | 'admin' | 'employee' | 'shopper';
+  role: 'developer' | 'superadmin' | 'admin' | 'employee' | 'shopper';
   shopId?: string;
   shopName?: string;
   mobile?: string;

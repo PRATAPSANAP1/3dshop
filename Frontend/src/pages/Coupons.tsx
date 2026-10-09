@@ -17,7 +17,7 @@ const Coupons = () => {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [search, setSearch] = useState("");
-  const [formData, setFormData] = useState({ code: "", discountPercentage: "" });
+  const [formData, setFormData] = useState({ code: "", discountPercentage: "", validFrom: "", validUntil: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
@@ -44,10 +44,12 @@ const Coupons = () => {
     try {
       await api.post("/coupons", {
         code: formData.code.toUpperCase(),
-        discountPercentage: Number(formData.discountPercentage)
+        discountPercentage: Number(formData.discountPercentage),
+        validFrom: formData.validFrom || undefined,
+        validUntil: formData.validUntil || undefined
       });
       toast({ title: "Coupon Created", description: `Code ${formData.code.toUpperCase()} is now live!` });
-      setFormData({ code: "", discountPercentage: "" });
+      setFormData({ code: "", discountPercentage: "", validFrom: "", validUntil: "" });
       setShowAddModal(false);
       fetchCoupons();
     } catch (err: any) {
@@ -151,6 +153,22 @@ const Coupons = () => {
                        <p className="text-5xl font-black italic text-orange-500 leading-none">{coupon.discountPercentage}</p>
                        <p className="text-xl font-black text-slate-900">% <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest not-italic">Discount</span></p>
                     </div>
+                    
+                    {/* Time Interval Info */}
+                    {(coupon.validFrom || coupon.validUntil) && (
+                      <div className="flex flex-col gap-1 mt-2">
+                        {coupon.validFrom && (
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase">
+                            <Calendar size={12} className="text-emerald-500" /> From: {new Date(coupon.validFrom).toLocaleDateString()}
+                          </div>
+                        )}
+                        {coupon.validUntil && (
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase">
+                            <Clock size={12} className="text-rose-500" /> Until: {new Date(coupon.validUntil).toLocaleDateString()}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase">
@@ -186,17 +204,17 @@ const Coupons = () => {
         {/* Add Modal */}
         <AnimatePresence>
           {showAddModal && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto">
               <motion.div 
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 onClick={() => setShowAddModal(false)}
-                className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" 
+                className="fixed inset-0 bg-slate-900/60 backdrop-blur-md" 
               />
               <motion.div 
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="relative bg-white rounded-[2.5rem] p-8 md:p-10 w-full max-w-md shadow-2xl flex flex-col gap-8"
+                className="relative bg-white rounded-[2.5rem] p-8 md:p-10 w-full max-w-md shadow-2xl flex flex-col gap-8 my-8"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -239,11 +257,32 @@ const Coupons = () => {
                        />
                     </div>
                   </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1"><Calendar size={10} /> Valid From (Opt)</label>
+                      <Input 
+                        type="date"
+                        value={formData.validFrom}
+                        onChange={(e) => setFormData({ ...formData, validFrom: e.target.value })}
+                        className="h-12 rounded-xl bg-slate-50 border-none text-xs font-bold text-slate-700"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-1"><Clock size={10} /> Valid Until (Opt)</label>
+                      <Input 
+                        type="date"
+                        value={formData.validUntil}
+                        onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
+                        className="h-12 rounded-xl bg-slate-50 border-none text-xs font-bold text-slate-700"
+                      />
+                    </div>
+                  </div>
 
                   <Button 
                     type="submit" 
                     disabled={isSubmitting}
-                    className="w-full h-16 rounded-2xl bg-slate-900 text-white hover:bg-orange-500 font-black uppercase tracking-widest text-xs transition-all shadow-lg active:scale-95"
+                    className="w-full h-16 rounded-2xl bg-slate-900 text-white hover:bg-orange-500 font-black uppercase tracking-widest text-xs transition-all shadow-lg active:scale-95 mt-2"
                   >
                     {isSubmitting ? "SYNCING..." : "DEPLOY COUPON"}
                   </Button>

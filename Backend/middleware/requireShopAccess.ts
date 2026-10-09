@@ -13,7 +13,7 @@ export const requireShopAccess = (req: Request, res: Response, next: NextFunctio
   }
 
   // Superadmin can access any shop
-  if (user.role === 'superadmin') {
+  if (user.role === 'superadmin' || user.role === 'developer') {
     return next();
   }
 

@@ -4,7 +4,7 @@ import Product from '../models/Product';
 
 export const getRacks = async (req: Request, res: Response) => {
   try {
-    const shopId = (req as any).shopId;
+    const shopId = (req as any).shopId || req.user?._id;
     const query = shopId ? { shopId } : {};
     const racks = await Rack.find(query).lean();
     
@@ -26,44 +26,55 @@ export const getRacks = async (req: Request, res: Response) => {
 
     res.json(racksWithStatus);
   } catch (error) {
+    console.error('[GET_RACKS_ERROR]:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
 export const createRack = async (req: Request, res: Response) => {
   try {
-    const rack = new Rack({ ...req.body, shopId: (req as any).shopId });
+    const shopId = (req as any).shopId || req.user?._id;
+    if (!shopId) return res.status(400).json({ message: 'Shop ID is required' });
+    const rack = new Rack({ ...req.body, shopId });
     await rack.save();
     res.status(201).json(rack);
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    console.error('[CREATE_RACK_ERROR]:', error);
+    res.status(500).json({ message: 'Server error', details: (error as Error).message });
   }
 };
 
 export const updateRack = async (req: Request, res: Response) => {
   try {
+    const shopId = (req as any).shopId || req.user?._id;
     const rack = await Rack.findOneAndUpdate(
-      { _id: req.params.id, shopId: (req as any).shopId },
+      { _id: req.params.id, shopId },
       req.body,
       { new: true }
     );
     res.json(rack);
   } catch (error) {
+    console.error('[UPDATE_RACK_ERROR]:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
 export const deleteRack = async (req: Request, res: Response) => {
   try {
-    await Rack.findOneAndDelete({ _id: req.params.id, shopId: (req as any).shopId });
+    const shopId = (req as any).shopId || req.user?._id;
+    await Rack.findOneAndDelete({ _id: req.params.id, shopId });
     res.json({ message: 'Rack deleted' });
   } catch (error) {
+    console.error('[DELETE_RACK_ERROR]:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
 export const getPublicRacks = async (req: Request, res: Response) => {
   const { shopName } = req.params;
+  if (!shopName || shopName === 'null' || shopName === 'undefined') {
+    return res.status(404).json({ message: 'Invalid shop name' });
+  }
   try {
     const User = require('../models/User').default;
     const shop = await User.findOne({ shopName });
@@ -72,6 +83,7 @@ export const getPublicRacks = async (req: Request, res: Response) => {
     const racks = await Rack.find({ shopId: shop._id });
     res.json(racks);
   } catch (error) {
+    console.error('[GET_PUBLIC_RACKS_ERROR]:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

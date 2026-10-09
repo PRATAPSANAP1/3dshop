@@ -42,7 +42,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction): 
 
     req.user = user;
     // Attach shopId from JWT (or user doc) for downstream tenant-scoped queries
-    (req as any).shopId = decoded.shopId || user.shopId?.toString() || null;
+    (req as any).shopId = decoded.shopId || (user.shopId ? user.shopId.toString() : user._id ? user._id.toString() : null);
     next();
   } catch (error) {
     console.error('[AUTH_ERROR]:', error);
@@ -51,7 +51,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction): 
 };
 
 export const admin = (req: Request, res: Response, next: NextFunction): void => {
-  if (req.user && (req.user as any).role === 'admin') {
+  if (req.user && ((req.user as any).role === 'admin' || (req.user as any).role === 'developer')) {
     next();
   } else {
     res.status(403).json({ message: 'Restricted Access: Administrative privileges required.' });
@@ -60,12 +60,21 @@ export const admin = (req: Request, res: Response, next: NextFunction): void => 
 
 export const staff = (req: Request, res: Response, next: NextFunction): void => {
   if (req.user && (
+    (req.user as any).role === 'developer' ||
     (req.user as any).role === 'admin' || 
     (req.user as any).role === 'employee'
   )) {
     next();
   } else {
     res.status(403).json({ message: 'Restricted Access: Staff privileges required.' });
+  }
+};
+
+export const developer = (req: Request, res: Response, next: NextFunction): void => {
+  if (req.user && (req.user as any).role === 'developer') {
+    next();
+  } else {
+    res.status(403).json({ message: 'Restricted Access: Developer privileges required.' });
   }
 };
 

@@ -133,31 +133,6 @@ const AdminAIDashboard = () => {
           )}
         </div>
 
-        {/* Visitor Spatial Heatmap (KDE) */}
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/60 flex flex-col">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-              <Activity size={18} className="text-rose-500" />
-              Store Traffic Heatmap
-            </h2>
-            <span className="text-xs font-bold px-2 py-1 bg-rose-50 text-rose-600 rounded-lg">KDE Simulation</span>
-          </div>
-          
-          <div className="flex-1 bg-slate-100 rounded-2xl overflow-hidden relative border border-slate-200">
-            <canvas 
-              ref={canvasRef} 
-              width={600} 
-              height={400} 
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-sm border border-slate-200/50 text-xs font-medium text-slate-600 space-y-1">
-              <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-500 rounded-full" /> High Dwell Time</div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-500 rounded-full" /> Moderate</div>
-              <div className="flex items-center gap-2"><div className="w-3 h-3 bg-blue-500 rounded-full" /> Passing By</div>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   );

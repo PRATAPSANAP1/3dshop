@@ -4,6 +4,8 @@ const couponSchema = new mongoose.Schema({
   shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true },
   code: { type: String, required: true, unique: true, uppercase: true },
   discountPercentage: { type: Number, required: true, min: 1, max: 100 },
+  validFrom: { type: Date },
+  validUntil: { type: Date },
   isActive: { type: Boolean, default: true },
 }, {
   timestamps: true,
