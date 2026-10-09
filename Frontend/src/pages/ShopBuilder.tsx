@@ -239,18 +239,25 @@ const ShopBuilder = () => {
   const handleRackSubmit = async (e: any) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...formData,
+        rackName: formData.rackName && formData.rackName.trim() ? formData.rackName.trim() : `Rack ${racks.length + 1}`
+      };
       if (editingRack) {
-        await api.put(`/racks/${editingRack._id}`, formData);
-        setRacks(racks.map(r => r._id === editingRack._id ? { ...r, ...formData } : r));
-        toast({ variant: "success", title: "Unit Updated" });
+        await api.put(`/racks/${editingRack._id}`, payload);
+        setRacks(racks.map(r => r._id === editingRack._id ? { ...r, ...payload } : r));
+        toast({ title: "✓ Unit Updated", description: `${payload.rackName} successfully updated.` });
       } else {
-        const { data } = await api.post('/racks', formData);
+        const { data } = await api.post('/racks', payload);
         setRacks([...racks, data]);
-        toast({ variant: "success", title: "Unit Initialized" });
+        toast({ title: "✓ Unit Created", description: `${payload.rackName} created successfully.` });
       }
       setShowForm(false);
       setEditingRack(null);
-    } catch { toast({ variant: "destructive", title: "Failure" }); }
+    } catch (err: any) {
+      const msg = err.response?.data?.details || err.response?.data?.message || err.message || "Failed to save rack";
+      toast({ variant: "destructive", title: "Rack Creation Error", description: msg });
+    }
   };
 
   const handleAddDoor = async (e: any) => {
@@ -259,8 +266,11 @@ const ShopBuilder = () => {
       const { data } = await api.post('/doors', doorFormData);
       setDoors([...doors, data]);
       setShowDoorForm(false);
-      toast({ variant: "success", title: "Portal Established" });
-    } catch { toast({ variant: "destructive", title: "Error" }); }
+      toast({ title: "✓ Portal Created", description: `${doorFormData.doorType.toUpperCase()} door added successfully.` });
+    } catch (err: any) {
+      const msg = err.response?.data?.details || err.response?.data?.message || err.message || "Failed to add door";
+      toast({ variant: "destructive", title: "Door Creation Error", description: msg });
+    }
   };
 
   const deleteRack = async (id: string) => {

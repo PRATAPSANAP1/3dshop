@@ -33,14 +33,31 @@ export const getRacks = async (req: Request, res: Response) => {
 
 export const createRack = async (req: Request, res: Response) => {
   try {
-    const shopId = (req as any).shopId || req.user?._id;
+    const shopId = (req as any).shopId || req.user?.shopId || req.user?._id;
     if (!shopId) return res.status(400).json({ message: 'Shop ID is required' });
-    const rack = new Rack({ ...req.body, shopId });
+    
+    const rackName = req.body.rackName && req.body.rackName.trim() ? req.body.rackName.trim() : `Rack ${Date.now().toString().slice(-4)}`;
+    
+    const rackData = {
+      ...req.body,
+      rackName,
+      shopId,
+      positionX: Number(req.body.positionX) || 0,
+      positionY: Number(req.body.positionY) || 1.5,
+      positionZ: Number(req.body.positionZ) || 0,
+      rotation: Number(req.body.rotation) || 0,
+      width: Number(req.body.width) || 2,
+      height: Number(req.body.height) || 3,
+      shelves: Number(req.body.shelves) || 4,
+      columns: Number(req.body.columns) || 3,
+    };
+    
+    const rack = new Rack(rackData);
     await rack.save();
     res.status(201).json(rack);
   } catch (error) {
     console.error('[CREATE_RACK_ERROR]:', error);
-    res.status(500).json({ message: 'Server error', details: (error as Error).message });
+    res.status(400).json({ message: 'Failed to create rack', details: (error as Error).message });
   }
 };
 

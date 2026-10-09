@@ -16,14 +16,28 @@ export const getDoors = async (req: Request, res: Response) => {
 
 export const createDoor = async (req: Request, res: Response) => {
   try {
-    const shopId = (req as any).shopId || req.user?._id;
+    const shopId = (req as any).shopId || req.user?.shopId || req.user?._id;
     if (!shopId) return res.status(400).json({ message: 'Shop ID is required' });
-    const door = new Door({ ...req.body, shopId });
+
+    const doorType = req.body.doorType === 'exit' ? 'exit' : 'entry';
+
+    const doorData = {
+      ...req.body,
+      doorType,
+      shopId,
+      positionX: Number(req.body.positionX) || 0,
+      positionZ: Number(req.body.positionZ) || 0,
+      rotation: Number(req.body.rotation) || 0,
+      width: Number(req.body.width) || 1.5,
+      height: Number(req.body.height) || 2.5,
+    };
+
+    const door = new Door(doorData);
     await door.save();
     res.status(201).json(door);
   } catch (error) {
     console.error('[CREATE_DOOR_ERROR]:', error);
-    res.status(500).json({ message: 'Server error', details: (error as Error).message });
+    res.status(400).json({ message: 'Failed to create door', details: (error as Error).message });
   }
 };
 
