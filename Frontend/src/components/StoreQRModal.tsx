@@ -18,29 +18,31 @@ const StoreQRModal = ({ open, onClose, shopName }: StoreQRModalProps) => {
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
+  const displayShopName = shopName || 'MainStore';
   const qrTargetUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/store-map/${encodeURIComponent(shopName)}`
-    : `/store-map/${encodeURIComponent(shopName)}`;
+    ? `${window.location.origin}/store-map/${encodeURIComponent(displayShopName)}`
+    : `/store-map/${encodeURIComponent(displayShopName)}`;
 
   useEffect(() => {
-    if (!shopName) return;
+    if (!open) return;
     QRCode.toDataURL(qrTargetUrl, {
       width: 512,
       margin: 1,
       color: { dark: "#0f172a", light: "#ffffff" },
       errorCorrectionLevel: "H",
-    }).then(setQrDataUrl);
-  }, [shopName, qrTargetUrl]);
+    }).then(setQrDataUrl).catch(err => console.error("QR Code Error:", err));
+  }, [displayShopName, qrTargetUrl, open]);
 
   useEffect(() => {
-    if (!canvasRef.current || !qrDataUrl || !shopName) return;
-    const ctx = canvasRef.current.getContext("2d");
+    if (!open || !canvasRef.current || !qrDataUrl) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const width = 400;
     const height = 500;
-    canvasRef.current.width = width;
-    canvasRef.current.height = height;
+    canvas.width = width;
+    canvas.height = height;
 
     // White background
     ctx.fillStyle = "#ffffff";
@@ -61,9 +63,9 @@ const StoreQRModal = ({ open, onClose, shopName }: StoreQRModalProps) => {
 
     ctx.font = "bold 14px 'Inter', sans-serif";
     ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.fillText(`STORE: ${shopName.toUpperCase()}`, width / 2, 68);
+    ctx.fillText(`STORE: ${displayShopName.toUpperCase()}`, width / 2, 68);
 
-    // QR Code
+    // QR Code Image
     const qrImg = new Image();
     qrImg.onload = () => {
       const qrSize = 240;
@@ -93,7 +95,7 @@ const StoreQRModal = ({ open, onClose, shopName }: StoreQRModalProps) => {
       ctx.fillText("POWERED BY 3DSHOP IN-STORE VISION", width / 2, 470);
     };
     qrImg.src = qrDataUrl;
-  }, [qrDataUrl, shopName]);
+  }, [qrDataUrl, displayShopName, open]);
 
   const handlePrint = () => {
     if (!canvasRef.current) return;
