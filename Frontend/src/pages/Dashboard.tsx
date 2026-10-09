@@ -29,8 +29,10 @@ const Dashboard = () => {
     try {
       const { data } = await api.get('/dashboard/stats');
       setStats(data);
-    } catch (error) {
-      console.error("Dashboard Fetch Error:", error);
+    } catch (error: any) {
+      if (error?.response?.status !== 401) {
+        console.error("Dashboard Fetch Error:", error);
+      }
     } finally {
       setLoading(false);
     }
