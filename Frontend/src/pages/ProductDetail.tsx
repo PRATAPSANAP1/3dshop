@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Heart, Star, ChevronLeft, ShieldCheck, Truck, RefreshCw, MessageSquare, Plus, Minus, Tag, Zap, X, User, BrainCircuit, Sparkles } from "lucide-react";
+import { ShoppingBag, Heart, Star, ChevronLeft, ChevronRight, ShieldCheck, Truck, RefreshCw, MessageSquare, Plus, Minus, Tag, Zap, X, User, BrainCircuit, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PageTransition from "@/components/PageTransition";
 import api from "@/lib/api";
