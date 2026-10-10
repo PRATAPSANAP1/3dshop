@@ -10,18 +10,13 @@ import {
   Truck,
   Heart,
   Search,
-  Bell,
   LayoutGrid,
-  Home,
   HelpCircle,
-  Box,
   Settings,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 const navItems = [
-  { to: "/",           icon: Box,          label: "3D Shop",      color: "text-violet-500", bg: "bg-violet-500/10", activeBg: "bg-gradient-to-r from-violet-500/15 to-purple-500/10" },
-  { to: "/home",       icon: Home,         label: "Home",        color: "text-orange-500", bg: "bg-orange-500/10",  activeBg: "bg-gradient-to-r from-orange-500/15 to-amber-500/10" },
   { to: "/catalog",    icon: Search,       label: "Products",         color: "text-orange-500", bg: "bg-orange-500/10",  activeBg: "bg-gradient-to-r from-orange-500/15 to-amber-500/10" },
   { to: "/categories", icon: LayoutGrid,   label: "Categories",       color: "text-amber-600",  bg: "bg-amber-500/10",  activeBg: "bg-gradient-to-r from-amber-500/15 to-orange-500/10" },
   { to: "/orders",     icon: Package,      label: "Orders",          color: "text-orange-500", bg: "bg-orange-500/10",  activeBg: "bg-gradient-to-r from-orange-500/15 to-amber-500/10" },
@@ -86,7 +81,7 @@ export const ShopperSidebarContent = () => {
                     >
                       {item.label}
                     </p>
-                    <p className="text-[10px] text-slate-400 font-medium mt-0.5 truncate">{item.desc}</p>
+                    {(item as any).desc && <p className="text-[10px] text-slate-400 font-medium mt-0.5 truncate">{(item as any).desc}</p>}
                   </div>
                   {isActive && (
                     <motion.div
