@@ -13,6 +13,7 @@ import {
   AttractiveRackFrame3D,
   GoogleMapsRoute3D,
   StoreDimensionsOverlay3D,
+  StoreInteriorDecor3D,
 } from '@/components/3d/StoreNavigation3D';
 
 interface ShopConfig {
@@ -895,9 +896,9 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
 
       <div className={`relative overflow-hidden w-full ${isMobile ? 'h-[75vh]' : 'flex-1 min-h-[500px]'}`} style={{ margin: 0 }}>
         {/* Floating Store Floor Switcher Bar */}
-        <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-1.5 bg-slate-900/85 backdrop-blur-xl p-1.5 rounded-2xl border border-slate-700/80 shadow-2xl">
-          <div className="flex items-center gap-1.5 px-2 text-slate-400">
-            <Layers size={13} className="text-orange-400" />
+        <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-1.5 bg-white/90 backdrop-blur-xl p-1.5 rounded-2xl border border-slate-200/80 shadow-lg">
+          <div className="flex items-center gap-1.5 px-2 text-slate-500">
+            <Layers size={13} className="text-orange-500" />
             <span className="text-[9px] font-black uppercase tracking-widest hidden sm:inline">Store Floor</span>
           </div>
           {availableFloors.map(fl => {
@@ -909,12 +910,12 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
                 onClick={() => setSelectedFloor(fl)}
                 className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
                   isActive
-                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/30 scale-105'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/25 scale-105'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
                 <span>🏢 {fl === 1 ? 'Floor 1 (Ground)' : `Floor ${fl}`}</span>
-                <span className={`text-[8px] px-1 py-0.2 rounded ${isActive ? 'bg-black/20 text-white' : 'bg-slate-800 text-slate-400'}`}>
+                <span className={`text-[8px] px-1.5 py-0.5 rounded ${isActive ? 'bg-black/15 text-white' : 'bg-slate-100 text-slate-500'}`}>
                   {floorRackCount}
                 </span>
               </button>
@@ -982,7 +983,7 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
               position: isMobile ? [0, 30, 25] : [0, 22, 22],
               fov: isMobile ? 55 : 45
             }}
-            style={{ background: 'linear-gradient(180deg, #0b1120 0%, #0f172a 100%)' }}
+            style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)' }}
             gl={{ 
               antialias: false, 
               powerPreference: 'default', 
@@ -1005,29 +1006,38 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
               });
             }}
           >
-            <ambientLight intensity={0.75} />
-            <hemisphereLight args={['#f8fafc', '#1e293b', 0.55]} />
-            <directionalLight position={[15, 25, 12]} intensity={0.95} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
-            <pointLight position={[(shopConfig?.width || 30) / 3, 10, (shopConfig?.depth || 20) / 3]} intensity={0.45} color="#38bdf8" />
-            <pointLight position={[-(shopConfig?.width || 30) / 3, 10, -(shopConfig?.depth || 20) / 3]} intensity={0.45} color="#f97316" />
+            <ambientLight intensity={0.9} />
+            <hemisphereLight args={['#ffffff', '#cbd5e1', 0.65]} />
+            <directionalLight position={[15, 25, 12]} intensity={1.1} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
+            <pointLight position={[0, 10, 0]} intensity={0.45} color="#fff7ed" />
 
-            {/* Polished architectural store floor */}
+            {/* Bright polished architectural retail floor */}
             <Plane args={[shopConfig?.width || 30, shopConfig?.depth || 20]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-              <meshStandardMaterial color="#1e293b" metalness={0.25} roughness={0.55} />
+              <meshStandardMaterial color="#f8fafc" metalness={0.08} roughness={0.45} />
             </Plane>
 
-            {/* Subtle store perimeter floor trim */}
-            <Box args={[(shopConfig?.width || 30) + 0.4, 0.08, (shopConfig?.depth || 20) + 0.4]} position={[0, -0.04, 0]}>
-              <meshStandardMaterial color="#334155" metalness={0.4} roughness={0.5} />
+            {/* Sleek store perimeter floor trim */}
+            <Box args={[(shopConfig?.width || 30) + 0.5, 0.1, (shopConfig?.depth || 20) + 0.5]} position={[0, -0.055, 0]}>
+              <meshStandardMaterial color="#cbd5e1" metalness={0.2} roughness={0.5} />
             </Box>
 
-            <gridHelper args={[Math.max(shopConfig?.width || 30, shopConfig?.depth || 20), Math.max(shopConfig?.width || 30, shopConfig?.depth || 20) / 2, '#334155', '#273549']} position={[0, 0.01, 0]} />
+            <gridHelper args={[Math.max(shopConfig?.width || 30, shopConfig?.depth || 20), Math.max(shopConfig?.width || 30, shopConfig?.depth || 20) / 2, '#cbd5e1', '#e2e8f0']} position={[0, 0.01, 0]} />
             <StoreDimensionsOverlay3D
               width={shopConfig?.width || 30}
               depth={shopConfig?.depth || 20}
               floor={selectedFloor}
             />
-            <ContactShadows frames={1} resolution={isMobile ? 256 : 512} scale={shopConfig?.width || 30} blur={2} opacity={0.18} far={10} color="#000000" />
+            <StoreInteriorDecor3D
+              width={shopConfig?.width || 30}
+              depth={shopConfig?.depth || 20}
+              exitPosition={
+                (() => {
+                  const ex = currentFloorDoors.find(d => d.doorType === 'exit') || doors.find(d => d.doorType === 'exit');
+                  return ex ? [ex.positionX, ex.positionZ] : undefined;
+                })()
+              }
+            />
+            <ContactShadows frames={1} resolution={isMobile ? 256 : 512} scale={shopConfig?.width || 30} blur={2} opacity={0.14} far={10} color="#0f172a" />
 
             <Box args={[shopConfig?.width || 30, 4, 0.3]} position={[0, 2, -(shopConfig?.depth || 20) / 2]}>
               <meshStandardMaterial color="#94a3b8" transparent opacity={0.08} depthWrite={false} />
@@ -1142,26 +1152,26 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="pointer-events-auto bg-slate-900/90 backdrop-blur-xl border border-sky-500/40 rounded-2xl px-4 py-3 shadow-2xl text-white max-w-xs"
+              className="pointer-events-auto bg-white/95 backdrop-blur-xl border border-sky-200 rounded-2xl px-4 py-3 shadow-xl text-slate-900 max-w-xs"
             >
-              <div className="flex items-center gap-2 text-sky-400 text-[10px] font-black uppercase tracking-widest mb-1">
+              <div className="flex items-center gap-2 text-sky-600 text-[10px] font-black uppercase tracking-widest mb-1">
                 <Route size={13} />
                 <span>Google Maps Route • Floor {selectedFloor}</span>
               </div>
               <div className="flex items-baseline gap-2">
-                <span className="text-lg font-black text-white">{totalRouteDistance.toFixed(1)} m</span>
-                <span className="text-xs font-bold text-emerald-400">
+                <span className="text-lg font-black text-slate-900">{totalRouteDistance.toFixed(1)} m</span>
+                <span className="text-xs font-bold text-emerald-600">
                   (~{Math.max(5, Math.round(totalRouteDistance / 1.2))}s walk)
                 </span>
               </div>
               {optimizedRoute[activeRouteStepIndex] && (
-                <p className="text-[10px] font-bold text-slate-300 mt-1 truncate">
-                  Next: <span className="text-orange-400">{optimizedRoute[activeRouteStepIndex].product.productName}</span> ({optimizedRoute[activeRouteStepIndex].rackName})
+                <p className="text-[10px] font-bold text-slate-500 mt-1 truncate">
+                  Next: <span className="text-orange-600">{optimizedRoute[activeRouteStepIndex].product.productName}</span> ({optimizedRoute[activeRouteStepIndex].rackName})
                 </p>
               )}
             </motion.div>
           )}
-          <div className="bg-slate-900/75 backdrop-blur-md border border-slate-700/70 rounded-xl px-3 py-1.5 text-[10px] font-black text-slate-300 uppercase tracking-wider w-fit">
+          <div className="bg-white/90 backdrop-blur-md border border-slate-200 rounded-xl px-3 py-1.5 text-[10px] font-black text-slate-600 uppercase tracking-wider w-fit shadow-sm">
             📐 Floor {selectedFloor}: {shopConfig?.width || 30}m × {shopConfig?.depth || 20}m
           </div>
         </div>

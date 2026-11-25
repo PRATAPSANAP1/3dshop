@@ -194,9 +194,9 @@ export const GoogleMapsRoute3D: React.FC<{
   return (
     <group>
       {/* Outer Google Maps blue glow ribbon */}
-      <Line points={floorPoints} color="#1d4ed8" lineWidth={10} transparent opacity={0.45} />
+      <Line points={floorPoints} color="#1d4ed8" lineWidth={10} transparent opacity={0.35} />
       {/* Inner crisp Google Maps navigation line */}
-      <Line points={floorPoints} color="#38bdf8" lineWidth={4.5} />
+      <Line points={floorPoints} color="#2563eb" lineWidth={4.5} />
 
       {/* Directional 3D arrows along every segment */}
       <group ref={arrowsGroupRef}>
@@ -208,8 +208,8 @@ export const GoogleMapsRoute3D: React.FC<{
                 <coneGeometry args={[0.24, 0.52, 4]} />
                 <meshStandardMaterial
                   color="#ffffff"
-                  emissive="#38bdf8"
-                  emissiveIntensity={1.2}
+                  emissive="#2563eb"
+                  emissiveIntensity={0.9}
                 />
               </mesh>
             </group>
@@ -321,23 +321,23 @@ export const AttractiveRackFrame3D: React.FC<{
   isHighlighted = false,
 }) => {
   const shelfHeight = height / shelves;
-  const headerColor = isHighlighted ? '#22c55e' : dimmed ? '#334155' : color;
-  const postColor = dimmed ? '#1e293b' : '#475569';
+  const headerColor = isHighlighted ? '#22c55e' : dimmed ? '#94a3b8' : color;
+  const postColor = dimmed ? '#cbd5e1' : '#64748b';
 
   return (
     <group>
-      {/* Back panel */}
+      {/* Clean retail rack back panel */}
       <Box args={[width, height, 0.04]} position={[0, 0, -depth / 2]}>
         <meshStandardMaterial
-          color={dimmed ? '#0f172a' : '#1e293b'}
-          roughness={0.6}
-          metalness={0.2}
+          color={dimmed ? '#e2e8f0' : '#f8fafc'}
+          roughness={0.5}
+          metalness={0.1}
           transparent
-          opacity={dimmed ? 0.18 : 0.75}
+          opacity={dimmed ? 0.2 : 0.88}
         />
       </Box>
 
-      {/* Four metallic vertical corner uprights */}
+      {/* Four brushed-steel vertical corner uprights */}
       {[
         [-width / 2, -depth / 2],
         [width / 2, -depth / 2],
@@ -347,7 +347,7 @@ export const AttractiveRackFrame3D: React.FC<{
         <Box key={`post-${idx}`} args={[0.07, height, 0.07]} position={[px, 0, pz]} castShadow>
           <meshStandardMaterial
             color={postColor}
-            metalness={0.7}
+            metalness={0.65}
             roughness={0.3}
             transparent={dimmed}
             opacity={dimmed ? 0.25 : 1}
@@ -360,23 +360,23 @@ export const AttractiveRackFrame3D: React.FC<{
         <meshStandardMaterial color={postColor} metalness={0.6} roughness={0.35} transparent={dimmed} opacity={dimmed ? 0.25 : 1} />
       </Box>
 
-      {/* Solid laminated shelves with front accent strip */}
+      {/* Solid laminated retail shelves with front price-rail accent strip */}
       {Array.from({ length: shelves }).map((_, shelfIndex) => {
         const shelfBaseY = -height / 2 + shelfHeight * shelfIndex;
         return (
           <group key={`shelf-board-${shelfIndex}`} position={[0, shelfBaseY, 0]}>
             <Box args={[width, 0.045, depth]} receiveShadow castShadow>
               <meshStandardMaterial
-                color={dimmed ? '#1e293b' : '#cbd5e1'}
-                roughness={0.5}
-                metalness={0.15}
+                color={dimmed ? '#e2e8f0' : '#f1f5f9'}
+                roughness={0.4}
+                metalness={0.1}
                 transparent={dimmed}
-                opacity={dimmed ? 0.2 : 0.95}
+                opacity={dimmed ? 0.2 : 0.98}
               />
             </Box>
             {/* Front price-rail accent strip */}
             <Box args={[width, 0.03, 0.02]} position={[0, 0, depth / 2 + 0.01]}>
-              <meshStandardMaterial color={headerColor} emissive={headerColor} emissiveIntensity={dimmed ? 0 : 0.25} />
+              <meshStandardMaterial color={headerColor} emissive={headerColor} emissiveIntensity={dimmed ? 0 : 0.2} />
             </Box>
           </group>
         );
@@ -388,15 +388,15 @@ export const AttractiveRackFrame3D: React.FC<{
           <meshStandardMaterial
             color={headerColor}
             emissive={headerColor}
-            emissiveIntensity={dimmed ? 0 : isHighlighted ? 0.8 : 0.35}
+            emissiveIntensity={dimmed ? 0 : isHighlighted ? 0.7 : 0.2}
             roughness={0.3}
-            metalness={0.2}
+            metalness={0.15}
           />
         </Box>
         <Text
           position={[0, 0, 0.05]}
           fontSize={0.2}
-          color={dimmed ? '#64748b' : '#ffffff'}
+          color="#ffffff"
           outlineWidth={0.015}
           outlineColor="#0f172a"
           fontWeight="900"
@@ -405,6 +405,76 @@ export const AttractiveRackFrame3D: React.FC<{
           maxWidth={Math.max(width * 0.85, 1.2)}
         >
           {rackName.toUpperCase()}
+        </Text>
+      </group>
+    </group>
+  );
+};
+
+/**
+ * Modern store ceiling LED light bars & subtle checkout counter props
+ * to make the 3D scene look like an authentic retail supermarket.
+ */
+export const StoreInteriorDecor3D: React.FC<{
+  width: number;
+  depth: number;
+  exitPosition?: [number, number];
+}> = ({ width, depth, exitPosition }) => {
+  const lightPositions = useMemo(() => {
+    const cols = width >= 24 ? [-width / 4, width / 4] : [0];
+    const rows = depth >= 18 ? [-depth / 4, depth / 4] : [0];
+    const list: [number, number][] = [];
+    cols.forEach((x) => rows.forEach((z) => list.push([x, z])));
+    return list;
+  }, [width, depth]);
+
+  const checkoutX = exitPosition ? exitPosition[0] + (exitPosition[0] > 0 ? -2.2 : 2.2) : -width / 4;
+  const checkoutZ = exitPosition ? exitPosition[1] : -depth / 2 + 1.8;
+
+  return (
+    <group>
+      {/* Overhead suspended LED light fixtures */}
+      {lightPositions.map(([lx, lz], i) => (
+        <group key={`ceiling-light-${i}`} position={[lx, 4.3, lz]}>
+          <Box args={[3.2, 0.08, 0.35]}>
+            <meshStandardMaterial color="#e2e8f0" metalness={0.5} roughness={0.3} />
+          </Box>
+          <Box args={[3.0, 0.03, 0.25]} position={[0, -0.04, 0]}>
+            <meshBasicMaterial color="#ffffff" />
+          </Box>
+        </group>
+      ))}
+
+      {/* Sleek Retail Checkout / Billing Counter near Exit */}
+      <group position={[checkoutX, 0, checkoutZ]}>
+        {/* Counter body */}
+        <Box args={[2.2, 0.95, 0.85]} position={[0, 0.475, 0]} castShadow receiveShadow>
+          <meshStandardMaterial color="#ffffff" roughness={0.35} metalness={0.1} />
+        </Box>
+        {/* Counter orange/slate top surface */}
+        <Box args={[2.3, 0.08, 0.95]} position={[0, 0.98, 0]} castShadow>
+          <meshStandardMaterial color="#0f172a" roughness={0.3} metalness={0.2} />
+        </Box>
+        {/* Accent front strip */}
+        <Box args={[2.22, 0.14, 0.03]} position={[0, 0.72, 0.43]}>
+          <meshStandardMaterial color="#f97316" emissive="#f97316" emissiveIntensity={0.2} />
+        </Box>
+        {/* POS Monitor */}
+        <Box args={[0.45, 0.32, 0.04]} position={[-0.4, 1.24, 0]}>
+          <meshStandardMaterial color="#1e293b" metalness={0.5} roughness={0.3} />
+        </Box>
+        <Box args={[0.4, 0.26, 0.02]} position={[-0.4, 1.24, 0.02]}>
+          <meshBasicMaterial color="#38bdf8" />
+        </Box>
+        <Text
+          position={[0, 1.65, 0]}
+          fontSize={0.22}
+          color="#0f172a"
+          fontWeight="900"
+          anchorX="center"
+          anchorY="bottom"
+        >
+          BILLING COUNTER
         </Text>
       </group>
     </group>
