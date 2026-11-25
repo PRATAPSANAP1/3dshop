@@ -39,20 +39,48 @@ import { apiLimiter } from './middleware/security';
 
 const app = express();
 
+const extraFrontendOrigins = (process.env.FRONTEND_URL || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:8080',
   'http://localhost:8081',
   'http://localhost:5174',
   'http://127.0.0.1:5173',
+  'https://3dshop-du7.pages.dev',
   'https://3dshop-tawny.vercel.app',
   'https://threedshop-dg44.onrender.com',
-  process.env.FRONTEND_URL || ''
-].filter(Boolean);
+  ...extraFrontendOrigins,
+];
+
+const isOriginAllowed = (origin?: string): boolean => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  if (
+    origin.startsWith('http://localhost:') ||
+    origin.startsWith('http://127.0.0.1:') ||
+    origin.startsWith('http://192.168.') ||
+    origin.startsWith('http://10.') ||
+    origin.startsWith('http://172.')
+  ) {
+    return true;
+  }
+  if (
+    origin.endsWith('.pages.dev') ||
+    origin.endsWith('.vercel.app') ||
+    origin.endsWith('.onrender.com')
+  ) {
+    return true;
+  }
+  return false;
+};
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:') || origin.startsWith('http://192.168.') || origin.startsWith('http://10.') || origin.startsWith('http://172.')) {
+    if (isOriginAllowed(origin)) {
       callback(null, true);
     } else {
       logger.warn(`CORS blocked origin: ${origin}`);
@@ -83,7 +111,13 @@ app.use(cookieParser());
 
 const io = new Server(httpServer, {
   cors: {
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (isOriginAllowed(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
   }
