@@ -202,7 +202,7 @@ const HomePage = () => {
           const rackPromises = racks.slice(0, 3).map((r: any) => api.get(`/public/products/rack/${r._id}`));
           const rackResults = await Promise.all(rackPromises);
           
-          let prods: Product[] = [];
+          const prods: Product[] = [];
           rackResults.forEach(res => prods.push(...res.data));
           
           setTrending(prods.slice(0, 10));

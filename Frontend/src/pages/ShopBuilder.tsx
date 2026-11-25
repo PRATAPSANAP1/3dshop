@@ -1,14 +1,17 @@
-import { useState, useEffect, Suspense, useRef } from "react";
-import { Store, Maximize, Plus, Trash2, Edit2, X, Move, RotateCw, ArrowUpRight, QrCode } from "lucide-react";
+import { useState, useEffect, Suspense, useRef, useMemo } from "react";
+import { Store, Maximize, Plus, Trash2, Edit2, X, Move, RotateCw, ArrowUpRight, QrCode, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageTransition from "@/components/PageTransition";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Box, Text, Plane, Environment, ContactShadows } from "@react-three/drei";
+import * as THREE from "three";
 import api from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import StoreQRModal from "@/components/StoreQRModal";
+import { ProductBoxMesh } from "@/components/3d/ProductBoxMesh";
+import { AttractiveRackFrame3D, StoreDimensionsOverlay3D } from "@/components/3d/StoreNavigation3D";
 
 const AxisArrows = () => (
   <group>
@@ -112,7 +115,7 @@ const RotationDial = ({ value, onChange, color = '#8b5cf6' }: any) => {
 const Rack3D = ({ rack, products = [], isPreview = false }: any) => {
   const width = rack.width || 2;
   const height = rack.height || 3;
-  const depth = 0.3;
+  const depth = 0.4;
   const shelves = rack.shelves || 4;
   const columns = rack.columns || 3;
   const shelfHeight = height / shelves;
@@ -125,48 +128,35 @@ const Rack3D = ({ rack, products = [], isPreview = false }: any) => {
 
   return (
     <group position={[rack.positionX, rack.positionY || 0, rack.positionZ]} rotation={[0, (rack.rotation || 0) * Math.PI / 180, 0]}>
-      <Box args={[width, height, depth]} castShadow>
-        <meshStandardMaterial color="#f1f5f9" transparent opacity={0.08} depthWrite={false} />
-      </Box>
-
-      <group position={[0, height / 2 + 0.3, 0.16]}>
-        <Box args={[width * 0.9, 0.4, 0.05]}>
-          <meshStandardMaterial color={getColor()} emissive={getColor()} emissiveIntensity={0.3} />
-        </Box>
-        <Text position={[0, 0, 0.03]} fontSize={0.45} color="#000000" fontWeight="900" anchorX="center" anchorY="middle">
-          {(rack.rackName || 'PREVIEW').toUpperCase()}
-        </Text>
-      </group>
-
-      {Array.from({ length: shelves }).map((_, shelfIndex) => {
-        const shelfY = -height / 2 + shelfHeight * (shelfIndex + 0.5);
-        return (
-          <group key={`shelf-${shelfIndex}`}>
-             <Plane args={[width, depth]} position={[0, shelfY - shelfHeight/2, 0.15]} rotation={[-Math.PI / 2, 0, 0]}>
-               <meshStandardMaterial color="#cbd5e1" transparent opacity={0.1} depthWrite={false} />
-             </Plane>
-          </group>
-        );
-      })}
+      <AttractiveRackFrame3D
+        width={width}
+        height={height}
+        depth={depth}
+        shelves={shelves}
+        rackName={rack.rackName || 'PREVIEW'}
+        color={getColor()}
+      />
 
       {!isPreview && products.map((product: any, index: number) => {
-        const shelfIndex = Math.floor(index / columns);
-        const columnIndex = index % columns;
-        if (shelfIndex >= shelves) return null;
+        const shelfIndex = product.shelfNumber ? product.shelfNumber - 1 : Math.floor(index / columns);
+        const columnIndex = product.columnNumber ? product.columnNumber - 1 : index % columns;
+        if (shelfIndex >= shelves || shelfIndex < 0 || columnIndex >= columns || columnIndex < 0) return null;
 
         const productColors = ['#f97316','#8b5cf6','#06b6d4','#ec4899','#10b981','#f59e0b','#3b82f6','#ef4444'];
         const productColor = productColors[index % productColors.length];
 
         const productX = -width / 2 + columnWidth * (columnIndex + 0.5);
         const productY = -height / 2 + shelfHeight * (shelfIndex + 0.5);
-        const productSize = [columnWidth * 0.7, shelfHeight * 0.6, 0.2] as [number, number, number];
+        const productSize = [columnWidth * 0.72, shelfHeight * 0.62, 0.24] as [number, number, number];
 
         return (
-          <group key={product._id} position={[productX, productY, 0.15]}>
-            <Box args={productSize}>
-              <meshStandardMaterial color={productColor} />
-            </Box>
-          </group>
+          <ProductBoxMesh
+            key={product._id || `prod-${index}`}
+            product={product}
+            position={[productX, productY, 0.06]}
+            size={productSize}
+            accentColor={productColor}
+          />
         );
       })}
     </group>
@@ -180,19 +170,41 @@ const ShopBuilder = () => {
   const [isMobileScreen, setIsMobileScreen] = useState(window.innerWidth < 1280);
   const [showForm, setShowForm] = useState(false);
   const [editingRack, setEditingRack] = useState<any>(null);
+  const [currentFloor, setCurrentFloor] = useState<number>(1);
+  const [rackFloorFilter, setRackFloorFilter] = useState<number | 'all'>('all');
   const [formData, setFormData] = useState({ 
     rackName: '', positionX: 0, positionY: 1.5, positionZ: 0, 
-    rotation: 0, width: 2, height: 3, shelves: 4, columns: 3, color: '#EA580C' 
+    rotation: 0, width: 2, height: 3, shelves: 4, columns: 3, color: '#EA580C',
+    floor: 1
   });
-  const [shopDimensions, setShopDimensions] = useState({ width: 30, depth: 30 });
+  const [shopDimensions, setShopDimensions] = useState({ width: 30, depth: 30, totalFloors: 1 });
   const [doors, setDoors] = useState<any[]>([]);
   const [showDoorForm, setShowDoorForm] = useState(false);
-  const [doorFormData, setDoorFormData] = useState({ doorType: 'entry', positionX: 0, positionZ: 0, rotation: 0, width: 1.5, height: 2.5 });
+  const [doorFormData, setDoorFormData] = useState({ doorType: 'entry', positionX: 0, positionZ: 0, rotation: 0, width: 1.5, height: 2.5, floor: 1 });
   const [showQRModal, setShowQRModal] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  const availableFloors = useMemo(() => {
+    const floorSet = new Set<number>([1]);
+    const configuredFloors = Number(shopDimensions.totalFloors) || 1;
+    for (let fl = 1; fl <= configuredFloors; fl++) {
+      floorSet.add(fl);
+    }
+    racks.forEach((r: any) => floorSet.add(Number(r.floor) || 1));
+    doors.forEach((d: any) => floorSet.add(Number(d.floor) || 1));
+    return Array.from(floorSet).sort((a, b) => a - b);
+  }, [racks, doors, shopDimensions.totalFloors]);
+
+  const currentFloorRacks = useMemo(() => {
+    return racks.filter(r => (Number(r.floor) || 1) === currentFloor);
+  }, [racks, currentFloor]);
+
+  const currentFloorDoors = useMemo(() => {
+    return doors.filter(d => (Number(d.floor) || 1) === currentFloor);
+  }, [doors, currentFloor]);
 
   useEffect(() => {
     const handleResize = () => setIsMobileScreen(window.innerWidth < 1280);
@@ -219,7 +231,11 @@ const ShopBuilder = () => {
         const [configRes, rackRes, doorRes] = await Promise.all([
           api.get('/shop-config'), api.get('/racks'), api.get('/doors')
         ]);
-        if (configRes.data) setShopDimensions({ width: configRes.data.width, depth: configRes.data.depth });
+        if (configRes.data) setShopDimensions({
+          width: configRes.data.width || 30,
+          depth: configRes.data.depth || 30,
+          totalFloors: configRes.data.totalFloors || 1
+        });
         setRacks(rackRes.data);
         setDoors(doorRes.data);
         loadRackProducts(rackRes.data);
@@ -241,16 +257,17 @@ const ShopBuilder = () => {
     try {
       const payload = {
         ...formData,
+        floor: Number(formData.floor) || currentFloor || 1,
         rackName: formData.rackName && formData.rackName.trim() ? formData.rackName.trim() : `Rack ${racks.length + 1}`
       };
       if (editingRack) {
         await api.put(`/racks/${editingRack._id}`, payload);
         setRacks(racks.map(r => r._id === editingRack._id ? { ...r, ...payload } : r));
-        toast({ title: "✓ Rack Updated successfully", description: `${payload.rackName} updated successfully.` });
+        toast({ title: "✓ Rack Updated successfully", description: `${payload.rackName} updated on Floor ${payload.floor}.` });
       } else {
         const { data } = await api.post('/racks', payload);
         setRacks([...racks, data]);
-        toast({ title: "✓ Rack Created successfully", description: `${payload.rackName} created successfully.` });
+        toast({ title: "✓ Rack Created successfully", description: `${payload.rackName} placed on Floor ${payload.floor}.` });
       }
       setShowForm(false);
       setEditingRack(null);
@@ -263,10 +280,14 @@ const ShopBuilder = () => {
   const handleAddDoor = async (e: any) => {
     e.preventDefault();
     try {
-      const { data } = await api.post('/doors', doorFormData);
+      const payload = {
+        ...doorFormData,
+        floor: Number(doorFormData.floor) || currentFloor || 1
+      };
+      const { data } = await api.post('/doors', payload);
       setDoors([...doors, data]);
       setShowDoorForm(false);
-      toast({ title: "✓ Door Created successfully", description: `${doorFormData.doorType.toUpperCase()} door added successfully.` });
+      toast({ title: "✓ Door Created successfully", description: `${doorFormData.doorType.toUpperCase()} door added on Floor ${payload.floor}.` });
     } catch (err: any) {
       const msg = err.response?.data?.details || err.response?.data?.message || err.message || "Failed to add door";
       toast({ variant: "destructive", title: "Door Creation Error", description: msg });
@@ -291,7 +312,7 @@ const ShopBuilder = () => {
 
   const handleEdit = (rack: any) => {
     setEditingRack(rack);
-    setFormData({ ...rack });
+    setFormData({ ...rack, floor: Number(rack.floor) || 1 });
     setShowForm(true);
   };
 
@@ -307,6 +328,57 @@ const ShopBuilder = () => {
                 <div className="h-2 w-2 rounded-full bg-violet animate-pulse" />
                 <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">3D Architectural Studio</span>
              </div>
+          </div>
+
+          <div className="absolute top-20 left-8 z-10 flex flex-wrap items-center gap-1.5 bg-white/95 backdrop-blur-md p-1.5 rounded-2xl shadow-sm border border-slate-200">
+             <div className="flex items-center gap-1.5 px-2 text-slate-400">
+                <Layers size={13} className="text-violet" />
+                <span className="text-[9px] font-black uppercase tracking-wider">Floors</span>
+             </div>
+             {availableFloors.map((fl) => {
+                const isActive = currentFloor === fl;
+                const rCount = racks.filter(r => (Number(r.floor) || 1) === fl).length;
+                return (
+                   <button
+                      key={fl}
+                      type="button"
+                      onClick={() => setCurrentFloor(fl)}
+                      className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                         isActive
+                            ? 'bg-slate-900 text-white shadow-sm'
+                            : 'text-slate-600 hover:bg-slate-100'
+                      }`}
+                   >
+                      <span>🏢 {fl === 1 ? 'Floor 1 (Ground)' : `Floor ${fl}`}</span>
+                      <span className={`text-[8px] px-1.5 py-0.5 rounded ${isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
+                         {rCount} racks
+                      </span>
+                   </button>
+                );
+             })}
+             <button
+                type="button"
+                onClick={async () => {
+                   const nextFl = Math.max(...availableFloors, Number(shopDimensions.totalFloors) || 1, 1) + 1;
+                   const nextConfig = { ...shopDimensions, totalFloors: nextFl };
+                   setShopDimensions(nextConfig);
+                   setCurrentFloor(nextFl);
+                   setFormData(prev => ({ ...prev, floor: nextFl }));
+                   setDoorFormData(prev => ({ ...prev, floor: nextFl }));
+                   try {
+                     await api.post('/shop-config', nextConfig);
+                   } catch {
+                     // Fallback local state if config save fails
+                   }
+                   toast({
+                      title: `🏢 Floor ${nextFl} Added`,
+                      description: `Shop now has ${nextFl} floors. Building on Floor ${nextFl}.`
+                   });
+                }}
+                className="px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200 flex items-center gap-1 transition-all"
+             >
+                <Plus size={12} /> Add Floor
+             </button>
           </div>
 
           <div className="absolute top-8 right-8 z-10">
@@ -355,17 +427,18 @@ const ShopBuilder = () => {
                   </Box>
                </group>
                
-               <gridHelper args={[shopDimensions.width, shopDimensions.width/2, "#cbd5e1", "#f1f5f9"]} position={[0, 0.01, 0]} />
+               <gridHelper args={[Math.max(shopDimensions.width, shopDimensions.depth), Math.max(shopDimensions.width, shopDimensions.depth)/2, "#cbd5e1", "#f1f5f9"]} position={[0, 0.01, 0]} />
+               <StoreDimensionsOverlay3D width={shopDimensions.width} depth={shopDimensions.depth} floor={currentFloor} />
                <AxisArrows />
 
-               {doors.map((door: any) => (
+               {currentFloorDoors.map((door: any) => (
                   <group key={door._id} position={[door.positionX, 1.25, door.positionZ]} rotation={[0, (door.rotation || 0) * Math.PI/180, 0]}>
                     <Box args={[1.5, 2.5, 0.1]}><meshStandardMaterial color={door.doorType==='entry'?'#10b981':'#f43f5e'} transparent opacity={0.6} /></Box>
                     <Text position={[0, 1.5, 0]} fontSize={0.3} color="#1e293b" fontWeight="bold">{door.doorType.toUpperCase()}</Text>
                   </group>
                ))}
 
-               {racks.map((rack) => (
+               {currentFloorRacks.map((rack) => (
                   editingRack?._id === rack._id ? null : <Rack3D key={rack._id} rack={rack} products={rackProducts[rack._id] || []} />
                ))}
 
@@ -410,7 +483,7 @@ const ShopBuilder = () => {
                       <div className="h-9 w-9 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600"><Maximize size={18} strokeWidth={3} /></div>
                       <h3 className="font-heading text-sm font-black text-slate-900 tracking-tight uppercase italic">Dimension</h3>
                    </div>
-                   <div className="grid grid-cols-2 gap-4 mb-4">
+                   <div className="grid grid-cols-3 gap-3 mb-4">
                       <div className="space-y-1.5">
                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Breadth (m)</label>
                          <Input type="number" value={shopDimensions.width} onChange={e => setShopDimensions({...shopDimensions, width: parseInt(e.target.value) || 10})} className="h-10 rounded-xl" />
@@ -418,6 +491,10 @@ const ShopBuilder = () => {
                       <div className="space-y-1.5">
                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Depth (m)</label>
                          <Input type="number" value={shopDimensions.depth} onChange={e => setShopDimensions({...shopDimensions, depth: parseInt(e.target.value) || 10})} className="h-10 rounded-xl" />
+                      </div>
+                      <div className="space-y-1.5">
+                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Floors</label>
+                         <Input type="number" min={1} max={10} value={shopDimensions.totalFloors} onChange={e => setShopDimensions({...shopDimensions, totalFloors: Math.max(1, parseInt(e.target.value) || 1)})} className="h-10 rounded-xl" />
                       </div>
                    </div>
                    <Button onClick={handleSaveShopConfig} className="w-full bg-slate-900 text-white font-black uppercase tracking-widest text-[9px] h-10 rounded-xl">Save Boundary</Button>
@@ -438,6 +515,18 @@ const ShopBuilder = () => {
                          <div className="flex gap-2">
                              <Button type="button" onClick={() => setDoorFormData({...doorFormData, doorType: 'entry'})} variant={doorFormData.doorType === 'entry' ? 'default' : 'outline'} className="flex-1 h-8 text-[9px] bg-emerald">ENTRY</Button>
                              <Button type="button" onClick={() => setDoorFormData({...doorFormData, doorType: 'exit'})} variant={doorFormData.doorType === 'exit' ? 'default' : 'outline'} className="flex-1 h-8 text-[9px]">EXIT</Button>
+                         </div>
+                         <div className="space-y-1">
+                            <label className="text-[8px] font-black uppercase text-slate-500">Floor Level</label>
+                            <select
+                               value={doorFormData.floor || currentFloor}
+                               onChange={e => setDoorFormData({...doorFormData, floor: parseInt(e.target.value) || 1})}
+                               className="w-full h-8 rounded-xl border border-slate-200 bg-white px-2 text-[10px] font-bold"
+                            >
+                               {availableFloors.map(fl => (
+                                  <option key={fl} value={fl}>Floor {fl} {fl === 1 ? '(Ground)' : ''}</option>
+                               ))}
+                            </select>
                          </div>
                          <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
@@ -469,7 +558,12 @@ const ShopBuilder = () => {
                    <div className="space-y-2 max-h-40 overflow-y-auto">
                       {doors.map(door => (
                          <div key={door._id} className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-between text-[10px] font-bold">
-                            <span>{door.doorType.toUpperCase()} ({door.positionX}, {door.positionZ})</span>
+                            <div className="flex items-center gap-2">
+                               <span>{door.doorType.toUpperCase()} ({door.positionX}, {door.positionZ})</span>
+                               <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-emerald/10 text-emerald uppercase">
+                                  Floor {door.floor || 1}
+                               </span>
+                            </div>
                             <button onClick={() => deleteDoor(door._id)} className="text-slate-300 hover:text-rose-500"><Trash2 size={14} /></button>
                          </div>
                       ))}
@@ -484,10 +578,22 @@ const ShopBuilder = () => {
                          <div className="h-9 w-9 bg-violet/10 text-violet rounded-xl flex items-center justify-center"><RotateCw size={18} strokeWidth={3} /></div>
                          <h3 className="font-heading text-sm font-black uppercase italic">Racks</h3>
                       </div>
-                      <button onClick={() => { setShowForm(!showForm); setEditingRack(null); setFormData({ rackName: '', positionX: 0, positionY: 1.5, positionZ: 0, rotation: 0, width: 2, height: 3, shelves: 4, columns: 3, color: '#EA580C' }); }} className="h-9 w-9 rounded-xl bg-violet text-white flex items-center justify-center shadow-sm transition-all active:scale-95 hover:bg-violet-600">{showForm ? <X size={16} /> : <Plus size={16} />}</button>
+                      <button onClick={() => { setShowForm(!showForm); setEditingRack(null); setFormData({ rackName: '', positionX: 0, positionY: 1.5, positionZ: 0, rotation: 0, width: 2, height: 3, shelves: 4, columns: 3, color: '#EA580C', floor: currentFloor }); }} className="h-9 w-9 rounded-xl bg-violet text-white flex items-center justify-center shadow-sm transition-all active:scale-95 hover:bg-violet-600">{showForm ? <X size={16} /> : <Plus size={16} />}</button>
                    </div>
                    {showForm && (
                       <form onSubmit={handleRackSubmit} className="bg-white p-5 rounded-2xl border border-slate-100 mb-4 shadow-sm space-y-4 text-[10px]">
+                         <div className="space-y-1">
+                            <label className="text-[8px] font-black uppercase text-slate-500">Floor Level</label>
+                            <select
+                               value={formData.floor || currentFloor}
+                               onChange={e => setFormData({...formData, floor: parseInt(e.target.value) || 1})}
+                               className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3 font-bold text-xs"
+                            >
+                               {availableFloors.concat(availableFloors.includes(formData.floor || currentFloor) ? [] : [formData.floor || currentFloor]).sort((a,b)=>a-b).map(fl => (
+                                  <option key={fl} value={fl}>Floor {fl} {fl === 1 ? '(Ground Floor)' : ''}</option>
+                               ))}
+                            </select>
+                         </div>
                          <Input placeholder="Rack Name" value={formData.rackName} onChange={e => setFormData({...formData, rackName: e.target.value})} className="h-10" required />
                          <div className="grid grid-cols-2 gap-4">
                             <Input type="number" placeholder="Width" value={formData.width} onChange={e => setFormData({...formData, width: parseFloat(e.target.value)})} className="h-10" />
@@ -541,12 +647,38 @@ const ShopBuilder = () => {
                          </Button>
                       </form>
                    )}
+                   <div className="flex items-center gap-1.5 mb-3 overflow-x-auto pb-1">
+                      <button
+                         type="button"
+                         onClick={() => setRackFloorFilter('all')}
+                         className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${rackFloorFilter === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                      >
+                         All ({racks.length})
+                      </button>
+                      {availableFloors.map(fl => (
+                         <button
+                            key={fl}
+                            type="button"
+                            onClick={() => setRackFloorFilter(fl)}
+                            className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all ${rackFloorFilter === fl ? 'bg-violet text-white shadow-sm' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                         >
+                            Floor {fl} ({racks.filter(r => (Number(r.floor) || 1) === fl).length})
+                         </button>
+                      ))}
+                   </div>
                    <div className="space-y-3">
-                      {racks.map(rack => (
+                      {racks
+                         .filter(rack => rackFloorFilter === 'all' || (Number(rack.floor) || 1) === rackFloorFilter)
+                         .map(rack => (
                          <div key={rack._id} className="stat-card p-4 border-slate-50 flex justify-between items-center">
                             <div>
-                               <p className="text-[10px] font-bold">{rack.rackName}</p>
-                               <p className="text-[8px] text-slate-400">{rack.width}m x {rack.height}m</p>
+                               <div className="flex items-center gap-2">
+                                  <p className="text-[10px] font-bold">{rack.rackName}</p>
+                                  <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-violet/10 text-violet uppercase">
+                                     Floor {rack.floor || 1}
+                                  </span>
+                               </div>
+                               <p className="text-[8px] text-slate-400 mt-0.5">{rack.width}m x {rack.height}m • {rack.shelves || 4} shelves</p>
                             </div>
                             <div className="flex gap-2">
                                <button onClick={() => handleEdit(rack)} className="p-1.5 text-slate-400 hover:text-violet"><Edit2 size={12} /></button>

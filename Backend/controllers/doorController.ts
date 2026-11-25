@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import Door from '../models/Door';
 import User from '../models/User';
+import { resolveShop } from '../utils/shopResolver';
 import Shop from '../models/Shop';
 
 export const getDoors = async (req: Request, res: Response) => {
@@ -36,6 +37,7 @@ export const createDoor = async (req: Request, res: Response) => {
       rotation: Number(req.body.rotation) || 0,
       width: Number(req.body.width) || 1.5,
       height: Number(req.body.height) || 2.5,
+      floor: Number(req.body.floor) || 1,
     };
 
     const door = new Door(doorData);
@@ -68,9 +70,9 @@ export const getPublicDoors = async (req: Request, res: Response) => {
     return res.status(404).json({ message: 'Invalid shop name' });
   }
   try {
-    const user = await User.findOne({ shopName });
-    if (!user) return res.status(404).json({ message: 'Shop not found' });
-    const doors = await Door.find({ shopId: user._id });
+    const resolved = await resolveShop(shopName);
+    if (!resolved) return res.status(404).json({ message: 'Shop not found' });
+    const doors = await Door.find({ shopId: resolved.shopId });
     res.json(doors);
   } catch (error) {
     console.error('[GET_PUBLIC_DOORS_ERROR]:', error);

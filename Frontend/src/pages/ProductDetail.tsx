@@ -124,7 +124,11 @@ const ProductDetail = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="aspect-square bg-slate-50 rounded-[3rem] border border-slate-100 flex items-center justify-center overflow-hidden relative group "
             >
-              <ShoppingBag size={120} className="text-slate-100 group-hover:scale-110 transition-transform duration-700" />
+              {product?.imageUrl ? (
+                <img src={product.imageUrl} alt={product.productName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+              ) : (
+                <ShoppingBag size={120} className="text-slate-100 group-hover:scale-110 transition-transform duration-700" />
+              )}
               
               <div className="absolute top-8 left-8">
                  <Badge className="px-5 py-2 rounded-full bg-slate-900 border-none text-white font-black italic text-[10px] tracking-[0.2em] uppercase">
@@ -241,7 +245,11 @@ const ProductDetail = () => {
                       className="group cursor-pointer"
                     >
                        <div className="aspect-[4/5] bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-center mb-3 relative overflow-hidden group-hover:border-orange-200 transition-all">
-                          <ShoppingBag size={40} className="text-slate-100 group-hover:scale-110 transition-transform duration-500" />
+                          {p.imageUrl ? (
+                            <img src={p.imageUrl} alt={p.productName} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                          ) : (
+                            <ShoppingBag size={40} className="text-slate-100 group-hover:scale-110 transition-transform duration-500" />
+                          )}
                           <div className="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/5 transition-all" />
                        </div>
                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">{p.category}</p>

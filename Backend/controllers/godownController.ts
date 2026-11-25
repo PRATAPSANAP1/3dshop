@@ -38,7 +38,7 @@ export const getGodownOverview = async (req: Request, res: Response) => {
     // Get all stock (unique products count and low stock count)
     const stockItems = await GodownStock.find({ godownId: { $in: godownIds } });
     const totalProducts = new Set(stockItems.map(s => s.productId.toString())).size;
-    const lowStock = stockItems.filter(s => s.quantity <= (s as any).minQuantity || 10).length;
+    const lowStock = stockItems.filter(s => s.quantity <= ((s as any).minQuantity ?? (s as any).minStockLevel ?? 10)).length;
 
     res.json({
       stats: {

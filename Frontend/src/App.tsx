@@ -182,7 +182,7 @@ const AnimatedRoutes = () => {
               <Route path="builder" element={<GodownBuilder />} />
               <Route path="racks" element={<ManageRacks />} />
               <Route path="shelves" element={<ManageShelves />} />
-              <Route path="stock" element={<StockTransfer />} />
+              <Route path="stock" element={<GodownStock />} />
               <Route path="transfer" element={<StockTransfer />} />
               <Route path="reports" element={<GodownReports />} />
               <Route path="settings" element={<GodownSettings />} />

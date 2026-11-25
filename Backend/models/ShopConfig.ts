@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const shopConfigSchema = new mongoose.Schema({
   width: { type: Number, default: 20 },
   depth: { type: Number, default: 20 },
+  totalFloors: { type: Number, default: 1 },
   shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true, unique: true }
 }, {
   timestamps: true

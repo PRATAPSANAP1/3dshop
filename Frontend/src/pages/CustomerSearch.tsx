@@ -1,16 +1,24 @@
-import React, { useState, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Box, Text, Plane, Environment, ContactShadows, Line } from '@react-three/drei';
+import * as THREE from 'three';
 import API from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Package, AlertCircle, X, ShoppingCart, Heart, Store, ChevronRight, QrCode, Route, Footprints, CheckCircle2, ListOrdered, Plus, Trash2, Sparkles, Check } from 'lucide-react';
+import { Search, MapPin, Package, AlertCircle, X, ShoppingCart, Heart, Store, ChevronRight, QrCode, Route, Footprints, CheckCircle2, ListOrdered, Plus, Trash2, Sparkles, Check, Layers } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { ProductBoxMesh } from '@/components/3d/ProductBoxMesh';
+import {
+  AttractiveRackFrame3D,
+  GoogleMapsRoute3D,
+  StoreDimensionsOverlay3D,
+} from '@/components/3d/StoreNavigation3D';
 
 interface ShopConfig {
   width: number;
   depth: number;
+  totalFloors?: number;
 }
 
 interface Door {
@@ -20,6 +28,7 @@ interface Door {
   width?: number;
   height?: number;
   rotation?: number;
+  floor?: number;
   doorType: 'entry' | 'exit';
 }
 
@@ -34,6 +43,7 @@ interface Rack {
   rotation?: number;
   shelves?: number;
   columns?: number;
+  floor?: number;
   color?: string;
 }
 
@@ -50,32 +60,11 @@ interface Product {
   color?: string;
   brand?: string;
   expiryDate?: string;
+  imageUrl?: string;
+  image?: string;
+  floor?: number;
   rackId?: Rack;
 }
-
-const GlowBox = ({ args, color, glow, dimmed }: any) => {
-  const ref = useRef<any>();
-  
-  // Only run the frame loop if glow is active to save resources
-  useFrame(({ clock }) => {
-    if (ref.current && glow) {
-      ref.current.emissiveIntensity = 1.5 + Math.sin(clock.getElapsedTime() * 4) * 1.0;
-    }
-  });
-
-  return (
-    <Box args={args} castShadow>
-      <meshStandardMaterial 
-        ref={ref} 
-        color={glow ? '#22c55e' : dimmed ? '#1e293b' : color} 
-        emissive={glow ? '#22c55e' : color} 
-        emissiveIntensity={glow ? 1.5 : dimmed ? 0 : 0.2} 
-        transparent 
-        opacity={dimmed ? 0.15 : 1} 
-      />
-    </Box>
-  );
-};
 
 const BouncingArrow = ({ height, rackName }: any) => {
   const ref = useRef<any>();
@@ -104,7 +93,7 @@ const BouncingArrow = ({ height, rackName }: any) => {
 const SupermarketRack = ({ rack, products, isHighlighted, highlightedProductId, setSelectedProduct, searchActive, clickedProductId }: any) => {
   const width = rack.width || 2;
   const height = rack.height || 3;
-  const depth = 0.3;
+  const depth = 0.4;
   const shelves = rack.shelves || 4;
   const columns = rack.columns || 3;
   const shelfHeight = height / shelves;
@@ -112,29 +101,16 @@ const SupermarketRack = ({ rack, products, isHighlighted, highlightedProductId, 
 
   return (
     <group position={[rack.positionX, rack.positionY || 0, rack.positionZ]} rotation={[0, (rack.rotation || 0) * Math.PI / 180, 0]}>
-      <Box args={[width, height, depth]} castShadow>
-        <meshStandardMaterial color="#f1f5f9" transparent opacity={searchActive && !isHighlighted ? 0.04 : 0.08} depthWrite={false} />
-      </Box>
-
-      <group position={[0, height / 2 + 0.3, 0.16]}>
-        <Box args={[width * 0.9, 0.4, 0.05]}>
-          <meshStandardMaterial color={searchActive && !isHighlighted ? '#334155' : rack.color || '#EA580C'} emissive={searchActive && !isHighlighted ? '#000' : rack.color || '#EA580C'} emissiveIntensity={searchActive && !isHighlighted ? 0 : 0.3} />
-        </Box>
-        <Text position={[0, 0, 0.03]} fontSize={0.2} color={searchActive && !isHighlighted ? '#475569' : '#000000'} fontWeight="900" anchorX="center" anchorY="middle">
-          {rack.rackName.toUpperCase()}
-        </Text>
-      </group>
-
-      {Array.from({ length: shelves }).map((_, shelfIndex) => {
-        const shelfY = -height / 2 + shelfHeight * (shelfIndex + 0.5);
-        return (
-          <group key={`shelf-${shelfIndex}`}>
-            <Plane args={[width, depth]} position={[0, shelfY - shelfHeight / 2, 0.15]} rotation={[-Math.PI / 2, 0, 0]}>
-              <meshStandardMaterial color="#cbd5e1" transparent opacity={0.1} depthWrite={false} />
-            </Plane>
-          </group>
-        );
-      })}
+      <AttractiveRackFrame3D
+        width={width}
+        height={height}
+        depth={depth}
+        shelves={shelves}
+        rackName={rack.rackName}
+        color={rack.color || '#EA580C'}
+        dimmed={searchActive && !isHighlighted}
+        isHighlighted={isHighlighted}
+      />
 
       {products.map((product: Product, index: number) => {
         const shelfIndex = (product.shelfNumber || 1) - 1;
@@ -143,7 +119,7 @@ const SupermarketRack = ({ rack, products, isHighlighted, highlightedProductId, 
 
         const productX = -width / 2 + columnWidth * (columnIndex + 0.5);
         const productY = -height / 2 + shelfHeight * (shelfIndex + 0.5);
-        const productSize = [columnWidth * 0.7, shelfHeight * 0.6, 0.2] as [number, number, number];
+        const productSize = [columnWidth * 0.72, shelfHeight * 0.62, 0.24] as [number, number, number];
         const productColors = ['#f97316', '#8b5cf6', '#06b6d4', '#ec4899', '#10b981', '#f59e0b', '#3b82f6', '#ef4444'];
         const isProductHighlighted = highlightedProductId === product._id;
         const isClicked = clickedProductId === product._id;
@@ -151,61 +127,20 @@ const SupermarketRack = ({ rack, products, isHighlighted, highlightedProductId, 
         const shouldDim = searchActive && !isProductHighlighted && !isClicked;
 
         return (
-          <group key={product._id} position={[productX, productY, 0.15]} onClick={(e) => { e.stopPropagation(); setSelectedProduct(product); }}>
-            <GlowBox args={productSize} color={productColor} glow={isProductHighlighted || isClicked} dimmed={shouldDim} />
-            <Text position={[0, productSize[1] / 2 + 0.08, 0.12]} fontSize={0.12} color="white" fontWeight="bold" anchorX="center" anchorY="bottom" maxWidth={productSize[0]}>
-              {product.productName}
-            </Text>
-          </group>
+          <ProductBoxMesh
+            key={product._id}
+            product={product}
+            position={[productX, productY, 0.06]}
+            size={productSize}
+            accentColor={productColor}
+            glow={isProductHighlighted || isClicked}
+            dimmed={shouldDim}
+            onClick={() => setSelectedProduct(product)}
+          />
         );
       })}
 
       {isHighlighted && <BouncingArrow height={height} rackName={rack.rackName} />}
-    </group>
-  );
-};
-
-const RoutePath3D = ({ points, activeStepIndex }: { points: [number, number, number][]; activeStepIndex: number }) => {
-  if (!points || points.length < 2) return null;
-  return (
-    <group position={[0, 0.05, 0]}>
-      <Line
-        points={points}
-        color="#f97316"
-        lineWidth={4}
-        dashed={true}
-        dashScale={2}
-        dashSize={0.4}
-      />
-      {points.map((pt, i) => {
-        const isEntry = i === 0;
-        const isExit = i === points.length - 1;
-        const isActive = i === activeStepIndex + 1;
-        const stepLabel = isEntry ? 'START: ENTRY GATE' : isExit ? 'FINISH: EXIT / CHECKOUT' : `STOP ${i}`;
-
-        return (
-          <group key={`route-pt-${i}`} position={pt}>
-            <mesh position={[0, 0.4, 0]}>
-              <sphereGeometry args={[isEntry || isExit ? 0.35 : 0.25, 16, 16]} />
-              <meshStandardMaterial
-                color={isEntry ? '#10b981' : isExit ? '#f43f5e' : isActive ? '#22c55e' : '#f97316'}
-                emissive={isEntry ? '#10b981' : isExit ? '#f43f5e' : isActive ? '#22c55e' : '#f97316'}
-                emissiveIntensity={isActive ? 1.5 : 0.5}
-              />
-            </mesh>
-            <Text
-              position={[0, 0.9, 0]}
-              fontSize={0.28}
-              color={isEntry ? '#10b981' : isExit ? '#f43f5e' : '#ffffff'}
-              fontWeight="900"
-              anchorX="center"
-              anchorY="bottom"
-            >
-              {stepLabel}
-            </Text>
-          </group>
-        );
-      })}
     </group>
   );
 };
@@ -223,6 +158,7 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
   const [doors, setDoors] = useState<Door[]>([]);
   const [racks, setRacks] = useState<Rack[]>([]);
   const [rackProducts, setRackProducts] = useState<Record<string, Product[]>>({});
+  const [selectedFloor, setSelectedFloor] = useState<number>(1);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [foundProduct, setFoundProduct] = useState<Product | null>(null);
@@ -245,6 +181,53 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
   const [completedItemIds, setCompletedItemIds] = useState<Set<string>>(new Set());
   const [showShoppingListPanel, setShowShoppingListPanel] = useState(false);
   const [activeRouteStepIndex, setActiveRouteStepIndex] = useState(0);
+  const [activeSuggestion, setActiveSuggestion] = useState<{ sourceProduct: Product; items: any[] } | null>(null);
+  const [modalSuggestions, setModalSuggestions] = useState<any[]>([]);
+  const [searchSuggestions, setSearchSuggestions] = useState<any[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
+  const fetchSuggestionsForProduct = useCallback(async (product: Product, showFloatingBanner: boolean = true) => {
+    try {
+      setLoadingSuggestions(true);
+      const shopParam = shopName ? `&shopName=${encodeURIComponent(shopName)}` : '';
+      const { data } = await API.get(`/public/suggestions?productId=${product._id}&productName=${encodeURIComponent(product.productName)}${shopParam}&limit=4`);
+      if (Array.isArray(data) && data.length > 0) {
+        setModalSuggestions(data);
+        if (showFloatingBanner) {
+          setActiveSuggestion({ sourceProduct: product, items: data });
+        }
+      } else {
+        setModalSuggestions([]);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch suggestions", err);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  }, [shopName]);
+
+  const availableFloors = useMemo(() => {
+    const set = new Set<number>([1]);
+    const configuredFloors = Number(shopConfig?.totalFloors) || 1;
+    for (let fl = 1; fl <= configuredFloors; fl++) {
+      set.add(fl);
+    }
+    racks.forEach(r => set.add(Number(r.floor) || 1));
+    doors.forEach(d => set.add(Number(d.floor) || 1));
+    allProducts.forEach(p => {
+      if (p.floor) set.add(Number(p.floor));
+      if (p.rackId?.floor) set.add(Number(p.rackId.floor));
+    });
+    return Array.from(set).sort((a, b) => a - b);
+  }, [racks, doors, allProducts, shopConfig?.totalFloors]);
+
+  const currentFloorRacks = useMemo(() => {
+    return racks.filter(r => (Number(r.floor) || 1) === selectedFloor);
+  }, [racks, selectedFloor]);
+
+  const currentFloorDoors = useMemo(() => {
+    return doors.filter(d => (Number(d.floor) || 1) === selectedFloor);
+  }, [doors, selectedFloor]);
 
   const toggleShoppingListItem = (product: Product) => {
     setShoppingList(prev => {
@@ -252,6 +235,7 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
       if (exists) {
         return prev.filter(p => p._id !== product._id);
       } else {
+        fetchSuggestionsForProduct(product, true);
         return [...prev, product];
       }
     });
@@ -350,20 +334,44 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
 
   const routePoints = useMemo(() => {
     if (optimizedRoute.length === 0) return [];
-    const entryDoor = doors.find(d => d.doorType === 'entry') || { positionX: 0, positionZ: (shopConfig.depth || 20) / 2 };
-    const exitDoor = doors.find(d => d.doorType === 'exit') || { positionX: 0, positionZ: -(shopConfig.depth || 20) / 2 };
+    const floorSteps = optimizedRoute.filter(step => (Number(step.product.floor || step.product.rackId?.floor) || 1) === selectedFloor);
+    if (floorSteps.length === 0) return [];
+
+    const entryDoor = currentFloorDoors.find(d => d.doorType === 'entry') || doors.find(d => d.doorType === 'entry') || { positionX: 0, positionZ: (shopConfig.depth || 20) / 2 };
+    const exitDoor = currentFloorDoors.find(d => d.doorType === 'exit') || doors.find(d => d.doorType === 'exit') || { positionX: 0, positionZ: -(shopConfig.depth || 20) / 2 };
 
     const pts: [number, number, number][] = [
       [entryDoor.positionX, 0.2, entryDoor.positionZ]
     ];
 
-    optimizedRoute.forEach(step => {
+    floorSteps.forEach(step => {
       pts.push([step.x, 0.5, step.z]);
     });
 
     pts.push([exitDoor.positionX, 0.2, exitDoor.positionZ]);
     return pts;
-  }, [optimizedRoute, doors, shopConfig]);
+  }, [optimizedRoute, doors, currentFloorDoors, selectedFloor, shopConfig]);
+
+  const routeStopLabels = useMemo(() => {
+    if (optimizedRoute.length === 0) return [];
+    const floorSteps = optimizedRoute.filter(step => (Number(step.product.floor || step.product.rackId?.floor) || 1) === selectedFloor);
+    return [
+      { label: 'START' },
+      ...floorSteps.map(s => ({ label: s.product.productName.slice(0, 14) })),
+      { label: 'EXIT / PAY' }
+    ];
+  }, [optimizedRoute, selectedFloor]);
+
+  const totalRouteDistance = useMemo(() => {
+    if (routePoints.length < 2) return 0;
+    let total = 0;
+    for (let i = 0; i < routePoints.length - 1; i++) {
+      const dx = routePoints[i + 1][0] - routePoints[i][0];
+      const dz = routePoints[i + 1][2] - routePoints[i][2];
+      total += Math.hypot(dx, dz);
+    }
+    return total;
+  }, [routePoints]);
   
   const navigate = useNavigate();
   const params = useParams<{ shopName?: string }>();
@@ -376,6 +384,7 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
     try {
       await API.post('/cart/add', { productId: product._id, qty: 1 });
       toast({ title: 'Added to Cart', description: `${product.productName} added successfully` });
+      fetchSuggestionsForProduct(product, true);
     } catch {
       toast({ variant: 'destructive', title: 'Failed', description: 'Could not add to cart' });
     }
@@ -468,7 +477,8 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
       if (configRes.data) {
         setShopConfig({
           width: configRes.data.width || 30,
-          depth: configRes.data.depth || 20
+          depth: configRes.data.depth || 20,
+          totalFloors: configRes.data.totalFloors || 1
         });
       }
       setDoors(doorsRes.data || []);
@@ -521,8 +531,17 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
   };
 
   const handleProductClick = (product: Product) => {
+    const prodFloor = Number(product.floor || product.rackId?.floor) || 1;
+    if (prodFloor !== selectedFloor) {
+      setSelectedFloor(prodFloor);
+      toast({
+        title: `🏢 Switched to Floor ${prodFloor}`,
+        description: `${product.productName} is located on Floor ${prodFloor} (${product.rackId?.rackName || 'Rack'})`
+      });
+    }
     setSelectedProduct(product);
     setClickedProductId(product._id);
+    fetchSuggestionsForProduct(product, false);
   };
 
   const handleSearch = async () => {
@@ -535,10 +554,20 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
     try {
       const { data } = await API.get(`/public/search?query=${searchQuery}&shopName=${shopName}`);
       if (data.length > 0) {
-        setFoundProduct(data[0]);
+        const prod = data[0];
+        setFoundProduct(prod);
         setNotFound(false);
         setShowArrow(true);
         setFilteredProducts([]);
+        const prodFloor = Number(prod.floor || prod.rackId?.floor) || 1;
+        if (prodFloor !== selectedFloor) {
+          setSelectedFloor(prodFloor);
+          toast({
+            title: `🏢 Switched to Floor ${prodFloor}`,
+            description: `${prod.productName} is located on Floor ${prodFloor} (${prod.rackId?.rackName || 'Rack'})`
+          });
+        }
+        fetchSuggestionsForProduct(prod, true);
         setTimeout(() => setShowArrow(false), 20000);
       } else {
         setFoundProduct(null);
@@ -552,6 +581,30 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
   };
 
   const [showAllProducts, setShowAllProducts] = useState(false);
+
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setSearchSuggestions([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const shopParam = shopName ? `&shopName=${encodeURIComponent(shopName)}` : '';
+        const firstMatch = allProducts.find(p => p.productName.toLowerCase().includes(q.toLowerCase()));
+        const idParam = firstMatch ? `&productId=${firstMatch._id}` : '';
+        const { data } = await API.get(
+          `/public/suggestions?productName=${encodeURIComponent(firstMatch?.productName || q)}${idParam}${shopParam}&limit=4`
+        );
+        if (Array.isArray(data)) {
+          setSearchSuggestions(data);
+        }
+      } catch {
+        setSearchSuggestions([]);
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery, shopName, allProducts]);
 
   const handleSearchInput = (value: string) => {
     setSearchQuery(value);
@@ -712,6 +765,14 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
                           setSearchQuery(product.productName);
                           setFilteredProducts([]);
                           setShowAllProducts(false);
+                          const prodFloor = Number(product.floor || product.rackId?.floor) || 1;
+                          if (prodFloor !== selectedFloor) {
+                            setSelectedFloor(prodFloor);
+                            toast({
+                              title: `🏢 Switched to Floor ${prodFloor}`,
+                              description: `${product.productName} is on Floor ${prodFloor} (${product.rackId?.rackName || 'Rack'})`
+                            });
+                          }
                           setTimeout(() => handleSearch(), 50);
                         }}
                         className="w-full flex items-center justify-between px-4 py-3 hover:bg-orange-50/60 transition-colors text-left cursor-pointer"
@@ -727,6 +788,9 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
                           </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0 ml-2">
+                          <span className="px-2 py-0.5 bg-orange-50 text-orange-600 text-[9px] font-black uppercase tracking-wider rounded border border-orange-100">
+                            Floor {product.floor || product.rackId?.floor || 1}
+                          </span>
                           <span className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[9px] font-black uppercase tracking-wider rounded">
                             {product.rackId?.rackName || 'Store'}
                           </span>
@@ -750,6 +814,67 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
                       </div>
                     );
                   })}
+                  {searchQuery.trim().length >= 2 && searchSuggestions.length > 0 && (
+                    <div className="border-t-2 border-orange-100 bg-gradient-to-b from-orange-50/70 to-amber-50/30 p-3">
+                      <div className="flex items-center gap-1.5 mb-2 px-1">
+                        <Sparkles size={12} className="text-orange-500" />
+                        <p className="text-[9px] font-black uppercase tracking-widest text-orange-600">
+                          Recommended With "{searchQuery.trim()}" — Add to Route
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        {searchSuggestions.map((sug: any) => {
+                          const sugInRoute = shoppingList.some(p => p._id === sug._id);
+                          return (
+                            <div
+                              key={`search-sug-${sug._id}`}
+                              onMouseDown={(e) => e.preventDefault()}
+                              className="flex items-center justify-between gap-2 p-2 rounded-xl bg-white border border-orange-100 shadow-sm"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                {sug.imageUrl || sug.image ? (
+                                  <img
+                                    src={sug.imageUrl || sug.image}
+                                    alt={sug.productName}
+                                    className="h-7 w-7 rounded-lg object-cover shrink-0 border border-orange-100"
+                                  />
+                                ) : (
+                                  <div className="h-7 w-7 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
+                                    <Package size={12} className="text-orange-400" />
+                                  </div>
+                                )}
+                                <div className="min-w-0">
+                                  <p className="text-xs font-bold text-slate-800 truncate">{sug.productName}</p>
+                                  <p className="text-[9px] font-bold text-orange-600 truncate">
+                                    ₹{sug.price} • Floor {sug.floor || sug.rackId?.floor || 1}
+                                  </p>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleShoppingListItem(sug);
+                                  toast({
+                                    title: sugInRoute ? 'Removed from Route' : '✓ Added Recommended Item to Route',
+                                    description: `${sug.productName}`,
+                                  });
+                                }}
+                                className={`h-6 px-2 rounded-lg text-[8px] font-black uppercase tracking-wider shrink-0 flex items-center gap-1 transition-all ${
+                                  sugInRoute
+                                    ? 'bg-emerald-500 text-white'
+                                    : 'bg-orange-500 hover:bg-orange-600 text-white'
+                                }`}
+                              >
+                                <Plus size={9} className={sugInRoute ? 'rotate-45' : ''} />
+                                {sugInRoute ? 'In Route' : 'Route'}
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -768,12 +893,40 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
         </div>
       </motion.div>
 
-      <div className={`relative overflow-hidden w-full ${isMobile || isQRMode ? 'h-[75vh]' : 'flex-1'}`} style={{ margin: 0 }}>
+      <div className={`relative overflow-hidden w-full ${isMobile ? 'h-[75vh]' : 'flex-1 min-h-[500px]'}`} style={{ margin: 0 }}>
+        {/* Floating Store Floor Switcher Bar */}
+        <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-1.5 bg-slate-900/85 backdrop-blur-xl p-1.5 rounded-2xl border border-slate-700/80 shadow-2xl">
+          <div className="flex items-center gap-1.5 px-2 text-slate-400">
+            <Layers size={13} className="text-orange-400" />
+            <span className="text-[9px] font-black uppercase tracking-widest hidden sm:inline">Store Floor</span>
+          </div>
+          {availableFloors.map(fl => {
+            const isActive = selectedFloor === fl;
+            const floorRackCount = racks.filter(r => (Number(r.floor) || 1) === fl).length;
+            return (
+              <button
+                key={fl}
+                onClick={() => setSelectedFloor(fl)}
+                className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                  isActive
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/30 scale-105'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                }`}
+              >
+                <span>🏢 {fl === 1 ? 'Floor 1 (Ground)' : `Floor ${fl}`}</span>
+                <span className={`text-[8px] px-1 py-0.2 rounded ${isActive ? 'bg-black/20 text-white' : 'bg-slate-800 text-slate-400'}`}>
+                  {floorRackCount}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
         <AnimatePresence>
           {notFound && (
             <motion.div
               initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2.5 px-5 py-3 bg-rose-500 text-white rounded-2xl shadow-sm shadow-rose-500/30 text-sm font-bold"
+              className="absolute top-16 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2.5 px-5 py-3 bg-rose-500 text-white rounded-2xl shadow-sm shadow-rose-500/30 text-sm font-bold"
             >
               <AlertCircle size={16} /> Product not found in store
             </motion.div>
@@ -781,23 +934,25 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
           {foundProduct && showArrow && (
             <motion.div
               initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-              className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2.5 px-5 py-3 bg-emerald-500 text-white rounded-2xl shadow-sm shadow-emerald-500/30 text-sm font-bold"
+              className="absolute top-16 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2.5 px-5 py-3 bg-emerald-500 text-white rounded-2xl shadow-sm shadow-emerald-500/30 text-sm font-bold"
             >
-              <MapPin size={16} /> Found in <span className="font-black italic">{foundProduct.rackId?.rackName}</span>
+              <MapPin size={16} /> Found in <span className="font-black italic">{foundProduct.rackId?.rackName}</span> (Floor {foundProduct.floor || foundProduct.rackId?.floor || 1})
             </motion.div>
           )}
         </AnimatePresence>
 
-        {!isMobile && racks.length > 0 && (
+        {!isMobile && currentFloorRacks.length > 0 && (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
             className="absolute top-4 right-4 z-10 bg-white/80 backdrop-blur-xl rounded-2xl p-4 shadow-sm border border-slate-100/80 max-h-[280px] overflow-y-auto"
           >
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Rack Legend</p>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">
+              Floor {selectedFloor} Racks ({currentFloorRacks.length})
+            </p>
             <div className="space-y-2">
-              {racks.map((rack, i) => (
+              {currentFloorRacks.map((rack, i) => (
                 <div 
                   key={rack._id} 
                   className="flex items-center gap-2.5 group cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition-colors"
@@ -821,13 +976,13 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
 
           <Canvas
             shadows={!isMobile}
-            frameloop="demand"
+            frameloop={shoppingList.length > 0 || showArrow ? 'always' : 'demand'}
             performance={{ min: 0.5 }}
             camera={{
-              position: isMobile ? [0, 30, 25] : [0, 20, 20],
+              position: isMobile ? [0, 30, 25] : [0, 22, 22],
               fov: isMobile ? 55 : 45
             }}
-            style={{ background: '#0f172a' }}
+            style={{ background: 'linear-gradient(180deg, #0b1120 0%, #0f172a 100%)' }}
             gl={{ 
               antialias: false, 
               powerPreference: 'default', 
@@ -850,16 +1005,29 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
               });
             }}
           >
-            <ambientLight intensity={0.5} />
-            <directionalLight position={[15, 20, 10]} intensity={0.8} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
-            <pointLight position={[(shopConfig?.width || 30) / 2, 10, (shopConfig?.depth || 20) / 2]} intensity={0.4} color="#EA580C" />
+            <ambientLight intensity={0.75} />
+            <hemisphereLight args={['#f8fafc', '#1e293b', 0.55]} />
+            <directionalLight position={[15, 25, 12]} intensity={0.95} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
+            <pointLight position={[(shopConfig?.width || 30) / 3, 10, (shopConfig?.depth || 20) / 3]} intensity={0.45} color="#38bdf8" />
+            <pointLight position={[-(shopConfig?.width || 30) / 3, 10, -(shopConfig?.depth || 20) / 3]} intensity={0.45} color="#f97316" />
 
+            {/* Polished architectural store floor */}
             <Plane args={[shopConfig?.width || 30, shopConfig?.depth || 20]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-              <meshStandardMaterial color="#1e293b" metalness={0.2} roughness={0.8} />
+              <meshStandardMaterial color="#1e293b" metalness={0.25} roughness={0.55} />
             </Plane>
 
-            <gridHelper args={[Math.max(shopConfig?.width || 30, shopConfig?.depth || 20), 20, '#334155', '#1e293b']} position={[0, 0.01, 0]} />
-            <ContactShadows frames={1} resolution={isMobile ? 256 : 512} scale={shopConfig?.width || 30} blur={2} opacity={0.15} far={10} color="#000000" />
+            {/* Subtle store perimeter floor trim */}
+            <Box args={[(shopConfig?.width || 30) + 0.4, 0.08, (shopConfig?.depth || 20) + 0.4]} position={[0, -0.04, 0]}>
+              <meshStandardMaterial color="#334155" metalness={0.4} roughness={0.5} />
+            </Box>
+
+            <gridHelper args={[Math.max(shopConfig?.width || 30, shopConfig?.depth || 20), Math.max(shopConfig?.width || 30, shopConfig?.depth || 20) / 2, '#334155', '#273549']} position={[0, 0.01, 0]} />
+            <StoreDimensionsOverlay3D
+              width={shopConfig?.width || 30}
+              depth={shopConfig?.depth || 20}
+              floor={selectedFloor}
+            />
+            <ContactShadows frames={1} resolution={isMobile ? 256 : 512} scale={shopConfig?.width || 30} blur={2} opacity={0.18} far={10} color="#000000" />
 
             <Box args={[shopConfig?.width || 30, 4, 0.3]} position={[0, 2, -(shopConfig?.depth || 20) / 2]}>
               <meshStandardMaterial color="#94a3b8" transparent opacity={0.08} depthWrite={false} />
@@ -874,24 +1042,47 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
               <meshStandardMaterial color="#94a3b8" transparent opacity={0.08} depthWrite={false} />
             </Box>
 
-            {doors.map((door) => (
-              <group key={door._id} position={[door.positionX, (door.height || 2.5) / 2, door.positionZ]} rotation={[0, (door.rotation || 0) * Math.PI / 180, 0]}>
-                <Box args={[door.width || 1.5, door.height || 2.5, 0.15]}>
-                  <meshStandardMaterial color={door.doorType === 'entry' ? '#10b981' : '#ef4444'} transparent opacity={0.6} />
-                </Box>
-                <Text
-                  position={[0, (door.height || 2.5) / 2 + 0.5, 0]}
-                  fontSize={0.3}
-                  color="white"
-                  fontWeight="bold"
-                  anchorY="bottom"
-                >
-                  {door.doorType === 'entry' ? 'ENTRANCE' : 'EXIT'}
-                </Text>
-              </group>
-            ))}
+            {currentFloorDoors.map((door) => {
+              const dWidth = door.width || 1.8;
+              const dHeight = door.height || 2.6;
+              const dColor = door.doorType === 'entry' ? '#10b981' : '#f43f5e';
+              return (
+                <group key={door._id} position={[door.positionX, 0, door.positionZ]} rotation={[0, (door.rotation || 0) * Math.PI / 180, 0]}>
+                  {/* Floor welcome/exit zone mat */}
+                  <Plane args={[dWidth + 0.6, 1.2]} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+                    <meshBasicMaterial color={dColor} transparent opacity={0.28} />
+                  </Plane>
+                  {/* Door side pillars */}
+                  <Box args={[0.14, dHeight, 0.22]} position={[-dWidth / 2, dHeight / 2, 0]}>
+                    <meshStandardMaterial color="#334155" metalness={0.7} roughness={0.3} />
+                  </Box>
+                  <Box args={[0.14, dHeight, 0.22]} position={[dWidth / 2, dHeight / 2, 0]}>
+                    <meshStandardMaterial color="#334155" metalness={0.7} roughness={0.3} />
+                  </Box>
+                  {/* Glowing overhead portal header */}
+                  <Box args={[dWidth + 0.3, 0.35, 0.24]} position={[0, dHeight + 0.15, 0]}>
+                    <meshStandardMaterial color={dColor} emissive={dColor} emissiveIntensity={0.6} />
+                  </Box>
+                  {/* Glass door leaf */}
+                  <Box args={[dWidth - 0.1, dHeight - 0.1, 0.06]} position={[0, dHeight / 2, 0]}>
+                    <meshStandardMaterial color={dColor} transparent opacity={0.25} />
+                  </Box>
+                  <Text
+                    position={[0, dHeight + 0.55, 0]}
+                    fontSize={0.3}
+                    color="white"
+                    outlineWidth={0.02}
+                    outlineColor="#0f172a"
+                    fontWeight="bold"
+                    anchorY="bottom"
+                  >
+                    {door.doorType === 'entry' ? 'ENTRANCE' : 'EXIT / CHECKOUT'}
+                  </Text>
+                </group>
+              );
+            })}
 
-            {racks.map((rack) => (
+            {currentFloorRacks.map((rack) => (
               <SupermarketRack
                 key={rack._id}
                 rack={rack}
@@ -904,7 +1095,11 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
               />
             ))}
 
-            <RoutePath3D points={routePoints} activeStepIndex={activeRouteStepIndex} />
+            <GoogleMapsRoute3D
+              points={routePoints}
+              activeStepIndex={activeRouteStepIndex}
+              stopLabels={routeStopLabels}
+            />
 
             <OrbitControls
               maxPolarAngle={Math.PI / 2.1}
@@ -941,7 +1136,35 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
             </div>
           </div>
         )}
-        {/* Overlays removed for cleaner view */}
+        {/* Google Maps-style Live Dimensions & Route HUD */}
+        <div className="absolute bottom-6 left-4 z-20 flex flex-col gap-2 pointer-events-none">
+          {shoppingList.length > 0 && totalRouteDistance > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="pointer-events-auto bg-slate-900/90 backdrop-blur-xl border border-sky-500/40 rounded-2xl px-4 py-3 shadow-2xl text-white max-w-xs"
+            >
+              <div className="flex items-center gap-2 text-sky-400 text-[10px] font-black uppercase tracking-widest mb-1">
+                <Route size={13} />
+                <span>Google Maps Route • Floor {selectedFloor}</span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-lg font-black text-white">{totalRouteDistance.toFixed(1)} m</span>
+                <span className="text-xs font-bold text-emerald-400">
+                  (~{Math.max(5, Math.round(totalRouteDistance / 1.2))}s walk)
+                </span>
+              </div>
+              {optimizedRoute[activeRouteStepIndex] && (
+                <p className="text-[10px] font-bold text-slate-300 mt-1 truncate">
+                  Next: <span className="text-orange-400">{optimizedRoute[activeRouteStepIndex].product.productName}</span> ({optimizedRoute[activeRouteStepIndex].rackName})
+                </p>
+              )}
+            </motion.div>
+          )}
+          <div className="bg-slate-900/75 backdrop-blur-md border border-slate-700/70 rounded-xl px-3 py-1.5 text-[10px] font-black text-slate-300 uppercase tracking-wider w-fit">
+            📐 Floor {selectedFloor}: {shopConfig?.width || 30}m × {shopConfig?.depth || 20}m
+          </div>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -970,13 +1193,36 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
               </button>
 
               <div className="relative px-6 pt-6 pb-4 bg-gradient-to-br from-orange-50 via-amber-50/50 to-white">
-                <div className="flex items-start gap-4">
-                  <div className="h-14 w-14 rounded-2xl bg-white shadow-sm shadow-orange-100 flex items-center justify-center shrink-0 border border-orange-100/50">
-                    <Package size={24} className="text-orange-500" />
+                {(selectedProduct.imageUrl || selectedProduct.image) && (
+                  <div className="relative w-full h-48 bg-white rounded-2xl overflow-hidden border border-orange-100 shadow-sm mb-4 group">
+                    <img
+                      src={selectedProduct.imageUrl || selectedProduct.image}
+                      alt={selectedProduct.productName}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                    <div className="absolute top-3 left-3 bg-slate-900/85 backdrop-blur-md px-3 py-1 rounded-full text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                      <span>🏢 Floor {selectedProduct.floor || selectedProduct.rackId?.floor || 1}</span>
+                    </div>
+                    <div className="absolute bottom-3 right-3 bg-emerald-500/90 backdrop-blur-md px-3 py-1 rounded-xl text-white text-xs font-black shadow-sm">
+                      ₹{selectedProduct.price}
+                    </div>
                   </div>
+                )}
+
+                <div className="flex items-start gap-4">
+                  {!(selectedProduct.imageUrl || selectedProduct.image) && (
+                    <div className="h-14 w-14 rounded-2xl bg-white shadow-sm shadow-orange-100 flex items-center justify-center shrink-0 border border-orange-100/50">
+                      <Package size={24} className="text-orange-500" />
+                    </div>
+                  )}
                   <div className="min-w-0 pt-1">
                     <h3 className="text-lg font-black text-slate-900 leading-tight pr-8 tracking-tight">{selectedProduct.productName}</h3>
-                    <p className="text-2xl font-black text-orange-600 italic mt-1">₹{selectedProduct.price}</p>
+                    {!(selectedProduct.imageUrl || selectedProduct.image) && (
+                      <p className="text-2xl font-black text-orange-600 italic mt-1">₹{selectedProduct.price}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -996,8 +1242,10 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
                       <MapPin size={16} className="text-orange-500" />
                     </div>
                     <div>
-                      <p className="text-[9px] font-black text-orange-400 uppercase tracking-widest">Location</p>
-                      <p className="text-sm font-bold text-slate-800">{selectedProduct.rackId?.rackName} • Shelf {selectedProduct.shelfNumber}</p>
+                      <p className="text-[9px] font-black text-orange-400 uppercase tracking-widest">Store Location</p>
+                      <p className="text-sm font-bold text-slate-800">
+                        Floor {selectedProduct.floor || selectedProduct.rackId?.floor || 1} • {selectedProduct.rackId?.rackName || 'Rack'} • Shelf {selectedProduct.shelfNumber || 1}
+                      </p>
                     </div>
                   </div>
                   {selectedProduct.brand && (
@@ -1040,8 +1288,164 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
                     </button>
                   </div>
                 </div>
+
+                {modalSuggestions.length > 0 && (
+                  <div className="mt-6 pt-4 border-t border-slate-100">
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <Sparkles size={14} className="text-orange-500 animate-pulse" />
+                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-800">
+                        Frequently Paired Together
+                      </p>
+                    </div>
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {modalSuggestions.map((sug) => {
+                        const inRoute = shoppingList.some(p => p._id === sug._id);
+                        return (
+                          <div
+                            key={sug._id}
+                            className="flex items-center justify-between p-2.5 rounded-2xl bg-orange-50/50 border border-orange-100/70 hover:bg-orange-50 transition-all"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              {sug.imageUrl ? (
+                                <img src={sug.imageUrl} alt={sug.productName} className="h-10 w-10 rounded-xl object-cover shrink-0 border border-orange-100" />
+                              ) : (
+                                <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shrink-0 border border-orange-100">
+                                  <Package size={16} className="text-orange-400" />
+                                </div>
+                              )}
+                              <div className="min-w-0">
+                                <p className="text-xs font-black text-slate-900 truncate">{sug.productName}</p>
+                                <p className="text-[9px] font-bold text-orange-600 truncate">
+                                  ₹{sug.price} • Floor {sug.floor || sug.rackId?.floor || 1} • {sug.rackId?.rackName || 'Rack'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  toggleShoppingListItem(sug);
+                                  toast({
+                                    title: inRoute ? 'Removed from Route' : '✓ Added to Shortest Path Route',
+                                    description: `${sug.productName}`
+                                  });
+                                }}
+                                className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1 ${
+                                  inRoute
+                                    ? 'bg-emerald-500 text-white shadow-sm'
+                                    : 'bg-orange-500 hover:bg-orange-600 text-white shadow-sm active:scale-95'
+                                }`}
+                              >
+                                <Plus size={10} className={inRoute ? 'rotate-45' : ''} />
+                                {inRoute ? 'In Route' : 'Route'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleAddToCart(sug)}
+                                className="h-7 w-7 rounded-lg bg-slate-900 hover:bg-slate-800 text-white flex items-center justify-center active:scale-95 shadow-sm"
+                                title="Add to Cart"
+                              >
+                                <ShoppingCart size={11} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Smart Suggestion Drawer */}
+      <AnimatePresence>
+        {activeSuggestion && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 50, scale: 0.95 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[75] w-[95vw] max-w-xl bg-white/95 backdrop-blur-2xl border-2 border-orange-300 rounded-[2rem] shadow-2xl p-4 sm:p-5"
+          >
+            <div className="flex items-center justify-between pb-2 mb-3 border-b border-orange-100">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center shadow-sm">
+                  <Sparkles size={14} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                    Added {activeSuggestion.sourceProduct.productName}! Suggested Next:
+                  </h4>
+                  <p className="text-[9px] font-bold text-orange-600">
+                    Frequently bought together — add to your route or cart
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveSuggestion(null)}
+                className="h-7 w-7 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors"
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {activeSuggestion.items.slice(0, 4).map((sug: any) => {
+                const inRoute = shoppingList.some(p => p._id === sug._id);
+                return (
+                  <div
+                    key={sug._id}
+                    className="flex items-center justify-between p-2.5 bg-orange-50/50 hover:bg-orange-50/90 rounded-2xl border border-orange-100 transition-all"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {sug.imageUrl ? (
+                        <img src={sug.imageUrl} alt={sug.productName} className="h-10 w-10 rounded-xl object-cover shrink-0 border border-orange-100" />
+                      ) : (
+                        <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center shrink-0 border border-orange-100">
+                          <Package size={16} className="text-orange-400" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-xs font-black text-slate-900 truncate">{sug.productName}</p>
+                        <p className="text-[10px] font-bold text-orange-600 mt-0.5">
+                          ₹{sug.price} • Floor {sug.floor || sug.rackId?.floor || 1}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          toggleShoppingListItem(sug);
+                          toast({
+                            title: inRoute ? 'Removed from Route' : '✓ Added to Shortest Path Route',
+                            description: `${sug.productName}`
+                          });
+                        }}
+                        className={`h-7 px-2 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1 transition-all ${
+                          inRoute
+                            ? 'bg-emerald-500 text-white shadow-sm'
+                            : 'bg-orange-500 hover:bg-orange-600 text-white shadow-sm active:scale-95'
+                        }`}
+                      >
+                        <Plus size={10} className={inRoute ? 'rotate-45' : ''} />
+                        {inRoute ? 'In' : 'Route'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleAddToCart(sug)}
+                        className="h-7 w-7 rounded-lg bg-slate-900 hover:bg-slate-800 text-white flex items-center justify-center active:scale-95 shadow-sm"
+                        title="Add to Cart"
+                      >
+                        <ShoppingCart size={12} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -1065,7 +1469,11 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
                   </div>
                   <div>
                     <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">Shortest Shopping Path</h3>
-                    <p className="text-[10px] font-bold text-slate-400">Entry Gate → Items → Exit Gate</p>
+                    <p className="text-[10px] font-bold text-sky-600">
+                      {totalRouteDistance > 0
+                        ? `Total: ${totalRouteDistance.toFixed(1)} m • ~${Math.max(5, Math.round(totalRouteDistance / 1.2))}s walk`
+                        : 'Entry Gate → Items → Exit Gate'}
+                    </p>
                   </div>
                 </div>
                 <button
@@ -1108,6 +1516,14 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
                         setActiveRouteStepIndex(idx);
                         setFoundProduct(step.product);
                         setShowArrow(true);
+                        const stepFloor = Number(step.product.floor || step.product.rackId?.floor) || 1;
+                        if (stepFloor !== selectedFloor) {
+                          setSelectedFloor(stepFloor);
+                          toast({
+                            title: `🏢 Switched to Floor ${stepFloor}`,
+                            description: `${step.product.productName} is on Floor ${stepFloor}`
+                          });
+                        }
                       }}
                     >
                       <button
@@ -1126,6 +1542,9 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
                         <div className="flex items-center gap-1.5">
                           <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
                             Stop {idx + 1}
+                          </span>
+                          <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-orange-50 text-orange-600 border border-orange-100">
+                            Floor {step.product.floor || step.product.rackId?.floor || 1}
                           </span>
                           <p className={`text-xs font-black truncate ${isCompleted ? 'line-through text-slate-400' : 'text-slate-900'}`}>
                             {step.product.productName}

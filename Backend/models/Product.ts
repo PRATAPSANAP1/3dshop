@@ -14,6 +14,9 @@ const productSchema = new mongoose.Schema({
   columnNumber: { type: Number },
   brand: { type: String },
   size: { type: String },
+  imageUrl: { type: String, default: '' },
+  image: { type: String, default: '' },
+  floor: { type: Number, default: 1 },
   variants: [{
     size: { type: String },
     color: { type: String },

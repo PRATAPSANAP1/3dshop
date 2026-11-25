@@ -4,7 +4,7 @@ import Godown from '../models/Godown';
 
 export const getStock = async (req: Request, res: Response) => {
   try {
-    const stock = await GodownStock.find({ godownId: req.params.godownId }).populate('productId', 'name sku');
+    const stock = await GodownStock.find({ godownId: req.params.godownId }).populate('productId', 'productName price qrCode category');
     res.json(stock);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -16,7 +16,7 @@ export const getAllStock = async (req: Request, res: Response) => {
     const shopId = (req as any).shopId || (req.user as any).shopId;
     const godowns = await Godown.find({ shopId });
     const godownIds = godowns.map(g => g._id);
-    const stock = await GodownStock.find({ godownId: { $in: godownIds } }).populate('productId', 'name sku qrCode price').populate('godownId', 'name');
+    const stock = await GodownStock.find({ godownId: { $in: godownIds } }).populate('productId', 'productName price qrCode category').populate('godownId', 'name');
     res.json(stock);
   } catch (error: any) {
     res.status(500).json({ message: error.message });

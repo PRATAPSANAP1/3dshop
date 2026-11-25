@@ -126,7 +126,7 @@ const QRLabelModal = ({ open, onClose, product }: QRLabelModalProps) => {
             window.onload = function() { 
               setTimeout(function() { window.print(); }, 200); 
             };
-          <\/script>
+          </script>
         </body>
       </html>
     `);

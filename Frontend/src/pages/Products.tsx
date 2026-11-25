@@ -29,7 +29,8 @@ const Products = () => {
   const [racks, setRacks] = useState<any[]>([]);
   const [form, setForm] = useState({
     productName: '', category: '', price: '', quantity: '',
-    minStockLevel: '', rackId: '', shelfNumber: '', columnNumber: ''
+    minStockLevel: '', rackId: '', shelfNumber: '', columnNumber: '',
+    imageUrl: '', floor: '1'
   });
   const [qrProduct, setQrProduct] = useState<any>(null);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -67,7 +68,7 @@ const Products = () => {
       }
       setShowAddModal(false);
       setEditingProduct(null);
-      setForm({ productName: '', category: '', price: '', quantity: '', minStockLevel: '', rackId: '', shelfNumber: '', columnNumber: '' });
+      setForm({ productName: '', category: '', price: '', quantity: '', minStockLevel: '', rackId: '', shelfNumber: '', columnNumber: '', imageUrl: '', floor: '1' });
       fetchData();
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: editingProduct ? "Could not update product" : "Could not add product" });
@@ -96,6 +97,8 @@ const Products = () => {
       rackId: product.rackId?._id || product.rackId || '',
       shelfNumber: String(product.shelfNumber || ''),
       columnNumber: String(product.columnNumber || ''),
+      imageUrl: product.imageUrl || product.image || '',
+      floor: String(product.floor || product.rackId?.floor || '1')
     });
     setShowAddModal(true);
   };
@@ -300,8 +303,19 @@ const Products = () => {
                       )}
                     </div>
 
-                    <div className="absolute -bottom-3 -right-2 opacity-15">
-                      <ShoppingBag size={70} className="text-white" />
+                    <div className="absolute -bottom-3 -right-2">
+                      {product.imageUrl || product.image ? (
+                        <img
+                          src={product.imageUrl || product.image}
+                          alt={product.productName}
+                          className="h-16 w-16 object-contain drop-shadow-md rounded-xl bg-white/20 p-1 backdrop-blur-xs"
+                          onError={(e) => { (e.target as any).style.display = 'none'; }}
+                        />
+                      ) : (
+                        <div className="opacity-15">
+                          <ShoppingBag size={70} className="text-white" />
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -310,9 +324,14 @@ const Products = () => {
                     <h3 className="text-[15px] font-black text-slate-900 leading-snug tracking-tight group-hover:text-slate-700 transition-colors line-clamp-2">
                       {product.productName || product.name || 'Unnamed'}
                     </h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 mb-4">
-                      {product.rackId?.rackName || "Unassigned"} · Shelf {product.shelfNumber || "—"}
-                    </p>
+                    <div className="flex items-center gap-2 mt-1 mb-4 flex-wrap">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        {product.rackId?.rackName || "Unassigned"} · Shelf {product.shelfNumber || "—"}
+                      </span>
+                      <span className="text-[9px] font-black uppercase tracking-wider text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md border border-orange-100/60">
+                        Floor {product.floor || product.rackId?.floor || 1}
+                      </span>
+                    </div>
 
                     <div className="mt-auto grid grid-cols-2 gap-2.5">
                       <div className={`${pal.soft} rounded-2xl p-3.5 border ${pal.border}`}>
@@ -427,10 +446,62 @@ const Products = () => {
                               placeholder="1" className="h-12 rounded-xl border-2 border-slate-100 focus:border-teal-400" />
                           </div>
                           <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Col #</label>
-                            <Input type="number" value={form.columnNumber} onChange={e => setForm({ ...form, columnNumber: e.target.value })}
-                              placeholder="1" className="h-12 rounded-xl border-2 border-slate-100 focus:border-teal-400" />
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Store Floor</label>
+                            <select
+                              value={form.floor}
+                              onChange={e => setForm({ ...form, floor: e.target.value })}
+                              className="w-full h-12 px-3 rounded-xl border-2 border-slate-100 bg-white text-xs font-bold focus:outline-none focus:border-indigo-400 transition-colors"
+                            >
+                              <option value="1">Floor 1 (Ground)</option>
+                              <option value="2">Floor 2 (1st)</option>
+                              <option value="3">Floor 3 (2nd)</option>
+                              <option value="4">Floor 4 (3rd)</option>
+                            </select>
                           </div>
+                        </div>
+                      </div>
+
+                      {/* Image URL & Preview */}
+                      <div className="space-y-2 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Product Image URL</label>
+                          {form.imageUrl && (
+                            <span className="text-[9px] font-bold text-emerald-600 bg-emerald-100/60 px-2 py-0.5 rounded-full">Preview Active</span>
+                          )}
+                        </div>
+                        <div className="flex gap-3 items-center">
+                          {form.imageUrl ? (
+                            <img src={form.imageUrl} alt="preview" className="h-12 w-12 rounded-xl object-contain bg-white border p-1 shrink-0 shadow-sm" onError={(e) => { (e.target as any).style.display = 'none'; }} />
+                          ) : (
+                            <div className="h-12 w-12 rounded-xl bg-white border border-dashed flex items-center justify-center text-slate-300 shrink-0">
+                              <Package size={20} />
+                            </div>
+                          )}
+                          <Input
+                            value={form.imageUrl}
+                            onChange={e => setForm({ ...form, imageUrl: e.target.value })}
+                            placeholder="https://images.unsplash.com/photo-..."
+                            className="h-12 rounded-xl border-2 border-slate-200 focus:border-amber-400 font-semibold text-xs flex-1 bg-white"
+                          />
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 pt-1 items-center">
+                          <span className="text-[9px] text-slate-400 font-bold mr-1">Quick Samples:</span>
+                          {[
+                            { label: "🍎 Fruit", url: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=200" },
+                            { label: "🥛 Milk", url: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=200" },
+                            { label: "🥖 Bread", url: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200" },
+                            { label: "🥤 Soda", url: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=200" },
+                            { label: "🍿 Chips", url: "https://images.unsplash.com/photo-1582293041079-7814c2f12063?w=200" }
+                          ].map(p => (
+                            <button
+                              key={p.label}
+                              type="button"
+                              onClick={() => setForm({ ...form, imageUrl: p.url })}
+                              className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 hover:bg-orange-50 hover:text-orange-600 text-[9px] font-bold text-slate-600 transition-colors shadow-2xs"
+                            >
+                              {p.label}
+                            </button>
+                          ))}
                         </div>
                       </div>
 

@@ -118,7 +118,14 @@ const GodownStock = () => {
                 <tr><td colSpan={6} className="text-center py-6 text-slate-400">Loading stock...</td></tr>
               ) : stockItems.length === 0 ? (
                 <tr><td colSpan={6} className="text-center py-6 text-slate-400">No stock found.</td></tr>
-              ) : stockItems.map((item, i) => (
+              ) : stockItems
+                  .filter(item => {
+                    if (!searchTerm) return true;
+                    const pName = (item.productId?.productName || item.productId?.name || '').toLowerCase();
+                    const qr = (item.productId?.qrCode || '').toLowerCase();
+                    return pName.includes(searchTerm.toLowerCase()) || qr.includes(searchTerm.toLowerCase());
+                  })
+                  .map((item, i) => (
                 <motion.tr 
                   key={item._id || i}
                   initial={{ opacity: 0, y: 15 }}
@@ -132,9 +139,9 @@ const GodownStock = () => {
                         <Package size={28} />
                       </div>
                       <div>
-                        <p className="text-sm font-black text-slate-800 uppercase tracking-tight italic group-hover:text-[#EA580C] transition-colors">{item.productId?.name || 'Unknown Product'}</p>
+                        <p className="text-sm font-black text-slate-800 uppercase tracking-tight italic group-hover:text-[#EA580C] transition-colors">{item.productId?.productName || item.productId?.name || 'Unknown Product'}</p>
                         <div className="flex items-center gap-3 mt-2">
-                           <span className="font-mono text-[10px] font-black text-[#EA580C] bg-orange-50 px-2 py-0.5 rounded uppercase tracking-widest">{item.productId?.sku || item._id}</span>
+                           <span className="font-mono text-[10px] font-black text-[#EA580C] bg-orange-50 px-2 py-0.5 rounded uppercase tracking-widest">{item.productId?.qrCode ? `QR: ${item.productId.qrCode.slice(0, 8)}` : (item.productId?.sku || item._id)}</span>
                            <Badge variant="outline" className="bg-slate-50 border-none text-[8px] font-black text-slate-400 tracking-[0.1em] uppercase px-2">Godown Stock</Badge>
                         </div>
                       </div>

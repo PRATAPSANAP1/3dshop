@@ -7,6 +7,7 @@ const doorSchema = new mongoose.Schema({
   rotation: { type: Number, default: 0 },
   width: { type: Number, default: 1.5 },
   height: { type: Number, default: 2.5 },
+  floor: { type: Number, default: 1 },
   shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true }
 }, {
   timestamps: true

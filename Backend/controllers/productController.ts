@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import crypto from 'crypto';
 import fs from 'fs';
 import csv from 'csv-parser';
@@ -6,10 +7,18 @@ import csv from 'csv-parser';
 import Product from '../models/Product';
 import Notification from '../models/Notification';
 import { createAuditLog } from '../middleware/audit';
+import { resolveShop } from '../utils/shopResolver';
 
 export const getProductsByRack = async (req: Request, res: Response) => {
   try {
-    const products = await Product.find({ rackId: req.params.rackId, shopId: (req as any).shopId });
+    const rawShopId = (req as any).shopId || req.user?.shopId || req.user?._id;
+    const filter: any = { rackId: req.params.rackId };
+    if (rawShopId) {
+      filter.shopId = (typeof rawShopId === 'string' && mongoose.Types.ObjectId.isValid(rawShopId))
+        ? new mongoose.Types.ObjectId(rawShopId)
+        : rawShopId;
+    }
+    const products = await Product.find(filter);
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -18,8 +27,13 @@ export const getProductsByRack = async (req: Request, res: Response) => {
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
-    const shopId = (req as any).shopId;
-    const query = shopId ? { shopId } : {};
+    const rawShopId = (req as any).shopId || req.user?.shopId || req.user?._id;
+    const query: any = {};
+    if (rawShopId) {
+      query.shopId = (typeof rawShopId === 'string' && mongoose.Types.ObjectId.isValid(rawShopId))
+        ? new mongoose.Types.ObjectId(rawShopId)
+        : rawShopId;
+    }
     const products = await Product.find(query).populate('rackId');
     res.json(products);
   } catch (error) {
@@ -27,16 +41,24 @@ export const getProducts = async (req: Request, res: Response) => {
   }
 };
 
-
-
 export const createProduct = async (req: Request, res: Response) => {
-  const { productName, category, price, quantity, minStockLevel, expiryDate, rackId, shelfNumber, columnNumber, brand, size } = req.body;
+  const { productName, category, price, quantity, minStockLevel, expiryDate, rackId, shelfNumber, columnNumber, brand, size, imageUrl, image, floor } = req.body;
 
   try {
+    const rawShopId = (req as any).shopId || req.user?.shopId || req.user?._id;
+    if (!rawShopId) return res.status(400).json({ message: 'Shop ID is required' });
+
+    const shopId = (typeof rawShopId === 'string' && mongoose.Types.ObjectId.isValid(rawShopId))
+      ? new mongoose.Types.ObjectId(rawShopId)
+      : rawShopId;
+
     const qrCode = crypto.randomBytes(16).toString('hex');
     const product = new Product({
       productName, category, price, quantity, minStockLevel, expiryDate, rackId, shelfNumber, columnNumber, brand, size, qrCode,
-      shopId: (req as any).shopId
+      imageUrl: imageUrl || image || '',
+      image: imageUrl || image || '',
+      floor: Number(floor) || 1,
+      shopId
     });
 
     await product.save();
@@ -46,7 +68,7 @@ export const createProduct = async (req: Request, res: Response) => {
         type: 'lowStock',
         message: `${productName} is low on stock (${quantity} left)`,
         productId: product._id,
-        shopId: (req as any).shopId
+        shopId
       });
     }
 
@@ -64,8 +86,16 @@ export const createProduct = async (req: Request, res: Response) => {
 
 export const updateProduct = async (req: Request, res: Response) => {
   try {
+    const rawShopId = (req as any).shopId || req.user?.shopId || req.user?._id;
+    const filter: any = { _id: req.params.id };
+    if (rawShopId) {
+      filter.shopId = (typeof rawShopId === 'string' && mongoose.Types.ObjectId.isValid(rawShopId))
+        ? new mongoose.Types.ObjectId(rawShopId)
+        : rawShopId;
+    }
+
     const product = await Product.findOneAndUpdate(
-      { _id: req.params.id, shopId: (req as any).shopId },
+      filter,
       req.body,
       { new: true }
     );
@@ -94,7 +124,15 @@ export const updateProduct = async (req: Request, res: Response) => {
 
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
-    const product = await Product.findOneAndDelete({ _id: req.params.id, shopId: (req as any).shopId });
+    const rawShopId = (req as any).shopId || req.user?.shopId || req.user?._id;
+    const filter: any = { _id: req.params.id };
+    if (rawShopId) {
+      filter.shopId = (typeof rawShopId === 'string' && mongoose.Types.ObjectId.isValid(rawShopId))
+        ? new mongoose.Types.ObjectId(rawShopId)
+        : rawShopId;
+    }
+
+    const product = await Product.findOneAndDelete(filter);
     if(product) {
        await createAuditLog((req as any).user, 'PRODUCT_DELETE', 'Product', `Deleted product ${product.productName}`, {
          entityId: product._id.toString(),
@@ -136,15 +174,18 @@ export const scanQR = async (req: Request, res: Response) => {
 export const getPublicSearch = async (req: Request, res: Response) => {
   const { query, shopName } = req.query;
   try {
-    const User = require('../models/User').default;
-    const shop = await User.findOne({ shopName });
-    if (!shop) return res.status(404).json({ message: 'Shop not found' });
+    if (!shopName) {
+      return res.status(400).json({ message: 'Shop name required' });
+    }
+    const resolved = await resolveShop(shopName as string);
+    if (!resolved) return res.status(404).json({ message: 'Shop not found' });
 
-    const products = await Product.find({
-      shopId: shop._id,
-      productName: { $regex: query as string, $options: 'i' }
-    }).populate('rackId');
-    
+    const filter: any = { shopId: resolved.shopId };
+    if (query) {
+      filter.productName = { $regex: query as string, $options: 'i' };
+    }
+
+    const products = await Product.find(filter).populate('rackId');
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -230,7 +271,10 @@ export const importProducts = async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'Please upload a CSV file' });
   }
 
-  const shopId = (req as any).shopId;
+  const rawShopId = (req as any).shopId || req.user?.shopId || req.user?._id;
+  const shopId = (typeof rawShopId === 'string' && mongoose.Types.ObjectId.isValid(rawShopId))
+    ? new mongoose.Types.ObjectId(rawShopId)
+    : rawShopId;
   const results: any[] = [];
   const errors: string[] = [];
 

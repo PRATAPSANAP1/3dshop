@@ -132,7 +132,7 @@ const StoreQRModal = ({ open, onClose, shopName }: StoreQRModalProps) => {
             window.onload = function() { 
               setTimeout(function() { window.print(); }, 300); 
             };
-          <\/script>
+          </script>
         </body>
       </html>
     `);

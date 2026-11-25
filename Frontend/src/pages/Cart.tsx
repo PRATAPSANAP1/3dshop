@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash2, Plus, Minus, ShoppingCart, ArrowRight, CreditCard, ShieldCheck } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingCart, ArrowRight, CreditCard, ShieldCheck, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PageTransition from "@/components/PageTransition";
 import api from "@/lib/api";
@@ -9,14 +9,32 @@ import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const [cart, setCart] = useState<any>({ items: [] });
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const fetchSuggestions = async (items: any[]) => {
+    const productIds = items.map((i: any) => i.product?._id).filter(Boolean);
+    if (productIds.length === 0) {
+      setSuggestions([]);
+      return;
+    }
+    try {
+      const { data } = await api.get(`/public/suggestions?productIds=${productIds.join(',')}&limit=4`);
+      const existingIds = new Set(productIds);
+      const filtered = Array.isArray(data) ? data.filter((p: any) => !existingIds.has(p._id)) : [];
+      setSuggestions(filtered);
+    } catch (err) {
+      console.warn("Could not load cart suggestions", err);
+    }
+  };
 
   const fetchCart = async () => {
     try {
       const { data } = await api.get("/cart");
       setCart(data);
+      fetchSuggestions(data?.items || []);
     } catch (err) {
       toast({ variant: "destructive", title: "Error", description: "Failed to load cart" });
     } finally {
@@ -27,6 +45,16 @@ const Cart = () => {
   useEffect(() => {
     fetchCart();
   }, []);
+
+  const addSuggestionToCart = async (product: any) => {
+    try {
+      await api.post('/cart/add', { productId: product._id, qty: 1 });
+      toast({ title: 'Added to Cart', description: `${product.productName} added to your cart` });
+      fetchCart();
+    } catch {
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not add to cart' });
+    }
+  };
 
   const updateQty = async (productId: string, newQty: number) => {
     if (newQty < 1) return;
@@ -145,6 +173,65 @@ const Cart = () => {
                   </motion.div>
                 ))}
               </AnimatePresence>
+
+              {/* Frequently Bought Together / Smart Complementary Suggestions */}
+              {suggestions.length > 0 && (
+                <div className="mt-8 p-5 sm:p-7 bg-gradient-to-br from-orange-50/70 via-amber-50/40 to-white rounded-3xl border border-orange-200/60 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="h-8 w-8 rounded-xl bg-orange-500 text-white flex items-center justify-center shadow-sm">
+                      <Sparkles size={16} />
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                        Frequently Bought Together
+                      </h3>
+                      <p className="text-[10px] font-bold text-orange-600">
+                        Complementary items suggested based on your cart
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {suggestions.map((item: any) => (
+                      <div
+                        key={item._id}
+                        className="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100 hover:border-orange-200 shadow-sm transition-all group"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          {item.imageUrl || item.image ? (
+                            <img
+                              src={item.imageUrl || item.image}
+                              alt={item.productName}
+                              className="h-12 w-12 rounded-xl object-cover shrink-0 border border-slate-100 group-hover:scale-105 transition-transform"
+                            />
+                          ) : (
+                            <div className="h-12 w-12 rounded-xl bg-orange-50 flex items-center justify-center shrink-0 border border-orange-100">
+                              <ShoppingCart size={18} className="text-orange-400" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="text-xs font-black text-slate-900 truncate">{item.productName}</p>
+                            <p className="text-[10px] font-bold text-orange-600 mt-0.5">₹{item.price}</p>
+                            {item.suggestionReason && (
+                              <p className="text-[8px] font-black text-slate-400 uppercase tracking-wider truncate">
+                                {item.suggestionReason}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <Button
+                          type="button"
+                          onClick={() => addSuggestionToCart(item)}
+                          className="h-8 px-3 rounded-xl bg-slate-900 hover:bg-orange-500 text-white font-black text-[9px] uppercase tracking-wider shrink-0 ml-2 active:scale-95 transition-all shadow-sm flex items-center gap-1"
+                        >
+                          <Plus size={12} /> Add
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-6">

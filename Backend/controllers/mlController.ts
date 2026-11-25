@@ -3,44 +3,124 @@ import Product from '../models/Product';
 import Order from '../models/Order';
 import User from '../models/User';
 import Wishlist from '../models/Wishlist';
+import { resolveShop } from '../utils/shopResolver';
 
-// --- 1. Apriori Simulation (Frequently Bought Together) ---
+// Knowledge base of complementary grocery & supermarket associations
+export const COMPLEMENTARY_KEYWORDS: Record<string, string[]> = {
+  milk: ['bread', 'biscuit', 'cookie', 'butter', 'cereal', 'tea', 'coffee', 'oats', 'rusk', 'jam', 'egg', 'cheese', 'paneer'],
+  bread: ['butter', 'jam', 'cheese', 'egg', 'milk', 'spread', 'mayo', 'biscuit', 'toast'],
+  biscuit: ['tea', 'coffee', 'milk', 'cookie', 'rusk', 'snack'],
+  cookie: ['milk', 'coffee', 'tea', 'ice cream', 'biscuit'],
+  tea: ['milk', 'sugar', 'biscuit', 'rusk', 'cookie', 'snack', 'ginger'],
+  chai: ['milk', 'sugar', 'biscuit', 'rusk', 'snack'],
+  coffee: ['milk', 'sugar', 'cookie', 'biscuit', 'creamer'],
+  butter: ['bread', 'jam', 'cheese', 'bun', 'toast', 'milk', 'egg'],
+  cheese: ['bread', 'butter', 'pasta', 'pizza', 'crackers', 'sandwich'],
+  egg: ['bread', 'butter', 'milk', 'salt', 'pepper', 'oil'],
+  chips: ['soda', 'coke', 'cold drink', 'pepsi', 'dip', 'salsa', 'juice', 'biscuit'],
+  snack: ['soda', 'cold drink', 'juice', 'tea', 'biscuit'],
+  soda: ['chips', 'popcorn', 'snack', 'burger', 'pizza', 'biscuit'],
+  coke: ['chips', 'snack', 'burger', 'pizza', 'popcorn'],
+  'cold drink': ['chips', 'snack', 'biscuit', 'soda'],
+  pasta: ['sauce', 'cheese', 'olive oil', 'oregano', 'seasoning', 'garlic bread'],
+  noodle: ['sauce', 'ketchup', 'soup', 'cheese', 'chips'],
+  maggi: ['sauce', 'ketchup', 'cheese', 'soup'],
+  rice: ['dal', 'lentil', 'ghee', 'oil', 'spices', 'pickle', 'papad'],
+  dal: ['rice', 'ghee', 'spices', 'oil', 'atta', 'flour'],
+  atta: ['ghee', 'oil', 'salt', 'sugar', 'butter', 'dal'],
+  flour: ['sugar', 'butter', 'baking powder', 'yeast', 'milk', 'egg'],
+  shampoo: ['conditioner', 'soap', 'body wash', 'hair oil', 'serum'],
+  conditioner: ['shampoo', 'hair oil', 'serum'],
+  soap: ['shampoo', 'conditioner', 'body wash', 'lotion', 'towel'],
+  'body wash': ['lotion', 'loofah', 'shampoo', 'soap'],
+  toothpaste: ['toothbrush', 'mouthwash', 'floss'],
+  toothbrush: ['toothpaste', 'mouthwash'],
+  apple: ['banana', 'orange', 'fruit', 'milk', 'yogurt', 'honey'],
+  fruit: ['yogurt', 'milk', 'honey', 'oats', 'juice'],
+  chocolate: ['biscuit', 'cookie', 'milk', 'ice cream', 'cake'],
+  sauce: ['bread', 'noodle', 'chips', 'pasta', 'cheese']
+};
+
+export const getComplementaryKeywordsForName = (productName: string): string[] => {
+  if (!productName || typeof productName !== 'string') return [];
+  const lower = productName.toLowerCase();
+  const keywords = new Set<string>();
+  for (const [key, targets] of Object.entries(COMPLEMENTARY_KEYWORDS)) {
+    if (lower.includes(key)) {
+      targets.forEach(t => keywords.add(t));
+    }
+  }
+  return Array.from(keywords);
+};
+
+// --- 1. Apriori & Semantic Recommendations (Frequently Bought Together) ---
 export const getFrequentlyBoughtTogether = async (req: Request, res: Response) => {
   try {
     const { productId } = req.params;
     if (!productId) return res.status(400).json({ message: 'Product ID required' });
 
-    // Find all orders containing this product
+    const sourceProduct = await Product.findById(productId).lean();
+    if (!sourceProduct) return res.status(404).json({ message: 'Product not found' });
+
+    // Step 1: Find all orders containing this product
     const orders = await Order.find({ 'orderItems.product': productId }).lean();
-    
     const coOccurrenceCount: Record<string, number> = {};
     
     orders.forEach(order => {
       order.orderItems.forEach((item: any) => {
-        const id = item.product.toString();
-        if (id !== productId) {
+        const id = item.product?.toString();
+        if (id && id !== productId) {
           coOccurrenceCount[id] = (coOccurrenceCount[id] || 0) + 1;
         }
       });
     });
 
-    // Sort by frequency and get top 4
-    const topIds = Object.entries(coOccurrenceCount)
+    const topCoOrderIds = Object.entries(coOccurrenceCount)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 4)
+      .slice(0, 6)
       .map(entry => entry[0]);
 
-    if (topIds.length === 0) {
-      // Fallback to random products in same category
-      const product = await Product.findById(productId);
-      if (product) {
-        const fallback = await Product.find({ category: product.category, _id: { $ne: productId } }).limit(4);
-        return res.json(fallback);
-      }
-      return res.json([]);
+    let recommendedProducts: any[] = [];
+    if (topCoOrderIds.length > 0) {
+      recommendedProducts = await Product.find({ _id: { $in: topCoOrderIds } }).populate('rackId').lean();
     }
 
-    const recommendedProducts = await Product.find({ _id: { $in: topIds } });
+    // Step 2: If we need more items, search semantic complementary products (e.g. Milk -> Bread, Biscuit, Butter)
+    if (recommendedProducts.length < 4) {
+      const keywords = getComplementaryKeywordsForName(sourceProduct.productName);
+      const excludeIds = [sourceProduct._id.toString(), ...recommendedProducts.map(p => p._id.toString())];
+
+      if (keywords.length > 0) {
+        const regexPattern = keywords.map(kw => `\\b${kw}`).join('|');
+        const filter: any = {
+          _id: { $nin: excludeIds },
+          productName: { $regex: regexPattern, $options: 'i' }
+        };
+        if (sourceProduct.shopId) filter.shopId = sourceProduct.shopId;
+
+        const complementary = await Product.find(filter)
+          .populate('rackId')
+          .limit(6 - recommendedProducts.length)
+          .lean();
+
+        recommendedProducts.push(...complementary);
+      }
+    }
+
+    // Step 3: Fallback to same category or popular products in the same store
+    if (recommendedProducts.length < 4) {
+      const excludeIds = [sourceProduct._id.toString(), ...recommendedProducts.map(p => p._id.toString())];
+      const fallbackFilter: any = { _id: { $nin: excludeIds } };
+      if (sourceProduct.shopId) fallbackFilter.shopId = sourceProduct.shopId;
+
+      const categoryFallback = await Product.find({ ...fallbackFilter, category: sourceProduct.category })
+        .populate('rackId')
+        .limit(4 - recommendedProducts.length)
+        .lean();
+
+      recommendedProducts.push(...categoryFallback);
+    }
+
     res.json(recommendedProducts);
   } catch (err) {
     console.error('Apriori Error:', err);
@@ -212,41 +292,226 @@ export const getCustomerSegments = async (req: Request, res: Response) => {
   }
 };
 
-// --- 4. Next Product Prediction (Markov Chain Simulation) ---
+// --- 4. Next Product Prediction (Markov Chain & Semantic Fallback) ---
 export const predictNextProduct = async (req: Request, res: Response) => {
   try {
-    const { currentProductId } = req.body;
-    if (!currentProductId) return res.status(400).json({ message: 'Current product ID required' });
+    const { currentProductId, productName, shopName } = req.body;
+    if (!currentProductId && !productName) return res.status(400).json({ message: 'Current product ID or Name required' });
 
-    // Since we don't track session views, we'll look at sequences in Orders
-    const orders = await Order.find({ 'orderItems.product': currentProductId }).lean();
-    
-    const nextProductCounts: Record<string, number> = {};
-
-    orders.forEach(order => {
-      const items = order.orderItems;
-      const idx = items.findIndex((i: any) => i.product.toString() === currentProductId);
-      // If found and there is a next item in the array
-      if (idx !== -1 && idx < items.length - 1) {
-        const nextId = items[idx + 1].product.toString();
-        nextProductCounts[nextId] = (nextProductCounts[nextId] || 0) + 1;
-      }
-    });
-
-    const mostLikelyNextId = Object.entries(nextProductCounts)
-      .sort((a, b) => b[1] - a[1])[0]?.[0];
-
-    if (!mostLikelyNextId) {
-       // Fallback to Frequently bought together (Apriori fallback)
-       const product = await Product.findById(currentProductId);
-       const fallback = await Product.findOne({ category: product?.category, _id: { $ne: currentProductId } });
-       return res.json({ predictedProduct: fallback });
+    let product: any = null;
+    if (currentProductId) {
+      product = await Product.findById(currentProductId).populate('rackId').lean();
     }
 
-    const predictedProduct = await Product.findById(mostLikelyNextId);
-    res.json({ predictedProduct });
+    // Since we don't track session views, we'll look at sequences in Orders
+    if (currentProductId) {
+      const orders = await Order.find({ 'orderItems.product': currentProductId }).lean();
+      const nextProductCounts: Record<string, number> = {};
+
+      orders.forEach(order => {
+        const items = order.orderItems;
+        const idx = items.findIndex((i: any) => i.product.toString() === currentProductId);
+        if (idx !== -1 && idx < items.length - 1) {
+          const nextId = items[idx + 1].product.toString();
+          nextProductCounts[nextId] = (nextProductCounts[nextId] || 0) + 1;
+        }
+      });
+
+      const mostLikelyNextId = Object.entries(nextProductCounts)
+        .sort((a, b) => b[1] - a[1])[0]?.[0];
+
+      if (mostLikelyNextId) {
+        const predictedProduct = await Product.findById(mostLikelyNextId).populate('rackId');
+        return res.json({ predictedProduct, reason: 'Frequently bought next in past orders' });
+      }
+    }
+
+    // Fallback: Smart semantic complementary prediction (e.g. Milk -> Bread or Biscuit)
+    const name = product?.productName || productName || '';
+    const keywords = getComplementaryKeywordsForName(name);
+
+    if (keywords.length > 0) {
+      const regexPattern = keywords.map(kw => `\\b${kw}`).join('|');
+      const filter: any = {
+        productName: { $regex: regexPattern, $options: 'i' }
+      };
+      if (product?._id) filter._id = { $ne: product._id };
+      if (product?.shopId) filter.shopId = product.shopId;
+
+      const complementary = await Product.findOne(filter).populate('rackId');
+      if (complementary) {
+        return res.json({ 
+          predictedProduct: complementary, 
+          reason: `Customers who buy ${name.split(' ')[0]} usually get this next` 
+        });
+      }
+    }
+
+    const fallbackFilter: any = {};
+    if (product?._id) fallbackFilter._id = { $ne: product._id };
+    if (product?.category) fallbackFilter.category = product.category;
+    if (product?.shopId) fallbackFilter.shopId = product.shopId;
+
+    const fallback = await Product.findOne(fallbackFilter).populate('rackId');
+    res.json({ predictedProduct: fallback, reason: 'Recommended complementary item' });
   } catch (err) {
     console.error('Markov Error:', err);
     res.status(500).json({ message: 'Error predicting next product' });
+  }
+};
+
+// --- 5. Universal Smart Product Suggestion System ---
+export const getSmartProductSuggestions = async (req: Request, res: Response) => {
+  try {
+    const { productId, productName, productIds, shopName, limit = 6 } = { ...req.query, ...req.body };
+    const numLimit = Math.min(Number(limit) || 6, 20);
+
+    let targetShopId: any = null;
+    if (shopName) {
+      const resolved = await resolveShop(shopName as string);
+      if (resolved) targetShopId = resolved.shopId;
+    }
+
+    const sourceIds: string[] = [];
+    if (productId && typeof productId === 'string') sourceIds.push(productId);
+    if (Array.isArray(productIds)) {
+      sourceIds.push(...productIds.map(String));
+    } else if (typeof productIds === 'string' && productIds.trim()) {
+      sourceIds.push(...productIds.split(',').map(s => s.trim()));
+    }
+
+    let sourceProducts: any[] = [];
+    if (sourceIds.length > 0) {
+      sourceProducts = await Product.find({ _id: { $in: sourceIds } }).lean();
+    }
+
+    if (sourceProducts.length === 0 && productName && typeof productName === 'string') {
+      sourceProducts.push({ productName, category: 'General' });
+    }
+
+    const targetKeywords = new Set<string>();
+    const sourceCategories = new Set<string>();
+    const excludeIds = new Set<string>(sourceProducts.filter(p => p._id).map(p => p._id.toString()));
+
+    if (!targetShopId && sourceProducts.length > 0 && sourceProducts[0].shopId) {
+      targetShopId = sourceProducts[0].shopId;
+    }
+
+    sourceProducts.forEach(prod => {
+      if (prod.productName) {
+        getComplementaryKeywordsForName(prod.productName).forEach(kw => targetKeywords.add(kw));
+      }
+      if (prod.category) {
+        sourceCategories.add(prod.category.toLowerCase());
+      }
+    });
+
+    // Check orders for co-occurrence (Apriori)
+    const coOccurrenceCount: Record<string, number> = {};
+    if (sourceIds.length > 0) {
+      const orders = await Order.find({ 'orderItems.product': { $in: sourceIds } }).lean();
+      orders.forEach(order => {
+        order.orderItems.forEach((item: any) => {
+          const id = item.product?.toString();
+          if (id && !excludeIds.has(id)) {
+            coOccurrenceCount[id] = (coOccurrenceCount[id] || 0) + 1;
+          }
+        });
+      });
+    }
+
+    const baseFilter: any = {};
+    if (targetShopId) baseFilter.shopId = targetShopId;
+    if (excludeIds.size > 0) baseFilter._id = { $nin: Array.from(excludeIds) };
+
+    // Find keyword matches
+    let keywordCandidates: any[] = [];
+    if (targetKeywords.size > 0) {
+      const regexPattern = Array.from(targetKeywords).map(kw => `\\b${kw}`).join('|');
+      keywordCandidates = await Product.find({
+        ...baseFilter,
+        productName: { $regex: regexPattern, $options: 'i' }
+      }).populate('rackId').lean();
+    }
+
+    // Find co-ordered products
+    const coOrderIds = Object.keys(coOccurrenceCount);
+    let coOrderCandidates: any[] = [];
+    if (coOrderIds.length > 0) {
+      coOrderCandidates = await Product.find({
+        ...baseFilter,
+        _id: { $in: coOrderIds }
+      }).populate('rackId').lean();
+    }
+
+    // Combine candidates
+    const candidateMap = new Map<string, any>();
+    [...keywordCandidates, ...coOrderCandidates].forEach(p => {
+      candidateMap.set(p._id.toString(), p);
+    });
+
+    // Additional popular products in store if needed
+    if (candidateMap.size < numLimit) {
+      const additional = await Product.find(baseFilter)
+        .populate('rackId')
+        .sort({ rating: -1, quantity: -1 })
+        .limit(numLimit * 2)
+        .lean();
+      additional.forEach(p => {
+        if (!candidateMap.has(p._id.toString())) {
+          candidateMap.set(p._id.toString(), p);
+        }
+      });
+    }
+
+    const scoredList = Array.from(candidateMap.values()).map(product => {
+      let score = 0;
+      let reason = 'Frequently paired together';
+      const pNameLower = (product.productName || '').toLowerCase();
+
+      let matchesKw = false;
+      for (const kw of targetKeywords) {
+        if (pNameLower.includes(kw)) {
+          matchesKw = true;
+          score += 60;
+          if (sourceProducts.length > 0 && sourceProducts[0].productName) {
+            reason = `Goes great with ${sourceProducts[0].productName.split(' ')[0]}`;
+          } else {
+            reason = `Frequently paired with your items`;
+          }
+          break;
+        }
+      }
+
+      const coCount = coOccurrenceCount[product._id.toString()] || 0;
+      if (coCount > 0) {
+        score += coCount * 25;
+        reason = `Often bought together (${coCount} orders)`;
+      }
+
+      const pCatLower = (product.category || '').toLowerCase();
+      if (sourceCategories.has('dairy') && (pCatLower.includes('bakery') || pCatLower.includes('snack'))) {
+        score += 20;
+      } else if (sourceCategories.has('bakery') && (pCatLower.includes('dairy') || pCatLower.includes('spread'))) {
+        score += 20;
+      }
+
+      if (product.quantity > 0) score += 10;
+      score += (product.rating || 0) * 2;
+
+      return {
+        ...product,
+        suggestionScore: score,
+        suggestionReason: reason
+      };
+    });
+
+    scoredList.sort((a, b) => b.suggestionScore - a.suggestionScore);
+    const results = scoredList.slice(0, numLimit);
+
+    res.json(results);
+  } catch (err: any) {
+    console.error('Smart suggestions error:', err);
+    res.status(500).json({ message: 'Error fetching suggestions', error: err.message });
   }
 };

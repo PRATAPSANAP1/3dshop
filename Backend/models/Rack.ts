@@ -11,6 +11,7 @@ const rackSchema = new mongoose.Schema({
   depth: { type: Number, default: 0.5 },
   shelves: { type: Number, default: 4 },
   columns: { type: Number, default: 1 },
+  floor: { type: Number, default: 1 },
   color: { type: String, default: '#3b82f6' },
   shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true }
 }, {

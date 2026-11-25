@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import Rack from '../models/Rack';
 import Product from '../models/Product';
+import { resolveShop } from '../utils/shopResolver';
 
 export const getRacks = async (req: Request, res: Response) => {
   try {
@@ -56,6 +57,7 @@ export const createRack = async (req: Request, res: Response) => {
       height: Number(req.body.height) || 3,
       shelves: Number(req.body.shelves) || 4,
       columns: Number(req.body.columns) || 3,
+      floor: Number(req.body.floor) || 1,
     };
     
     const rack = new Rack(rackData);
@@ -99,11 +101,10 @@ export const getPublicRacks = async (req: Request, res: Response) => {
     return res.status(404).json({ message: 'Invalid shop name' });
   }
   try {
-    const User = require('../models/User').default;
-    const shop = await User.findOne({ shopName });
-    if (!shop) return res.status(404).json({ message: 'Shop not found' });
+    const resolved = await resolveShop(shopName);
+    if (!resolved) return res.status(404).json({ message: 'Shop not found' });
 
-    const racks = await Rack.find({ shopId: shop._id });
+    const racks = await Rack.find({ shopId: resolved.shopId });
     res.json(racks);
   } catch (error) {
     console.error('[GET_PUBLIC_RACKS_ERROR]:', error);

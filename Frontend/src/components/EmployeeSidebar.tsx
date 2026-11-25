@@ -28,8 +28,12 @@ const navItems: NavItem[] = [
 
 const EmployeeNavItem = ({ item, index }: { item: NavItem; index: number }) => {
   const location = useLocation();
+  const { user } = useAuth();
   const isActive = location.pathname === item.to;
-  const hasPermission = item.permission ? usePermission(item.permission) : true;
+  const hasPermission = !item.permission ||
+    (user as any)?.role === 'admin' ||
+    (user as any)?.role === 'developer' ||
+    Boolean((user as any)?.employeePermissions?.includes(item.permission));
 
   if (!hasPermission) return null;
 
