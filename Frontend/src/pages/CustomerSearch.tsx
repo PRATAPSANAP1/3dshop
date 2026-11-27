@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ProductBoxMesh } from '@/components/3d/ProductBoxMesh';
 import {
   AttractiveRackFrame3D,
+  CreamTileFloor3D,
   GoogleMapsRoute3D,
   StoreDimensionsOverlay3D,
   StoreInteriorDecor3D,
@@ -980,10 +981,10 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
             frameloop={shoppingList.length > 0 || showArrow ? 'always' : 'demand'}
             performance={{ min: 0.5 }}
             camera={{
-              position: isMobile ? [0, 30, 25] : [0, 22, 22],
-              fov: isMobile ? 55 : 45
+              position: isMobile ? [0, 22, 22] : [0, 13, 19],
+              fov: isMobile ? 55 : 46
             }}
-            style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)' }}
+            style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #ede7dc 100%)' }}
             gl={{ 
               antialias: false, 
               powerPreference: 'default', 
@@ -1006,22 +1007,17 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
               });
             }}
           >
-            <ambientLight intensity={0.9} />
-            <hemisphereLight args={['#ffffff', '#cbd5e1', 0.65]} />
-            <directionalLight position={[15, 25, 12]} intensity={1.1} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
-            <pointLight position={[0, 10, 0]} intensity={0.45} color="#fff7ed" />
+            <ambientLight intensity={0.85} />
+            <hemisphereLight args={['#ffffff', '#e7dfd3', 0.65]} />
+            <directionalLight position={[12, 22, 14]} intensity={1.05} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} />
+            <pointLight position={[0, 4.2, 0]} intensity={0.4} color="#fffbeb" />
 
-            {/* Bright polished architectural retail floor */}
-            <Plane args={[shopConfig?.width || 30, shopConfig?.depth || 20]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-              <meshStandardMaterial color="#f8fafc" metalness={0.08} roughness={0.45} />
-            </Plane>
+            {/* Warm cream/ivory ceramic tile showroom floor */}
+            <CreamTileFloor3D
+              width={shopConfig?.width || 30}
+              depth={shopConfig?.depth || 20}
+            />
 
-            {/* Sleek store perimeter floor trim */}
-            <Box args={[(shopConfig?.width || 30) + 0.5, 0.1, (shopConfig?.depth || 20) + 0.5]} position={[0, -0.055, 0]}>
-              <meshStandardMaterial color="#cbd5e1" metalness={0.2} roughness={0.5} />
-            </Box>
-
-            <gridHelper args={[Math.max(shopConfig?.width || 30, shopConfig?.depth || 20), Math.max(shopConfig?.width || 30, shopConfig?.depth || 20) / 2, '#cbd5e1', '#e2e8f0']} position={[0, 0.01, 0]} />
             <StoreDimensionsOverlay3D
               width={shopConfig?.width || 30}
               depth={shopConfig?.depth || 20}
@@ -1030,6 +1026,7 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
             <StoreInteriorDecor3D
               width={shopConfig?.width || 30}
               depth={shopConfig?.depth || 20}
+              shopName={shopName || 'SOHO'}
               exitPosition={
                 (() => {
                   const ex = currentFloorDoors.find(d => d.doorType === 'exit') || doors.find(d => d.doorType === 'exit');
@@ -1038,19 +1035,6 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
               }
             />
             <ContactShadows frames={1} resolution={isMobile ? 256 : 512} scale={shopConfig?.width || 30} blur={2} opacity={0.14} far={10} color="#0f172a" />
-
-            <Box args={[shopConfig?.width || 30, 4, 0.3]} position={[0, 2, -(shopConfig?.depth || 20) / 2]}>
-              <meshStandardMaterial color="#94a3b8" transparent opacity={0.08} depthWrite={false} />
-            </Box>
-            <Box args={[shopConfig?.width || 30, 4, 0.3]} position={[0, 2, (shopConfig?.depth || 20) / 2]}>
-              <meshStandardMaterial color="#94a3b8" transparent opacity={0.08} depthWrite={false} />
-            </Box>
-            <Box args={[0.3, 4, shopConfig?.depth || 20]} position={[-(shopConfig?.width || 30) / 2, 2, 0]}>
-              <meshStandardMaterial color="#94a3b8" transparent opacity={0.08} depthWrite={false} />
-            </Box>
-            <Box args={[0.3, 4, shopConfig?.depth || 20]} position={[(shopConfig?.width || 30) / 2, 2, 0]}>
-              <meshStandardMaterial color="#94a3b8" transparent opacity={0.08} depthWrite={false} />
-            </Box>
 
             {currentFloorDoors.map((door) => {
               const dWidth = door.width || 1.8;
