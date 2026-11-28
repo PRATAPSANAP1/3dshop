@@ -18,6 +18,8 @@ interface Product {
   category: string;
   brand?: string;
   size?: string;
+  imageUrl?: string;
+  image?: string;
 }
 
 const PALETTES = [
@@ -113,8 +115,12 @@ const MobileSearchOverlay = ({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                     onClick={() => { onClose(); navigate(`/product/${p._id}`); }}
                     className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 active:border-orange-200 transition-colors"
                   >
-                    <div className="h-12 w-12 bg-slate-50 rounded-xl flex items-center justify-center text-orange-500">
-                      <Box size={24} />
+                    <div className="h-12 w-12 bg-slate-50 rounded-xl flex items-center justify-center text-orange-500 overflow-hidden shrink-0 border border-slate-100">
+                      {p.imageUrl || p.image ? (
+                        <img src={p.imageUrl || p.image} alt={p.productName} className="h-full w-full object-cover" />
+                      ) : (
+                        <Box size={24} />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-black text-slate-900 truncate uppercase mt-0.5">{p.productName}</h4>
@@ -156,11 +162,19 @@ const ProductCard = ({ product, index }: { product: Product; index: number }) =>
         <Heart size={18} />
       </button>
       
-      <div className={`h-40 w-full bg-gradient-to-br ${palette.grad} rounded-[1.5rem] mb-4 flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity`}>
-        <div className="relative">
-          <Box size={48} className="text-white/40 drop-shadow-lg" />
-          <div className="absolute inset-0 bg-white/20 blur-xl rounded-full" />
-        </div>
+      <div className={`h-40 w-full bg-gradient-to-br ${palette.grad} rounded-[1.5rem] mb-4 flex items-center justify-center overflow-hidden opacity-95 group-hover:opacity-100 transition-opacity`}>
+        {product.imageUrl || product.image ? (
+          <img
+            src={product.imageUrl || product.image}
+            alt={product.productName}
+            className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <div className="relative">
+            <Box size={48} className="text-white/40 drop-shadow-lg" />
+            <div className="absolute inset-0 bg-white/20 blur-xl rounded-full" />
+          </div>
+        )}
       </div>
       
       <div className="space-y-1">

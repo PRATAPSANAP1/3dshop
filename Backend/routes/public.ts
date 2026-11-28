@@ -94,5 +94,51 @@ router.get('/suggestions', getSmartProductSuggestions);
 router.post('/suggestions', getSmartProductSuggestions);
 router.get('/suggestions/product/:productId', getFrequentlyBoughtTogether);
 
+// CORS-safe Image Proxy for 3D WebGL Product Box Textures
+router.get('/image-proxy', async (req: Request, res: Response) => {
+  try {
+    const rawUrl = String(req.query.url || '').trim();
+    if (!rawUrl || (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://'))) {
+      return res.status(400).json({ error: 'Valid http/https url required' });
+    }
+    const parsed = new URL(rawUrl);
+    const host = parsed.hostname.toLowerCase();
+    if (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host.startsWith('10.') ||
+      host.startsWith('192.168.') ||
+      host.startsWith('169.254.') ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(host)
+    ) {
+      return res.status(403).json({ error: 'Blocked host' });
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    const response = await fetch(rawUrl, {
+      signal: controller.signal,
+      headers: { 'User-Agent': '3DShop-ImageProxy/1.0' }
+    });
+    clearTimeout(timer);
+
+    if (!response.ok) {
+      return res.status(response.status).end();
+    }
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    if (!contentType.startsWith('image/')) {
+      return res.status(415).json({ error: 'Not an image' });
+    }
+    const buffer = Buffer.from(await response.arrayBuffer());
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.send(buffer);
+  } catch {
+    res.status(502).end();
+  }
+});
+
 export default router;
 

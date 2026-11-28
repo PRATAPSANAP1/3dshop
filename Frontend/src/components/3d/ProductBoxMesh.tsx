@@ -127,19 +127,35 @@ export const ProductBoxMesh: React.FC<ProductBoxMeshProps> = ({
     let active = true;
     const loader = new THREE.TextureLoader();
     loader.setCrossOrigin('anonymous');
+
+    const applyTexture = (tex: THREE.Texture) => {
+      if (!active) return;
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.minFilter = THREE.LinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      setImageTexture(tex);
+    };
+
     loader.load(
       resolvedUrl,
-      (tex) => {
-        if (active) {
-          tex.colorSpace = THREE.SRGBColorSpace;
-          tex.minFilter = THREE.LinearFilter;
-          tex.magFilter = THREE.LinearFilter;
-          setImageTexture(tex);
-        }
-      },
+      applyTexture,
       undefined,
       () => {
-        if (active) setImageTexture(null);
+        if (!active) return;
+        // Fallback through backend CORS proxy for external product images
+        if (resolvedUrl.startsWith('http://') || resolvedUrl.startsWith('https://')) {
+          const proxyUrl = `${getApiUrl()}/public/image-proxy?url=${encodeURIComponent(resolvedUrl)}`;
+          loader.load(
+            proxyUrl,
+            applyTexture,
+            undefined,
+            () => {
+              if (active) setImageTexture(null);
+            }
+          );
+        } else {
+          setImageTexture(null);
+        }
       }
     );
     return () => {

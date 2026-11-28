@@ -781,9 +781,17 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
                         style={{ borderBottom: idx < filteredProducts.length - 1 ? '1px solid #f8fafc' : 'none' }}
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
-                            <Package size={14} className="text-slate-400" />
-                          </div>
+                          {product.imageUrl || product.image ? (
+                            <img
+                              src={product.imageUrl || product.image}
+                              alt={product.productName}
+                              className="h-9 w-9 rounded-lg object-cover shrink-0 border border-slate-100 bg-white"
+                            />
+                          ) : (
+                            <div className="h-9 w-9 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
+                              <Package size={14} className="text-slate-400" />
+                            </div>
+                          )}
                           <div className="min-w-0">
                             <p className="text-sm font-bold text-slate-800 truncate">{product.productName}</p>
                             <p className="text-[10px] text-slate-400 font-medium truncate">{product.category} • ₹{product.price}</p>
@@ -1531,6 +1539,18 @@ const CustomerSearch: React.FC<CustomerSearchProps> = ({ isQRMode = false }) => 
                       >
                         {isCompleted && <Check size={14} strokeWidth={3} />}
                       </button>
+
+                      {step.product.imageUrl || step.product.image ? (
+                        <img
+                          src={step.product.imageUrl || step.product.image}
+                          alt={step.product.productName}
+                          className="h-9 w-9 rounded-lg object-cover shrink-0 border border-slate-100 bg-white"
+                        />
+                      ) : (
+                        <div className="h-9 w-9 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100">
+                          <Package size={14} className="text-slate-400" />
+                        </div>
+                      )}
 
                       <div className="flex-1 overflow-hidden">
                         <div className="flex items-center gap-1.5">
